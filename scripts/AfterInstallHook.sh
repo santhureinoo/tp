@@ -14,3 +14,4 @@ export NVM_DIR="$HOME/.nvm"
 
 npm install
 npm run build
+pm2 restart tp-customer-dashboard-frontend
