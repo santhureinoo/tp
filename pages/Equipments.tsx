@@ -39,7 +39,7 @@ const Equipments: NextPage = () => {
 }
 
 Equipments.getInitialProps = async () => {
-  const title = 'Equipment1';
+  const title = 'Equipment';
   return { title };
 };
 
