@@ -1,0 +1,15 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /home/ubuntu/tp-customer-dashboard-frontend
+    overwrite: true
+hooks:
+  BeforeInstall:
+    - location: scripts/BeforeInstallHook.sh
+      timeout: 300
+      runas: ubuntu
+  AfterInstall:
+    - location: scripts/AfterInstallHook.sh
+      timeout: 300
+      runas: ubuntu
