@@ -1,7 +1,7 @@
 import CustomizedInput from "../components/CustomizedInput";
 import PillButton from "../components/PillButton";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleCheck, faCircle } from "@fortawesome/free-solid-svg-icons";
+import { faCircleCheck, faCircle, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 
 export const DummyCustomerDataRow = {
     CID: 'Cust-105864',
@@ -66,7 +66,7 @@ export const dummySummaryTableData = [
         "ID": "Outlet-295BO",
         "Name": "Tang City MCD",
         "Equipment": "10",
-        "ChkBox":  <FontAwesomeIcon style={{ fontSize: '2em', color:'gray' }} icon={faCircle} />
+        "ChkBox":  <FontAwesomeIcon style={{ fontSize: '2em', color:'#E8F2FF' }} icon={faCircle} />
     },
     {
         "ID": "Outlet-295BO",
@@ -79,7 +79,19 @@ export const dummySummaryTableData = [
         "Name": "Tang City MCD",
         "Equipment": "10",
         "ChkBox": <FontAwesomeIcon style={{ fontSize: '2em', color: 'Dodgerblue' }} icon={faCircleCheck} />
-    }
+    },
+    {
+        "ID": "Outlet-295BO",
+        "Name": "Tang City MCD",
+        "Equipment": "10",
+        "ChkBox":  <FontAwesomeIcon style={{ fontSize: '2em', color:'#E8F2FF' }} icon={faCircle} />
+    },
+    {
+        "ID": "Outlet-295BO",
+        "Name": "Tang City MCD",
+        "Equipment": "10",
+        "ChkBox":  <FontAwesomeIcon style={{ fontSize: '2em', color:'#E8F2FF' }} icon={faCircle} />
+    },
 ]
 
 
@@ -89,7 +101,7 @@ export const dummySummaryEquipmentTableData = [
         "Type": "VFD 1",
         "Name": "Tang City MCD",
         "Status": "Active",
-        "ChkBox": <FontAwesomeIcon style={{ fontSize: '2em' }} icon={faCircle} />
+        "ChkBox": <FontAwesomeIcon style={{ fontSize: '2em', color: 'Tomato' }} icon={faXmarkCircle} />
     },
     {
         "ID": "Outlet-295BO",
@@ -102,6 +114,18 @@ export const dummySummaryEquipmentTableData = [
 
 
 export const dummySummaryOutletTableData = [
+    {
+        "EquipmentID": "Outlet-295BO",
+        "Type": "Tang City MCD",
+        "Name": "10",
+        "CaltrType": <CustomizedInput hideDropDownPrefixIcon={true} inputType="select" value="FastFood" dropDownData={["FastFood", "Test", "Test"]} />
+    },
+    {
+        "EquipmentID": "Outlet-295BO",
+        "Type": "Tang City MCD",
+        "Name": "10",
+        "CaltrType": <CustomizedInput hideDropDownPrefixIcon={true} inputType="select" value="FastFood" dropDownData={["FastFood", "Test", "Test"]} />
+    },
     {
         "EquipmentID": "Outlet-295BO",
         "Type": "Tang City MCD",

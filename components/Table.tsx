@@ -22,8 +22,10 @@ const Table = ({ headers, data, handleAddNew, handleEdit, handleDelete, rightSid
                         {leftSideElements}
                     </div>
                     <div className="flex flex-row justify-end gap-x-2">
-                        {rightSideElements}
-                        {buttonText &&  <button type="button" onClick={(e) => { handleAddNew() }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <div className='flex justify-between gap-x-4'>
+                            {rightSideElements}
+                        </div>
+                        {buttonText && <button type="button" onClick={(e) => { handleAddNew() }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             {buttonText}
                         </button>}
                     </div>
@@ -31,20 +33,21 @@ const Table = ({ headers, data, handleAddNew, handleEdit, handleDelete, rightSid
                 <table className="items-center w-full bg-transparent border-collapse">
                     <thead>
                         <tr>
-                            {headers.map((header,idx) => {
-                                return (<th key={uuidv4()} className="px-6 bg-blueGray-50 text-gray-300 align-middle border border-solid border-blueGray-100 py-3 text-xs border-t-0 border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                            {headers.map((header, idx) => {
+                                return (<th key={uuidv4()} className="px-6 bg-blueGray-50 text-gray-400 align-middle border border-solid border-blueGray-100 py-3 text-xs border-t-0 border-l-0 border-r-0 whitespace-nowrap font-normal leading-6 text-left">
                                     {header}
                                 </th>)
                             })}
+                            <th key={uuidv4()} className="px-6 bg-blueGray-50 text-gray-400 align-middle border border-solid border-blueGray-100 py-3 text-xs border-t-0 border-l-0 border-r-0 whitespace-nowrap font-normal leading-6 text-left"></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {data.map((obj,i) => {
+                        {data.map((obj, i) => {
                             return (
                                 <tr key={uuidv4()} className="odd:bg-white even:bg-slate-50">
-                                    {Object.keys(obj).map((key,i) => {
+                                    {Object.keys(obj).map((key, i) => {
                                         return (
-                                            <td key={uuidv4()} className="px-6 bg-blueGray-50 text-blueGray-500 align-middle  py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                                            <td key={uuidv4()} className="px-6 bg-blueGray-50 text-blueGray-500 align-middle  py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-normal leading-6 text-left">
                                                 {obj[key]}
                                             </td>
                                         )
@@ -52,7 +55,7 @@ const Table = ({ headers, data, handleAddNew, handleEdit, handleDelete, rightSid
                                     <th onClick={(e: React.MouseEvent<HTMLElement>) => {
                                         if (i === openTinyMenuIndex) setOpenTinyMenuIndex(-1)
                                         else setOpenTinyMenuIndex(i);
-                                    }} className="relative cursor-pointer px-6 bg-blueGray-50 text-blueGray-500 align-middle  py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                                    }} className="relative cursor-pointer px-6 bg-blueGray-50 text-blueGray-500 align-middle  py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-normal leading-6 text-left">
                                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                                         <div className={`${openTinyMenuIndex === i ? 'absolute' : 'hidden'} z-20 top-8 -left-8`}>
                                             <TinyEditDeleteMenu onEdit={handleEdit} onDelete={handleDelete} />

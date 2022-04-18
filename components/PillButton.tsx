@@ -5,7 +5,7 @@ interface Props {
 
 const PillButton = ({className, text}: Props) => {
     return (
-        <button className={`rounded-full p-2 ${className}`}>
+        <button className={`rounded-full my-auto h-8 ${className}`}>
             {text}
         </button>
     )

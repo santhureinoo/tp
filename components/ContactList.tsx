@@ -3,6 +3,7 @@ import rfdc from 'rfdc';
 import CustomizedInput from "./CustomizedInput";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleCheck, faXmarkCircle } from '@fortawesome/free-solid-svg-icons'
+import Image from "next/image";
 
 
 const cloneDeep = rfdc();
@@ -21,15 +22,15 @@ const ContactList = ({ contactList, setContactList }: Props): React.ReactElement
                         <>
                             <div className="flex flex-row justify-between items-center">
                                 <div className="flex flex-row items-center gap-x-2">
-                                    <FontAwesomeIcon style={{ fontSize: '2em', color: 'Dodgerblue' }} icon={faCircleCheck} />
+                                    <Image alt="confirmSvg" src="/asserts/main/confirm.svg" width="24" height="24"/>
                                     <h4 className="text-lg text-slate-400">Primary Contact</h4>
                                 </div>
                                 <div>
-                                    <FontAwesomeIcon style={{ fontSize: '2em', cursor: 'pointer', color: 'Tomato' }} onClick={e => {
+                                     <Image onClick={e => {
                                         const clonedContactList = cloneDeep(contactList);
                                         clonedContactList.splice(idx, 1);
                                         setContactList(clonedContactList);
-                                    }} icon={faXmarkCircle} />
+                                    }}  src="/asserts/main/cross.svg" alt="crossSvg" className="cursor-pointer" width="24" height="24"/>
                                 </div>
                             </div>
                             <div className="mt-3 grid grid-cols-2 gap-x-2 gap-y-6 ">

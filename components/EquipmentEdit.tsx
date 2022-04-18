@@ -1,7 +1,7 @@
 import CustomizedInput from "./CustomizedInput"
 import React from 'react';
 import ContactList from "./ContactList";
-import { dummyContactList, dummySummaryEquipmentTableData, dummySummaryOutletTableData, dummySummaryTableData } from "../common/constant";
+import { dummyContactList, dummySummaryEquipmentTableData } from "../common/constant";
 import SummaryTable from "./SummaryTable";
 import FileUpload from "./FileUpload";
 import Searchfield from "./Searchfield";
@@ -70,7 +70,7 @@ const OutletEdit = ({ openEquipmentEdit, setOpenEquipmentEdit }: Props) => {
                     </div>
                     <div className="grid grid-cols-1 items-center">
                         <Searchfield IconFront={false} WithButton={true} InputElement={getSearchinput()} ButtonText={"Retrieve from Emily"} />
-                        <div className="w-full overflow-auto">
+                        <div className="w-full overflow-auto max-h-summaryTableHeight">
                             <SummaryTable headers={['Device ID', 'Type', 'Name', 'Status', '']} data={dummySummaryEquipmentTableData} />
                         </div>
                     </div>

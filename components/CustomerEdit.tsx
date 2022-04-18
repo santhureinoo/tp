@@ -49,7 +49,7 @@ const CustomerEdit = ({ openCustomerEdit, setOpenCustomerEdit }: Props) => {
                     </div>
                     <div className="grid grid-cols-1 items-center gap-x-1">
                         <Searchfield IconFront={true} WithButton={true} ButtonText={"Search"} />
-                        <div className="w-full overflow-auto">
+                        <div className="w-full overflow-auto max-h-summaryTableHeight">
                             <SummaryTable headers={['ID', 'Name', 'Equipment', '']} data={dummySummaryTableData} />
                         </div>
                         <div className="flex justify-end">

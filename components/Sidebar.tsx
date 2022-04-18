@@ -3,11 +3,23 @@ import React from "react";
 import { useRouter } from 'next/router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWrench, faUserGroup, faBriefcase, faUser, faWallet, fas, fa2 } from '@fortawesome/free-solid-svg-icons';
+import Image from "next/image";
 
 interface Props {
     sidebarOpen: boolean;
     setSidebarOpen(sidebarOpen: boolean): void;
 }
+
+
+const getLinkContent = (label: string, isActive: boolean, imageFileName: string): JSX.Element => {
+    return (
+        <a className={isActive ? "link-active" : "link"}>
+            <Image alt="selectSvg" src={`/asserts/sidebar/${imageFileName}${isActive ? '_select.svg' : '.svg'}`} width="25" height="25" />
+            <span className="mx-3">{label}</span>
+        </a>
+    )
+}
+
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: Props) => {
     const router = useRouter();
@@ -23,36 +35,21 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: Props) => {
                     </div>
                 </div>
 
-                <nav className="mt-10 space-y-3 px-2">
+                <nav className="mt-10 flex flex-col gap-y-2.5 py-3 px-2.5">
                     <Link href="/">
-                        <a className={router.pathname == "/" ? "link-active" : "link"}>
-                            <FontAwesomeIcon icon={faUserGroup} />
-                            <span className="mx-3">Customer</span>
-                        </a>
+                        {getLinkContent('Customer', router.pathname == "/", 'customer')}
                     </Link>
                     <Link href="/Outlets">
-                        <a className={router.pathname == "/Outlets" ? "link-active" : "link"}>
-                            <FontAwesomeIcon icon={faBriefcase} />
-                            <span className="mx-3">Outlet</span>
-                        </a>
+                        {getLinkContent('Outlet', router.pathname == "/Outlets", 'outlet')}
                     </Link>
                     <Link href="/Equipments">
-                        <a className={router.pathname == "/Equipments" ? "link-active" : "link"}>
-                            <FontAwesomeIcon icon={faWrench} />
-                            <span className="mx-3">Equipment</span>
-                        </a>
+                        {getLinkContent('Equipments', router.pathname == "/Equipments", 'equipment')}
                     </Link>
                     <Link href="/Users">
-                        <a className={router.pathname == "/Users" ? "link-active" : "link"}>
-                            <FontAwesomeIcon icon={faUser} />
-                            <span className="mx-3">User</span>
-                        </a>
+                        {getLinkContent('User', router.pathname == "/Users", 'user')}
                     </Link>
                     <Link href="/Billings">
-                        <a className={router.pathname == "/Billings" ? "link-active" : "link"}>
-                            <FontAwesomeIcon icon={faWallet} />
-                            <span className="mx-3">Billing</span>
-                        </a>
+                        {getLinkContent('Billing', router.pathname == "/Billings", 'billing')}
                     </Link>
                 </nav>
             </div>

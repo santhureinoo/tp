@@ -4,7 +4,17 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    fontFamily: {
+      'sans': ['MADE TOMMY', 'sans-serif'],
+    },
+    extend: {
+      maxHeight: {
+        'summaryTableHeight' : '132px',
+      },
+      width: {
+        'rightSidebar': '627.16px',
+      }
+    },
   },
   plugins: [],
 }
