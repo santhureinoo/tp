@@ -99,7 +99,7 @@ const BillingEdit = ({ openBillingEdit, setOpenBillingEdit }: Props) => {
                         <h2><b>Outlet (5)</b></h2>
                     </div>
                     <div className="grid grid-cols-1 items-center">
-                        <div className="w-full overflow-auto max-h-summaryTableHeight">
+                        <div className="w-full overflow-auto max-h-summaryBillingHeight">
                             <SummaryTable headerColor={`bg-slate-100`} headers={['Outlet Name','Last Available Tariff','Eqpt.EnergyBaseline','Energy Usage','Savings', 'Service Fee']} data={dummySummaryBillingTableData} />
                         </div>
                     </div>

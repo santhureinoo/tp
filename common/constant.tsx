@@ -171,4 +171,37 @@ export const dummySummaryBillingTableData = [
         "Savings": "$40/250kWh",
         "ServiceFee":'$29.59',
     },
+    {
+        "OutletName": "KFC Jakarta 1",
+        "LAT": "$0.249",
+        "EEB": "9.09kw",
+        "EUsage": '3000kWh/2670kWh',
+        "Savings": "$40/250kWh",
+        "ServiceFee":'$29.59',
+    },
+    {
+        "OutletName": "KFC Jakarta 1",
+        "LAT": "$0.249",
+        "EEB": "9.09kw",
+        "EUsage": '3000kWh/2670kWh',
+        "Savings": "$40/250kWh",
+        "ServiceFee":'$29.59',
+    },
+    {
+        "OutletName": "KFC Jakarta 1",
+        "LAT": "$0.249",
+        "EEB": "9.09kw",
+        "EUsage": '3000kWh/2670kWh',
+        "Savings": "$40/250kWh",
+        "ServiceFee":'$29.59',
+    },
+    {
+        "OutletName": "KFC Jakarta 1",
+        "LAT": "$0.249",
+        "EEB": "9.09kw",
+        "EUsage": '3000kWh/2670kWh',
+        "Savings": "$40/250kWh",
+        "ServiceFee":'$29.59',
+    },
+    
 ]

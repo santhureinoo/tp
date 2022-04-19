@@ -10,6 +10,7 @@ module.exports = {
     extend: {
       maxHeight: {
         'summaryTableHeight' : '132px',
+        'summaryBillingHeight': '294px',
       },
       width: {
         'rightSidebar': '627.16px',

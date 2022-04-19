@@ -24,7 +24,7 @@ const Users: NextPage = () => {
         headers={['Equipment ID', 'Customer', 'Outlet', 'Equipment Type', 'Equipment Name', 'Valid as Of']}
         data={getDummyUserData()}
         leftSideElements={[
-          <Searchfield key={uuidv4()} IconFront={true} WithButton={false} ButtonText={'Search'} />
+          <Searchfield key={uuidv4()} IconFront={false} WithButton={false} ButtonText={'Search'} />
         ]}
         rightSideElements={[
           <TableOptionField key={uuidv4()} label={'Business'} data={['All', 'Some']} />,

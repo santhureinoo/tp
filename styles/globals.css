@@ -10,10 +10,10 @@
 
 @layer utilities {
     .link-active {
-        @apply flex items-center py-4 px-6 bg-blue-300 text-blue-600 rounded-lg;
+        @apply flex items-center py-4 px-6 bg-[#E8F2FF] text-[#147CFC] font-medium rounded-lg;
     }
     .link {
-        @apply flex items-center py-4 px-6 hover:bg-blue-300 hover:text-blue-600 hover:rounded-lg;
+        @apply flex items-center py-4 px-6 hover:bg-[#E8F2FF] hover:text-black font-medium hover:rounded-lg;
     }
     .edit-container {
         @apply shadow-lg overflow-auto top-0 px-6 pt-6 bottom-0 right-0 fixed w-rightSidebar h-full bg-white ease-in-out z-50 duration-300;
