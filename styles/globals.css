@@ -24,4 +24,7 @@
     .edit-sub-container {
         @apply space-x-3 space-y-3 py-6;
     }
+    .header-thin {
+        @apply font-thin text-[20px]
+    }
 }

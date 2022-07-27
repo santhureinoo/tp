@@ -1,6 +1,7 @@
 export interface TableProps {
-    headers: string[];
+    headers: any[];
     data: any[];
+    hiddenDataCol?: any[];
     headerColor?: string;
 }
 

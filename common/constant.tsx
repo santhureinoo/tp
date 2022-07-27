@@ -2,6 +2,8 @@ import CustomizedInput from "../components/CustomizedInput";
 import PillButton from "../components/PillButton";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleCheck, faCircle, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
+import React from "react";
+import TwoTitlesHeader from "../components/TwoTitlesHeader";
 
 export const DummyCustomerDataRow = {
     CID: 'Cust-105864',
@@ -27,7 +29,7 @@ export const DummyOutletDataRow = {
     ONE: 'KFC Jakata Pusat',
     TRE: '$12.05',
     DOT: '20/11/2021',
-    SOS: (<div className="flex flex-row bg-slate-900 gap-x-6 items-center justify-between"><span>3%</span><PillButton className={"bg-green-300 w-24 h-8"} text={"Live"}/></div>)
+    SOS: (<div className="flex flex-row gap-x-6 items-center justify-between"><span>3%</span><PillButton className={"bg-green-300 w-24 h-8"} text={"Live"}/></div>)
 }
 
 export const DummyBillingDataRow = {
@@ -37,7 +39,8 @@ export const DummyBillingDataRow = {
     OUT: '5',
     TSF: '$485.09',
     TSS: '$250',
-    TSK: (<div className="flex flex-row bg-slate-900 gap-x-6 items-center justify-between"><span>470</span><PillButton className={"bg-green-300 w-40 h-8"} text={"Invoice Extracted"}/></div>)
+    TSK: (<div className="flex flex-row gap-x-6 items-center justify-between"><span>470</span><PillButton className={"bg-green-300 text-green-500 w-40 h-8"} text={"Invoice Extracted"}/></div>),
+    STA: 'Extracted',
 }
 
 export const dummyContactList = [
@@ -60,6 +63,73 @@ export const dummyContactList = [
         PhoneNumber: '+628788719580',
     }
 ];
+
+export const dummySavingEditHeaders= [
+    <b>Day</b>,
+    <TwoTitlesHeader mainTitle="1a" subTitle="(Time 24:00, NA)" />,
+    <TwoTitlesHeader mainTitle="1b" subTitle="(Time 24:00, NA)" />,
+    <TwoTitlesHeader mainTitle="2a" subTitle="(Time 24:00, NA)" />,
+    <TwoTitlesHeader mainTitle="1b" subTitle="(Time 24:00, NA)" />
+]
+
+export const dummySavingEditData= [
+    {
+        "Day": "Mon.",
+        "1a": <CustomizedInput inputType="text" value={""} />,
+        "1b": <CustomizedInput inputType="text" value={""} />,
+        "2a": <CustomizedInput inputType="text" value={""} />,
+        "2b": <CustomizedInput inputType="text" value={""} />,
+    },
+    {
+        "Day": "Tue.",
+        "1a": <CustomizedInput inputType="text" value={""} />,
+        "1b": <CustomizedInput inputType="text" value={""} />,
+        "2a": <CustomizedInput inputType="text" value={""} />,
+        "2b": <CustomizedInput inputType="text" value={""} />,
+    },
+    {
+        "Day": "Wed.",
+        "1a": <CustomizedInput inputType="text" value={""} />,
+        "1b": <CustomizedInput inputType="text" value={""} />,
+        "2a": <CustomizedInput inputType="text" value={""} />,
+        "2b": <CustomizedInput inputType="text" value={""} />,
+    },
+    {
+        "Day": "Thu.",
+        "1a": <CustomizedInput inputType="text" value={""} />,
+        "1b": <CustomizedInput inputType="text" value={""} />,
+        "2a": <CustomizedInput inputType="text" value={""} />,
+        "2b": <CustomizedInput inputType="text" value={""} />,
+    },
+    {
+        "Day": "Fri.",
+        "1a": <CustomizedInput inputType="text" value={""} />,
+        "1b": <CustomizedInput inputType="text" value={""} />,
+        "2a": <CustomizedInput inputType="text" value={""} />,
+        "2b": <CustomizedInput inputType="text" value={""} />,
+    },
+    {
+        "Day": "Sat.",
+        "1a": <CustomizedInput inputType="text" value={""} />,
+        "1b": <CustomizedInput inputType="text" value={""} />,
+        "2a": <CustomizedInput inputType="text" value={""} />,
+        "2b": <CustomizedInput inputType="text" value={""} />,
+    },
+    {
+        "Day": "Sun.",
+        "1a": <CustomizedInput inputType="text" value={""} />,
+        "1b": <CustomizedInput inputType="text" value={""} />,
+        "2a": <CustomizedInput inputType="text" value={""} />,
+        "2b": <CustomizedInput inputType="text" value={""} />,
+    },
+    {
+        "Day": "Holiday.",
+        "1a": <CustomizedInput inputType="text" value={""} />,
+        "1b": <CustomizedInput inputType="text" value={""} />,
+        "2a": <CustomizedInput inputType="text" value={""} />,
+        "2b": <CustomizedInput inputType="text" value={""} />,
+    },
+]
 
 export const dummySummaryTableData = [
     {

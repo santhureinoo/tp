@@ -5,6 +5,7 @@ import OutletEdit from '../components/OutletEdit';
 import TableOptionField from '../components/TableOptionField';
 import { DummyOutletDataRow } from '../common/constant';
 import { v4 as uuidv4 } from 'uuid';
+// import SavingsEdit from '../components/outlet/SavingsEdit';
 
 const Outlets: NextPage = () => {
   const [openOutletEdit, setOpenOutletEdit] = React.useState(false);
@@ -26,8 +27,9 @@ const Outlets: NextPage = () => {
         ]}
         handleAddNew={() => {
           setOpenOutletEdit(true);
-        }} handleEdit={() => setOpenOutletEdit(true)} handleDelete={() => setOpenOutletEdit(true)} buttonText={"+ Add New Outlet"} rightSideElements={[]} />
+        }} handleEdit={(selectedData) => setOpenOutletEdit(true)} handleDelete={() => setOpenOutletEdit(true)} buttonText={"+ Add New Outlet"} rightSideElements={[]} />
       <OutletEdit openOutletEdit={openOutletEdit} setOpenOutletEdit={setOpenOutletEdit} />
+      {/* <SavingsEdit openOutletEdit={openOutletEdit} setOpenOutletEdit={setOpenOutletEdit} /> */}
     </React.Fragment>
   )
 }

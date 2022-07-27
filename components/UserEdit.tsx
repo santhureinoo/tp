@@ -26,12 +26,12 @@ const UserEdit = ({ openUserEdit, setOpenUserEdit }: Props) => {
                         <div className="col-span-2">
                             <CustomizedInput label={"Category"} inputType="select" value={"Administrator"} dropDownData={['Administrator', 'Customer']} />
                         </div>
-                        <CustomizedInput label={"Customer ID"} inputType="text" value={""} />
-                        <CustomizedInput label={"Customer Name"} inputType="text" value={""} />
-                        <CustomizedInput label={"Country"} inputType="text" value={""} />
-                        <CustomizedInput label={"City"} inputType="text" value={""} />
-                        <CustomizedInput label={"Current Adress"} inputType="text" value={""} />
-                        <CustomizedInput label={"Postal Code"} inputType="text" value={""} />
+                        <CustomizedInput label={"User ID"} inputType="text" value={""} />
+                        <CustomizedInput label={"Phone Number"} inputType="text" value={""} />
+                        <CustomizedInput label={"Username"} inputType="text" value={""} />
+                        <CustomizedInput label={"Password"} inputType="text" value={""} />
+                        <CustomizedInput label={"Email"} inputType="text" value={""} />
+                        <CustomizedInput label={"Position"} inputType="text" value={""} />
                     </div>
                 </div>
                 <div className="edit-sub-container">

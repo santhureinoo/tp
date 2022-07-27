@@ -32,7 +32,7 @@ const Users: NextPage = () => {
         ]}
         handleAddNew={() => {
           setOpenUserEdit(true);
-        }} handleEdit={() => setOpenUserEdit(true)} handleDelete={() => setOpenUserEdit(true)} buttonText={"+ Add New User"} />
+        }} handleEdit={(selectedData) => setOpenUserEdit(true)} handleDelete={() => setOpenUserEdit(true)} buttonText={"+ Add New User"} />
       <UserEdit openUserEdit={openUserEdit} setOpenUserEdit={setOpenUserEdit} />
     </React.Fragment >
   )

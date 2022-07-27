@@ -32,7 +32,7 @@ const Equipments: NextPage = () => {
         ]}
         handleAddNew={() => {
           setOpenEquipmentEdit(true);
-        }} handleEdit={() => setOpenEquipmentEdit(true)} handleDelete={() => setOpenEquipmentEdit(true)} buttonText={"+ Add New Equipment"} />
+        }} handleEdit={(selectedData) => setOpenEquipmentEdit(true)} handleDelete={() => setOpenEquipmentEdit(true)} buttonText={"+ Add New Equipment"} />
       <EquipmentEdit openEquipmentEdit={openEquipmentEdit} setOpenEquipmentEdit={setOpenEquipmentEdit} />
     </React.Fragment>
   )

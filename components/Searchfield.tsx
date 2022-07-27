@@ -12,7 +12,7 @@ const Searchfield = ({ IconFront = false, WithButton = false, ButtonText = '', I
         <form className="flex flex-row gap-x-2 h-[37px]">
             {InputElement && <div className="w-full">{InputElement}</div>}
             {!InputElement &&
-                <div className="flex flex-row flex-1 items-center p-2 outline outline-2 outline-slate-200 rounded-lg h-12 w-80">
+                <div className="flex flex-row flex-1 items-center p-2 outline outline-2 outline-slate-200 focus-within:outline-black rounded-lg h-12 w-80">
                     {IconFront &&
                         <Image src="/asserts/main/search.svg" alt="searchSvg" unoptimized={true} width="25" height="25" />}
                     <input

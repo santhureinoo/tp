@@ -17,7 +17,7 @@ const Customers: NextPage = () => {
 
   return (
     <React.Fragment>
-      <Table headers={['ID','Name','PIC Name','PIC Phone','Outlets','Equipment']} data={getDummyCustomerData()} handleAddNew={() => setOpenCustomerEdit(true)} handleEdit={() => setOpenCustomerEdit(true)} handleDelete={() => setOpenCustomerEdit(true)} rightSideElements={[]} leftSideElements={[]} buttonText={'+ Add New Customer'} />
+      <Table headers={['ID','Name','PIC Name','PIC Phone','Outlets','Equipment']} data={getDummyCustomerData()} handleAddNew={() => setOpenCustomerEdit(true)} handleEdit={(selectedData) => setOpenCustomerEdit(true)} handleDelete={() => setOpenCustomerEdit(true)} rightSideElements={[]} leftSideElements={[]} buttonText={'+ Add New Customer'} />
       <CustomerEdit openCustomerEdit={openCustomerEdit} setOpenCustomerEdit={setOpenCustomerEdit} />
     </React.Fragment >
   )

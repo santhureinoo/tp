@@ -20,19 +20,19 @@ const CustomizedDropDown = ({ data, selected, extraIcon, textColor = 'text-black
         if (inputType === 'autocomplete') {
             return (<input type="text" className="grow w-full outline-none" placeholder="Search" />);
         } else {
-            return (<div onClick={(e) => { setOpenOutletList(!openOutletList) }} className="cursor-pointer grow w-full outline-none overflow-hidden">{selected}</div>)
+            return (<div tabIndex={0} onBlur={(e) => setOpenOutletList(false)} onClick={(e) => { setOpenOutletList(!openOutletList) }} className="cursor-pointer grow w-full outline-none overflow-hidden">{selected}</div>)
         }
     }
 
     return (
-        <div className="relative outline-none border-2 rounded-lg">
+        <div className={`relative outline-none border-2 rounded-lg ${openOutletList ? 'focus-within:border focus-within:border-black' : ''} `}>
             <div className={`w-full ${textColor} font-medium rounded-lg text-sm px-4 py-2.5  items-center`}>
                 <div className="flex w-full gap-x-2">
                     {!hidePrefixIcons && <svg className="text-slate-400 h-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
                     </svg>}
                     {getInputElem()}
-                    <div onClick={(e) => { setOpenOutletList(!openOutletList) }} className="flex items-center gap-x-2">
+                    <div tabIndex={0} onBlur={(e) => setOpenOutletList(false)}  onClick={(e) => { setOpenOutletList(!openOutletList) }} className="flex items-center gap-x-2">
                         {extraIcon}
                         <FontAwesomeIcon style={{cursor:'pointer' }} icon={faChevronDown} />
                     </div>
