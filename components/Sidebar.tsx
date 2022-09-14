@@ -47,6 +47,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: Props) => {
                     <Link href="/Users">
                         {getLinkContent('User', router.pathname == "/Users", 'user')}
                     </Link>
+                    <Link href="/Reports">
+                        {getLinkContent('Reports', router.pathname == "/Reports", 'billing')}
+                    </Link>
                     <Link href="/Billings">
                         {getLinkContent('Billing', router.pathname == "/Billings", 'billing')}
                     </Link>

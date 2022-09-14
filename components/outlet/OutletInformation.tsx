@@ -1,17 +1,92 @@
 import CustomizedInput from "../CustomizedInput"
 import React from 'react';
 import ContactList from "../ContactList";
-import { dummyContactList, dummySummaryOutletTableData } from "../../common/constant";
+import { outlet, outlet_person_in_charge } from "../../types/datatype";
+import rfdc from 'rfdc';
+import { gql, useQuery } from "@apollo/client";
+const cloneDeep = rfdc();
 
-const OutletInformation = () => {
-    const [contactList, setContactList] = React.useState(dummyContactList);
+interface Props {
+    outlet: outlet;
+    setOutlet: (outlet: outlet) => void;
+}
+
+const OutletInformation = ({ outlet, setOutlet }: Props) => {
+
+    const getCustomersQuery = gql`
+    query Customers {
+      customers {
+        customer_id
+        name
+      }
+    }`;
+
+    // const getOutletPICsQuery = gql`
+    // query Outlet_person_in_charges($where: Outlet_person_in_chargeWhereInput) {
+    //     outlet_person_in_charges(where: $where) {
+    //       outlet_id
+    //       contact_person_index
+    //       contact_person_name
+    //       contact_person_position
+    //       contact_person_address
+    //       contact_person_phone
+    //       primary_contact
+    //     }
+    //   }
+    // `;
+
+    // const getOutletPICsVariable = {
+    //     'variables': {
+    //         "where": {
+    //             "outlet_id": {
+    //                 "equals": outlet.outlet_id
+    //             }
+    //         }
+    //     }
+    // }
+
+
+    const customersResult = useQuery(getCustomersQuery);
+    // const outletPicResult = useQuery(getOutletPICsQuery, getOutletPICsVariable);
+
+    const customerDropdown = React.useMemo(() => {
+        if (customersResult.data && customersResult.data.customers && customersResult.data.customers.length > 0) {
+            const cloned_outlet: outlet = cloneDeep(outlet);
+            cloned_outlet.customer_id = customersResult.data.customers[0].customer_id;
+            setOutlet(cloned_outlet);
+            return customersResult.data.customers.map((cust: any) => {
+                return { key: cust.customer_id.toString(), value: cust.name }
+            })
+        } else {
+            return [];
+        }
+    }, [customersResult.data]);
+
+    // React.useEffect(() => {
+    //     if (outletPicResult.data && outletPicResult.data.outlet_person_in_charges) {
+    //         setContactList(outletPicResult.data.outlet_person_in_charges);
+    //     }
+    // }, [outletPicResult.data]);
+
+    const onChange = (value: any, attributeName: string) => {
+        const cloned_outlet: outlet = cloneDeep(outlet);
+        cloned_outlet[attributeName] = value;
+        setOutlet(cloned_outlet);
+    }
+
+    const onPicChange = (selectedPIC: outlet_person_in_charge[]) => {
+        const cloned_outlet: outlet = cloneDeep(outlet);
+        cloned_outlet.outlet_person_in_charges = selectedPIC;
+        setOutlet(cloned_outlet);
+    }
+
     return (
         <React.Fragment>
             <div className="edit-sub-container">
                 <div className="grid grid-cols-2 gap-x-4 pb-6">
-                    <CustomizedInput label={"Business"} inputType="select" value={"KFC Indonesia"} dropDownData={['KFC Indonesia', 'FKC Indonesia']} />
-                    <CustomizedInput label={"Status"} hideDropDownPrefixIcon={true} inputType="select" value={"Live"} dropDownData={['Live', 'Pending']} />
-                    <CustomizedInput label={"Type"} hideDropDownPrefixIcon={true} inputType="select" value={"Live"} dropDownData={['Restaurant', 'Station']} />
+                    <CustomizedInput label={"Business"} inputType="select" value={outlet.customer_id.toString()} dropDownData={customerDropdown} onChange={(value: string) => onChange(parseInt(value), 'customer_id')} />
+                    <CustomizedInput label={"Status"} hideDropDownPrefixIcon={true} inputType="select" value={outlet.outlet_status} onChange={(value: string) => onChange(value, 'outlet_status')} dropDownData={['Live', 'Pending']} />
+                    <CustomizedInput label={"Type"} hideDropDownPrefixIcon={true} inputType="select" value={outlet.outlet_type} onChange={(value: string) => onChange(value, 'outlet_type')} dropDownData={['Restaurant', 'Station']} />
                 </div>
             </div>
             <div className="edit-sub-container">
@@ -19,11 +94,10 @@ const OutletInformation = () => {
                     <h2><b>General</b></h2>
                 </div>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-6">
-                    <CustomizedInput label={"Outlet ID"} inputType="text" value={""} />
-                    {/* <CustomizedInput hideDropDownPrefixIcon={true} label={"Type"} inputType="select" value="FastFood" dropDownData={["FastFood", "Test", "Test"]} /> */}
-                    <CustomizedInput label={"Outlet Name"} inputType="text" value={""} />
+                    <CustomizedInput label={"Outlet ID"} inputType="text" value={outlet.outlet_id !== -1 ? outlet.outlet_id.toString() : " "} />
+                    <CustomizedInput label={"Outlet Name"} inputType="text" value={outlet.name} onChange={val => onChange(val, 'name')} />
                     <div className={"col-span-2"}>
-                        <CustomizedInput label={"Outlet Address"} inputType="textarea" value={""} />
+                        <CustomizedInput label={"Outlet Address"} inputType="textarea" value={outlet.outlet_address} onChange={val => onChange(val, 'outlet_address')} />
                     </div>
 
                 </div>
@@ -43,33 +117,12 @@ const OutletInformation = () => {
                 <div className="flex">
                     <h2><b>Person In Charge</b><br /> Information</h2>
                 </div>
-                <ContactList contactList={contactList} setContactList={setContactList} />
+                <ContactList contactList={outlet.outlet_person_in_charges || []} setContactList={onPicChange} />
             </div>
-            {/* <div className="edit-sub-container">
-                    <div className="flex justify-between">
-                        <h2><b>Quantity</b></h2>
-                        <div className="w-[45%]">
-                            <CustomizedInput textColor="text-gray-400" hideDropDownPrefixIcon={true} inputType="select" value="Type of Equipment" dropDownData={["Type of Equipment", "Type of Equipment", "Type of Equipment"]} />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-1 items-center">
-                        {/* <div className="w-full overflow-auto max-h-summaryTableHeight">
-                            <SummaryTable headers={['Equipment ID', 'Type', 'Name', '']} data={dummySummaryOutletTableData} />
-                        </div>
-                        <div className="flex justify-end">
-                            <span onClick={e => {
-
-                            }} className="cursor-pointer text-sm text-sky-400">Add Equipment Data</span>
-                        </div> 
-                        <div className="flex flex-col rounded-lg text-xs text-slate-400 justify-center w-full h-32 bg-slate-200">
-                            <span className="text-center">No Device Data is <br />available for this outlet</span>
-                        </div>
-                    </div>
-                </div> */}
-            <div className="flex flex-row gap-x-3 justify-between">
+            {/* <div className="flex flex-row gap-x-3 justify-between">
                 <button type='button' className="bg-white text-blue-500 border border-neutral-400 rounded-lg w-full text-sm h-11 text-center">Reset</button>
                 <button type='button' className="bg-blue-500 text-white rounded-lg w-full text-sm h-11 text-center">Save</button>
-            </div>
+            </div> */}
         </React.Fragment>
     )
 }

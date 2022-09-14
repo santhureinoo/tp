@@ -4,19 +4,20 @@ import { v4 as uuidv4 } from 'uuid';
 import { TableProps } from "../common/types";
 
 interface Props {
-    handleEdit(selectedData: any): any;
-    handleDelete(selectedData: any): any;
-    handleAddNew(): any;
+    handleEdit?: (selectedData: any) => any;
+    handleDelete?: (selectedData: any) => any;
+    handleAddNew?: () => any;
     rightSideElements: JSX.Element[];
     leftSideElements: JSX.Element[];
     buttonText?: string;
+    data: any;
 }
 
 const Table = ({ headers, data, hiddenDataCol = [], handleAddNew, handleEdit, handleDelete, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
     const [openTinyMenuIndex, setOpenTinyMenuIndex] = React.useState(-1);
     return (
         <React.Fragment>
-            <div className="drop-shadow-lg rounded-lg p-4 bg-white">
+            <div className="drop-shadow-lg h-100 rounded-lg p-4 bg-white">
                 <div className="grid grid-cols-2 justify-between items-start py-2 grow-0">
                     <div className="flex flex-row gap-x-2">
                         {leftSideElements}
@@ -25,7 +26,7 @@ const Table = ({ headers, data, hiddenDataCol = [], handleAddNew, handleEdit, ha
                         <div className='flex justify-between gap-x-4'>
                             {rightSideElements}
                         </div>
-                        {buttonText && <button type="button" onClick={(e) => { handleAddNew() }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        {buttonText && <button type="button" onClick={(e) => { handleAddNew && handleAddNew() }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             {buttonText}
                         </button>}
                     </div>
@@ -42,7 +43,7 @@ const Table = ({ headers, data, hiddenDataCol = [], handleAddNew, handleEdit, ha
                         </tr>
                     </thead>
                     <tbody>
-                        {data.map((obj, i) => {
+                        {data.map((obj: any, i: number) => {
                             return (
                                 <tr key={uuidv4()} className="odd:bg-white even:bg-slate-50">
                                     {Object.keys(obj).filter((key, i) => !hiddenDataCol.includes(key)).map((key, i) => {
@@ -59,7 +60,7 @@ const Table = ({ headers, data, hiddenDataCol = [], handleAddNew, handleEdit, ha
                                         className="relative cursor-pointer px-6 bg-blueGray-50 text-blueGray-500 align-middle  py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-normal leading-6 text-left">
                                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                                         <div className={`${openTinyMenuIndex === i ? 'absolute' : 'hidden'} z-20 top-8 -left-8`}>
-                                            <TinyEditDeleteMenu selectedData={obj} onEdit={handleEdit} onDelete={handleDelete} />
+                                            <TinyEditDeleteMenu selectedData={obj} onEdit={(selectedData) => handleEdit && handleEdit(selectedData)} onDelete={(selectedData) => handleDelete && handleDelete(selectedData)} />
                                         </div>
                                     </th>
                                 </tr>

@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleCheck, faCircle, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 import React from "react";
 import TwoTitlesHeader from "../components/TwoTitlesHeader";
+import { outlet_month_shifts } from "../types/datatype";
 
 export const DummyCustomerDataRow = {
     CID: 'Cust-105864',
@@ -29,7 +30,7 @@ export const DummyOutletDataRow = {
     ONE: 'KFC Jakata Pusat',
     TRE: '$12.05',
     DOT: '20/11/2021',
-    SOS: (<div className="flex flex-row gap-x-6 items-center justify-between"><span>3%</span><PillButton className={"bg-green-300 w-24 h-8"} text={"Live"}/></div>)
+    SOS: (<div className="flex flex-row gap-x-6 items-center justify-between"><span>3%</span><PillButton className={"bg-green-300 w-24 h-8"} text={"Live"} /></div>)
 }
 
 export const DummyBillingDataRow = {
@@ -39,7 +40,7 @@ export const DummyBillingDataRow = {
     OUT: '5',
     TSF: '$485.09',
     TSS: '$250',
-    TSK: (<div className="flex flex-row gap-x-6 items-center justify-between"><span>470</span><PillButton className={"bg-green-300 text-green-500 w-40 h-8"} text={"Invoice Extracted"}/></div>),
+    TSK: (<div className="flex flex-row gap-x-6 items-center justify-between"><span>470</span><PillButton className={"bg-green-300 text-green-500 w-40 h-8"} text={"Invoice Extracted"} /></div>),
     STA: 'Extracted',
 }
 
@@ -64,7 +65,7 @@ export const dummyContactList = [
     }
 ];
 
-export const dummySavingEditHeaders= [
+export const dummySavingEditHeaders = [
     <b>Day</b>,
     <TwoTitlesHeader mainTitle="1a" subTitle="(Time 24:00, NA)" />,
     <TwoTitlesHeader mainTitle="1b" subTitle="(Time 24:00, NA)" />,
@@ -72,7 +73,7 @@ export const dummySavingEditHeaders= [
     <TwoTitlesHeader mainTitle="1b" subTitle="(Time 24:00, NA)" />
 ]
 
-export const dummySavingEditData= [
+export const dummySavingEditData = [
     {
         "Day": "Mon.",
         "1a": <CustomizedInput inputType="text" value={""} />,
@@ -131,12 +132,124 @@ export const dummySavingEditData= [
     },
 ]
 
+
+export const defaultOutletMonthShifts: outlet_month_shifts[] = [
+    {
+        day_of_week: 'monday',
+        outlet_date: '',
+        outlet_id: -1,
+        shift_num: 1,
+        startTime: '',
+        endTime: '',
+        remarks_on_op_hours: '',
+    },
+    {
+        day_of_week: 'monday',
+        outlet_date: '',
+        outlet_id: -1,
+        shift_num: 2,
+        startTime: '',
+        endTime: '',
+        remarks_on_op_hours: '',
+    },
+    {
+        day_of_week: 'tuesday',
+        outlet_date: '',
+        outlet_id: -1,
+        shift_num: 1,
+        startTime: '',
+        endTime: '',
+        remarks_on_op_hours: '',
+    },
+    {
+        day_of_week: 'tuesday',
+        outlet_date: '',
+        outlet_id: -1,
+        shift_num: 2,
+        startTime: '',
+        endTime: '',
+        remarks_on_op_hours: '',
+    },
+    {
+        day_of_week: 'wednesday',
+        outlet_date: '',
+        outlet_id: -1,
+        shift_num: 1,
+        startTime: '',
+        endTime: '',
+        remarks_on_op_hours: '',
+    },
+    {
+        day_of_week: 'wednesday',
+        outlet_date: '',
+        outlet_id: -1,
+        shift_num: 2,
+        startTime: '',
+        endTime: '',
+        remarks_on_op_hours: '',
+    },
+    {
+        day_of_week: 'thursday',
+        outlet_date: '',
+        outlet_id: -1,
+        shift_num: 1,
+        startTime: '',
+        endTime: '',
+        remarks_on_op_hours: '',
+    },
+    {
+        day_of_week: 'thursday',
+        outlet_date: '',
+        outlet_id: -1,
+        shift_num: 2,
+        startTime: '',
+        endTime: '',
+        remarks_on_op_hours: '',
+    },
+    {
+        day_of_week: 'friday',
+        outlet_date: '',
+        outlet_id: -1,
+        shift_num: 1,
+        startTime: '',
+        endTime: '',
+        remarks_on_op_hours: '',
+    },  {
+        day_of_week: 'friday',
+        outlet_date: '',
+        outlet_id: -1,
+        shift_num: 2,
+        startTime: '',
+        endTime: '',
+        remarks_on_op_hours: '',
+    },
+    {
+        day_of_week: 'holiday',
+        outlet_date: '',
+        outlet_id: -1,
+        shift_num: 1,
+        startTime: '',
+        endTime: '',
+        remarks_on_op_hours: '',
+    },
+    {
+        day_of_week: 'holiday',
+        outlet_date: '',
+        outlet_id: -1,
+        shift_num: 2,
+        startTime: '',
+        endTime: '',
+        remarks_on_op_hours: '',
+    },
+]
+
+
 export const dummySummaryTableData = [
     {
         "ID": "Outlet-295BO",
         "Name": "Tang City MCD",
         "Equipment": "10",
-        "ChkBox":  <FontAwesomeIcon style={{ fontSize: '2em', color:'#E8F2FF' }} icon={faCircle} />
+        "ChkBox": <FontAwesomeIcon style={{ fontSize: '2em', color: '#E8F2FF' }} icon={faCircle} />
     },
     {
         "ID": "Outlet-295BO",
@@ -154,13 +267,13 @@ export const dummySummaryTableData = [
         "ID": "Outlet-295BO",
         "Name": "Tang City MCD",
         "Equipment": "10",
-        "ChkBox":  <FontAwesomeIcon style={{ fontSize: '2em', color:'#E8F2FF' }} icon={faCircle} />
+        "ChkBox": <FontAwesomeIcon style={{ fontSize: '2em', color: '#E8F2FF' }} icon={faCircle} />
     },
     {
         "ID": "Outlet-295BO",
         "Name": "Tang City MCD",
         "Equipment": "10",
-        "ChkBox":  <FontAwesomeIcon style={{ fontSize: '2em', color:'#E8F2FF' }} icon={faCircle} />
+        "ChkBox": <FontAwesomeIcon style={{ fontSize: '2em', color: '#E8F2FF' }} icon={faCircle} />
     },
 ]
 
@@ -223,7 +336,7 @@ export const dummySummaryBillingTableData = [
         "EEB": "9.09kw",
         "EUsage": '3000kWh/2670kWh',
         "Savings": "$40/250kWh",
-        "ServiceFee":'$29.59',
+        "ServiceFee": '$29.59',
     },
     {
         "OutletName": "KFC Jakarta 1",
@@ -231,7 +344,7 @@ export const dummySummaryBillingTableData = [
         "EEB": "9.09kw",
         "EUsage": '3000kWh/2670kWh',
         "Savings": "$40/250kWh",
-        "ServiceFee":'$29.59',
+        "ServiceFee": '$29.59',
     },
     {
         "OutletName": "KFC Jakarta 1",
@@ -239,7 +352,7 @@ export const dummySummaryBillingTableData = [
         "EEB": "9.09kw",
         "EUsage": '3000kWh/2670kWh',
         "Savings": "$40/250kWh",
-        "ServiceFee":'$29.59',
+        "ServiceFee": '$29.59',
     },
     {
         "OutletName": "KFC Jakarta 1",
@@ -247,7 +360,7 @@ export const dummySummaryBillingTableData = [
         "EEB": "9.09kw",
         "EUsage": '3000kWh/2670kWh',
         "Savings": "$40/250kWh",
-        "ServiceFee":'$29.59',
+        "ServiceFee": '$29.59',
     },
     {
         "OutletName": "KFC Jakarta 1",
@@ -255,7 +368,7 @@ export const dummySummaryBillingTableData = [
         "EEB": "9.09kw",
         "EUsage": '3000kWh/2670kWh',
         "Savings": "$40/250kWh",
-        "ServiceFee":'$29.59',
+        "ServiceFee": '$29.59',
     },
     {
         "OutletName": "KFC Jakarta 1",
@@ -263,7 +376,7 @@ export const dummySummaryBillingTableData = [
         "EEB": "9.09kw",
         "EUsage": '3000kWh/2670kWh',
         "Savings": "$40/250kWh",
-        "ServiceFee":'$29.59',
+        "ServiceFee": '$29.59',
     },
     {
         "OutletName": "KFC Jakarta 1",
@@ -271,7 +384,7 @@ export const dummySummaryBillingTableData = [
         "EEB": "9.09kw",
         "EUsage": '3000kWh/2670kWh',
         "Savings": "$40/250kWh",
-        "ServiceFee":'$29.59',
+        "ServiceFee": '$29.59',
     },
-    
+
 ]

@@ -16,7 +16,7 @@ const SummaryTable = ({ headers, data, headerColor }: TableProps) => {
             <tbody>
                 {data.map((obj, idx) => {
                     return (
-                        <tr key={uuidv4()}>
+                        <tr key={idx}>
                             {Object.keys(obj).map((key, idx) => {
                                 return (
                                     <td key={key + '-' + idx} className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-normal text-left">

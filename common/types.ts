@@ -11,3 +11,8 @@ export interface Contact {
     EmailAddress: string;
     PhoneNumber: string;
 }
+
+export interface DropdownProps {
+    key : string;
+    value: string;
+}
