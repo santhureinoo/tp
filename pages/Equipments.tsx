@@ -5,10 +5,11 @@ import TableOptionField from '../components/TableOptionField';
 import Searchfield from '../components/Searchfield';
 import EquipmentEdit from '../components/EquipmentEdit';
 import { v4 as uuidv4 } from 'uuid';
-import { outlet, outlet_device_ex_fa_input } from '../types/datatype';
+import { outlet, outlet_device_ac_input, outlet_device_ex_fa_input, outlet_month_shifts } from '../types/datatype';
 import ClientOnly from '../components/ClientOnly';
-import { gql, useQuery } from '@apollo/client';
+import { gql, useLazyQuery, useMutation, useQuery, WatchQueryFetchPolicy } from '@apollo/client';
 import { DropdownProps } from '../common/types';
+import { cloneDeep } from '@apollo/client/utilities';
 
 const Equipments: NextPage = () => {
 
@@ -53,21 +54,73 @@ const EquipmentTable: any = () => {
   }
   `;
 
+  const deleteAcEqptQuery = gql`
+  mutation DeleteOneOutlet_device_ac_input($where: Outlet_device_ac_inputWhereUniqueInput!) {
+    deleteOneOutlet_device_ac_input(where: $where) {
+      outlet_id
+      od_device_input_id
+    }
+  }`;
+
+  const deleteFaEqptQuery = gql`
+  mutation DeleteOneOutlet_device_ex_fa_input($where: Outlet_device_ex_fa_inputWhereUniqueInput!) {
+    deleteOneOutlet_device_ex_fa_input(where: $where) {
+      outlet_id
+      od_device_input_id
+    }
+  }
+  `
+
   const getEqptsQuery = gql`
-  query Outlet_device_ex_fa_inputs($where: Outlet_device_ex_fa_inputWhereInput) {
-    outlet_device_ex_fa_inputs(where: $where) {
-      outlet {
+  query OutletsWithEqpt($where: OutletWhereInput) {
+    outlets(where: $where) {
+      outlet_device_ac_input {
+        outlet_id
+        od_device_input_id
+        outlet_date
+        device_num
+        ac_baseline_kW
+        ac_factor_a
         name
-        customer {
+        last_update
+        eqpt_serial_no
+        eqpt_manufacturer
+        live_date
+        eqpt_model
+        eqpt_photo
+        outlet {
           name
+          customer {
+            name
+          }
         }
       }
-      name
-      device_type
-      device_num
-      live_date
-      outlet_date
-      od_ex_fa_input_id
+      outlet_device_ex_fa_input {
+        outlet_id
+        od_device_input_id
+        name
+        outlet_date
+        device_type
+        device_num
+        vfd_kW
+        display_baseline_kW
+        display_low_kW
+        dmm_baseline_kW
+        dmm_low_kW
+        caltr_type
+        last_update
+        eqpt_serial_no
+        eqpt_manufacturer
+        live_date
+        eqpt_model
+        eqpt_photo
+        outlet {
+          name
+          customer {
+            name
+          }
+        }
+      }
     }
   }
   `;
@@ -93,24 +146,24 @@ const EquipmentTable: any = () => {
     return {
       "variables": {
         "where": {
-          "outlet": {
-            "is": {
-              "customer_id": {
-                "equals": selectedCustomerID
-              },
-              "outlet_id": {
-                "equals": selectedOutletID
-              }
-            }
+          "customer_id": {
+            "equals": selectedCustomerID
+          },
+          "outlet_id": {
+            "equals": selectedOutletID
           }
         }
       }
     }
   }, [selectedCustomerID, selectedOutletID]);
 
+
+
   const outletsResult = useQuery(getOutletsQuery, getOutletsVariable);
   const customersResult = useQuery(getCustomersQuery);
-  const eqptsResult = useQuery(getEqptsQuery, getEqptsVariable);
+  const eqptsResult = useLazyQuery(getEqptsQuery, getEqptsVariable);
+  const deleteAcEqptResult = useMutation(deleteAcEqptQuery);
+  const deleteFaEqptResult = useMutation(deleteFaEqptQuery);
 
   const customerDropdown: DropdownProps[] = React.useMemo(() => {
 
@@ -137,15 +190,43 @@ const EquipmentTable: any = () => {
 
   // Hooks 
   React.useEffect(() => {
-    if (eqptsResult.data && eqptsResult.data.outlet_device_ex_fa_inputs) {
-      setEquipments(eqptsResult.data.outlet_device_ex_fa_inputs);
-    }
-  }, [eqptsResult.data]);
+    // if (eqptsResult.data && eqptsResult.data.outlets.length > 0) {
+    //   const outletsWithEqpts = eqptsResult.data.outlets as outlet[];
+    //   const eqptList: any[] = [];
+    //   outletsWithEqpts.map(oe => {
+    //     eqptList.push([...oe.outlet_device_ex_fa_inputs || [], ...oe.outlet_device_ac_inputs || []]);
+    //   })
+    //   setEquipments(eqptList);
+    // }
+    eqptsResult[0]().then(res => {
+      if (res.data && res.data.outlets) {
+        const outletsWithEqpts = res.data.outlets as outlet[];
+        let eqptList: any[] = [];
+
+        outletsWithEqpts.map(oe => {
+          let ac_list = oe.outlet_device_ac_input as any[];
+          if (ac_list.length > 0) {
+            ac_list = ac_list.map(ac => {
+              const cloned_ac = cloneDeep(ac);
+              cloned_ac.device_type = 'ac';
+              return cloned_ac;
+            })
+          }
+
+          eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
+        })
+        setEquipments(eqptList);
+      }
+
+    })
+  }, [selectedCustomerID, selectedOutletID]);
 
   React.useEffect(() => {
     if (equipments) {
-      setFilteredEquipmentsInArray(equipments.map((eqpt) => [eqpt.device_num, eqpt.outlet?.customer?.name, eqpt.outlet?.name, eqpt.device_type, eqpt.name, eqpt.live_date]));
-      setEquipmentsInArray(equipments.map((eqpt) => [eqpt.device_num, eqpt.outlet?.customer?.name, eqpt.outlet?.name, eqpt.device_type, eqpt.name, eqpt.live_date]));
+      setFilteredEquipmentsInArray(equipments.map((eqpt: outlet_device_ex_fa_input) => [eqpt.device_num, eqpt.outlet?.customer?.name, eqpt.outlet?.name, eqpt.device_type, eqpt.name, eqpt.live_date, eqpt.od_device_input_id]));
+      setEquipmentsInArray(equipments.map((eqpt: outlet_device_ex_fa_input) => {
+        return [eqpt.device_num, eqpt.outlet?.customer?.name, eqpt.outlet?.name, eqpt.device_type, eqpt.name, eqpt.live_date, eqpt.od_device_input_id];
+      }));
     }
   }, [equipments]);
 
@@ -153,6 +234,8 @@ const EquipmentTable: any = () => {
     <React.Fragment>
       <Table
         headers={['Equipment ID', 'Customer', 'Outlet', 'Equipment Type', 'Equipment Name', 'Valid as Of']}
+        hiddenDataCol={['od_device_input_id']}
+        hiddenDataColIndex={[6]}
         data={filteredEquipmentsInArray}
         leftSideElements={[
           <Searchfield data={equipmentsInArray} setFilteredData={setFilteredEquipmentsInArray} key={"eqpt_search"} IconFront={false} WithButton={false} ButtonText={'Search'} />
@@ -166,8 +249,95 @@ const EquipmentTable: any = () => {
         handleAddNew={() => {
           setSelectedEqpt(undefined);
           setOpenEquipmentEdit(true);
-        }} handleEdit={(selectedData) => { setSelectedEqpt(equipments.find(eqpt => eqpt.device_num === selectedData[0])); setOpenEquipmentEdit(true) }} handleDelete={() => setOpenEquipmentEdit(true)} buttonText={"+ Add New Equipment"} />
-      <EquipmentEdit eqpt={selectedEqpt} afterOperation={() => eqptsResult.refetch()} selectedOutletID={selectedOutletID} selectedCustomerID={selectedCustomerID} setEqpt={setSelectedEqpt} openEquipmentEdit={openEquipmentEdit} setOpenEquipmentEdit={setOpenEquipmentEdit} />
+        }} handleEdit={(selectedData) => { setSelectedEqpt((equipments as any[]).find((eqpt: any) => eqpt.device_num === selectedData[0])); setOpenEquipmentEdit(true) }} handleDelete={(data) => {
+          const id = data[6];
+          const type = data[3];
+
+          if (type === "ac") {
+            deleteAcEqptResult[0]({
+              variables: {
+                "where": {
+                  "od_device_input_id": id
+                },
+              }
+            }).then(res => {
+              eqptsResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
+                if (res.data && res.data.outlets) {
+                  const outletsWithEqpts = res.data.outlets as outlet[];
+                  let eqptList: any[] = [];
+
+                  outletsWithEqpts.map(oe => {
+                    let ac_list = oe.outlet_device_ac_input as any[];
+                    if (ac_list.length > 0) {
+                      ac_list = ac_list.map(ac => {
+                        const cloned_ac = cloneDeep(ac);
+                        cloned_ac.device_type = 'ac';
+                        return cloned_ac;
+                      })
+                    }
+
+                    eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
+                  })
+                  setEquipments(eqptList);
+                }
+
+              })
+            })
+          } else {
+            deleteFaEqptResult[0]({
+              variables: {
+                "where": {
+                  "od_device_input_id": id
+                },
+              }
+            }).then(res => {
+              eqptsResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
+                if (res.data && res.data.outlets) {
+                  const outletsWithEqpts = res.data.outlets as outlet[];
+                  let eqptList: any[] = [];
+
+                  outletsWithEqpts.map(oe => {
+                    let ac_list = oe.outlet_device_ac_input as any[];
+                    if (ac_list.length > 0) {
+                      ac_list = ac_list.map(ac => {
+                        const cloned_ac = cloneDeep(ac);
+                        cloned_ac.device_type = 'ac';
+                        return cloned_ac;
+                      })
+                    }
+
+                    eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
+                  })
+                  setEquipments(eqptList);
+                }
+
+              })
+            })
+          }
+        }} buttonText={"+ Add New Equipment"} />
+      <EquipmentEdit eqpt={selectedEqpt} afterOperation={() => {
+        eqptsResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
+          if (res.data && res.data.outlets) {
+            const outletsWithEqpts = res.data.outlets as outlet[];
+            let eqptList: any[] = [];
+
+            outletsWithEqpts.map(oe => {
+              let ac_list = oe.outlet_device_ac_input as any[];
+              if (ac_list.length > 0) {
+                ac_list = ac_list.map(ac => {
+                  const cloned_ac = cloneDeep(ac);
+                  cloned_ac.device_type = 'ac';
+                  return cloned_ac;
+                })
+              }
+
+              eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
+            })
+            setEquipments(eqptList);
+          }
+
+        })
+      }} selectedOutletID={selectedOutletID} selectedCustomerID={selectedCustomerID} setEqpt={setSelectedEqpt} openEquipmentEdit={openEquipmentEdit} setOpenEquipmentEdit={setOpenEquipmentEdit} />
     </React.Fragment>
   )
 }

@@ -86,6 +86,7 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
           name
           _count {
             outlet_device_ex_fa_input
+            outlet_device_ac_input
           }
         }
       }`;
@@ -119,7 +120,7 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
 
     React.useEffect(() => {
         if (getOutletsResult.data) {
-            setFilteredOutletsInArray(getOutletsResult.data.outlets.map((out: any) => [out.outlet_id, out.name, out._count.outlet_device_ex_fa_input, <FontAwesomeIcon style={{ fontSize: '2em', color: '#E8F2FF' }} icon={faCircle}></FontAwesomeIcon>]));
+            setFilteredOutletsInArray(getOutletsResult.data.outlets.map((out: any) => [out.outlet_id, out.name, out._count.outlet_device_ex_fa_input + out._count.outlet_device_ac_input, <FontAwesomeIcon style={{ fontSize: '2em', color: '#E8F2FF' }} icon={faCircle}></FontAwesomeIcon>]));
             setOutletsInArray(getOutletsResult.data.outlets.map((out: any) => [out.outlet_id, out.name, out._count.outlet_device_ex_fa_input, <FontAwesomeIcon style={{ fontSize: '2em', color: '#E8F2FF' }} icon={faCircle}></FontAwesomeIcon>]));
         }
     }, [getOutletsResult.data]);

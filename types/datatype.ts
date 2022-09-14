@@ -230,7 +230,6 @@ export namespace outlet_device_ac_inputFields {
     export type outlet_id = number;
     export type od_device_input_id = number;
     export type outlet_date = string;
-    export type device_type = string;
     export type device_num = string;
     export type ac_baseline_kW = string | null;
     export type ac_factor_a = string | null;
@@ -250,7 +249,6 @@ export interface outlet_device_ac_input {
     od_device_input_id: outlet_device_ac_inputFields.od_device_input_id;
     outlet_date: outlet_device_ac_inputFields.outlet_date;
     device_num: outlet_device_ac_inputFields.device_num;
-    device_type: outlet_device_ac_inputFields.device_type;
     ac_baseline_kW: outlet_device_ac_inputFields.ac_baseline_kW;
     ac_factor_a: outlet_device_ac_inputFields.ac_factor_a;
     name: outlet_device_ac_inputFields.name;
@@ -260,7 +258,6 @@ export interface outlet_device_ac_input {
     live_date: outlet_device_ac_inputFields.live_date;
     eqpt_model: outlet_device_ac_inputFields.eqpt_model;
     eqpt_photo: outlet_device_ac_inputFields.eqpt_photo;
-
 }
 
 export namespace outlet_device_ex_fa_inputFields {
@@ -285,6 +282,8 @@ export namespace outlet_device_ex_fa_inputFields {
 
 }
 
+
+
 export interface outlet_device_ex_fa_input {
     [key: string]: any;
     outlet_id: outlet_device_ex_fa_inputFields.outlet_id;
@@ -305,6 +304,35 @@ export interface outlet_device_ex_fa_input {
     live_date: outlet_device_ex_fa_inputFields.live_date;
     eqpt_model: outlet_device_ex_fa_inputFields.eqpt_model;
     eqpt_photo: outlet_device_ex_fa_inputFields.eqpt_photo;
+    ac_baseline_kW: outlet_device_ac_inputFields.ac_baseline_kW;
+    ac_factor_a: outlet_device_ac_inputFields.ac_factor_a;
+    outlet?: outlet | any;
+}
+
+
+
+export interface outlet_device_ex_fa_ac_input {
+    [key: string]: any;
+    outlet_id: outlet_device_ex_fa_inputFields.outlet_id;
+    od_device_input_id: outlet_device_ex_fa_inputFields.od_device_input_id;
+    name: outlet_device_ex_fa_inputFields.name;
+    outlet_date: outlet_device_ex_fa_inputFields.outlet_date;
+    device_type: outlet_device_ex_fa_inputFields.device_type;
+    device_num: outlet_device_ex_fa_inputFields.device_num;
+    vfd_kW: outlet_device_ex_fa_inputFields.vfd_kW;
+    display_baseline_kW: outlet_device_ex_fa_inputFields.display_baseline_kW;
+    display_low_kW: outlet_device_ex_fa_inputFields.display_low_kW;
+    dmm_baseline_kW: outlet_device_ex_fa_inputFields.dmm_baseline_kW;
+    dmm_low_kW: outlet_device_ex_fa_inputFields.dmm_low_kW;
+    caltr_type: outlet_device_ex_fa_inputFields.caltr_type;
+    last_update: outlet_device_ex_fa_inputFields.last_update;
+    eqpt_serial_no: outlet_device_ex_fa_inputFields.eqpt_serial_no;
+    eqpt_manufacturer: outlet_device_ex_fa_inputFields.eqpt_manufacturer;
+    live_date: outlet_device_ex_fa_inputFields.live_date;
+    eqpt_model: outlet_device_ex_fa_inputFields.eqpt_model;
+    eqpt_photo: outlet_device_ex_fa_inputFields.eqpt_photo;
+    ac_baseline_kW: outlet_device_ac_inputFields.ac_baseline_kW;
+    ac_factor_a: outlet_device_ac_inputFields.ac_factor_a;
     outlet?: outlet | any;
 }
 
@@ -486,7 +514,7 @@ export interface results {
     saturday: resultsFields.saturday;
     sunday: resultsFields.sunday;
     holiday: resultsFields.holiday;
-    outlet : outlet;
+    outlet: outlet;
 }
 
 export namespace rg_factorsFields {

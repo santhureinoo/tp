@@ -13,7 +13,7 @@ interface Props {
     data: any;
 }
 
-const Table = ({ headers, data, hiddenDataCol = [], handleAddNew, handleEdit, handleDelete, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
+const Table = ({ headers, data, hiddenDataCol = [], hiddenDataColIndex = [], handleAddNew, handleEdit, handleDelete, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
     const [openTinyMenuIndex, setOpenTinyMenuIndex] = React.useState(-1);
     return (
         <React.Fragment>
@@ -46,7 +46,7 @@ const Table = ({ headers, data, hiddenDataCol = [], handleAddNew, handleEdit, ha
                         {data.map((obj: any, i: number) => {
                             return (
                                 <tr key={uuidv4()} className="odd:bg-white even:bg-slate-50">
-                                    {Object.keys(obj).filter((key, i) => !hiddenDataCol.includes(key)).map((key, i) => {
+                                    {Object.keys(obj).filter((key,index) => !hiddenDataCol.includes(key) && !hiddenDataColIndex.includes(index)).map((key, i) => {
                                         return (
                                             <td key={uuidv4()} className="px-6 bg-blueGray-50 text-blueGray-500 align-middle  py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-normal leading-6 text-left">
                                                 {obj[key]}

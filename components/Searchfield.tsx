@@ -13,7 +13,6 @@ interface Props {
 const Searchfield = ({ IconFront = false, WithButton = false, ButtonText = '', InputElement, data, setFilteredData }: Props) => {
     const [text, setText] = React.useState("");
     const onChange = (value: string) => {
-        console.log(value);
         setText(value);
         if (value !== '') {
             const filtered = data.filter(e => {
