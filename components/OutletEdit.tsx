@@ -6,6 +6,7 @@ import SavingsInformation from "./outlet/SavingsInformation";
 import { gql, useLazyQuery, useMutation, WatchQueryFetchPolicy } from "@apollo/client";
 import { outlet, outlet_month, outlet_person_in_charge } from "../types/datatype"; import rfdc from 'rfdc';
 import { defaultOutletMonthShifts } from '../common/constant';
+import moment from 'moment';
 const cloneDeep = rfdc();
 
 interface Props {
@@ -18,22 +19,6 @@ interface Props {
 
 const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustomerID, afterOperation }: Props) => {
     // const [contactList, setContactList] = React.useState<outlet_person_in_charge[]>([]);
-    const [outletMonth, setOutletMonth] = React.useState<outlet_month>({
-        no_of_ac_in_outlet: 0,
-        no_of_ex_in_outlet: 0,
-        no_of_fa_in_outlet: 0,
-        no_of_ex_installed: 0,
-        no_of_fa_installed: 0,
-        no_of_ac_installed: 0,
-        remarks_on_eqpt_in_outlet_or_installed: "",
-        remarks_on_overall_outlet: "",
-        outlet_date: "0",
-        outlet_outlet_id: -1,
-        percent_share_of_savings: "",
-        last_avail_tariff: "",
-        tariff_month: "",
-
-    });
     const [selectedInformation, setSelectedinformation] = React.useState(1);
     const [currentOutlet, setCurrentOutlet] = React.useState<outlet>({
         outlet_id: -1,
@@ -43,6 +28,24 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
         outlet_address: "",
         outlet_type: "Restaurant",
         outlet_month_shifts: defaultOutletMonthShifts,
+        outlet_month: [
+            {
+                no_of_ac_in_outlet: 0,
+                no_of_ex_in_outlet: 0,
+                no_of_fa_in_outlet: 0,
+                no_of_ex_installed: 0,
+                no_of_fa_installed: 0,
+                no_of_ac_installed: 0,
+                remarks_on_eqpt_in_outlet_or_installed: "",
+                remarks_on_overall_outlet: "",
+                outlet_date: moment().format("DD/MM/YYYY"),
+                outlet_outlet_id: -1,
+                percent_share_of_savings: "",
+                last_avail_tariff: "",
+                tariff_month: "",
+
+            }
+        ]
     });
 
     const get_outlet_query = gql`
@@ -180,6 +183,24 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
                 outlet_address: "",
                 outlet_type: "Restaurant",
                 outlet_month_shifts: defaultOutletMonthShifts,
+                outlet_month: [
+                    {
+                        no_of_ac_in_outlet: 0,
+                        no_of_ex_in_outlet: 0,
+                        no_of_fa_in_outlet: 0,
+                        no_of_ex_installed: 0,
+                        no_of_fa_installed: 0,
+                        no_of_ac_installed: 0,
+                        remarks_on_eqpt_in_outlet_or_installed: "",
+                        remarks_on_overall_outlet: "",
+                        outlet_date: moment().format("DD/MM/YYYY"),
+                        outlet_outlet_id: -1,
+                        percent_share_of_savings: "",
+                        last_avail_tariff: "",
+                        tariff_month: "",
+        
+                    }
+                ]
             });
         }
     }, [outlet]);
@@ -235,6 +256,9 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
                                         },
                                         "remarks_on_op_hours": {
                                             "set": shift.remarks_on_op_hours
+                                        },
+                                        "outlet_date": {
+                                            "set": moment().format("DD/MM/YYYY")
                                         }
                                     }
                                 }
@@ -287,51 +311,51 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
                                 }
                             ]
                         } : undefined,
-                        "outlet_month": selectedInformation === 2 ? {
+                        "outlet_month": selectedInformation === 2 && currentOutlet?.outlet_month && currentOutlet.outlet_month.length > 0 ? {
                             "update": [
                                 {
                                     "data": {
                                         "outlet_date": {
-                                            "set": outletMonth.outlet_date
+                                            "set":  moment().format("DD/MM/YYYY")
                                         },
                                         "percent_share_of_savings": {
-                                            "set": outletMonth.percent_share_of_savings
+                                            "set": currentOutlet.outlet_month[0].percent_share_of_savings
                                         },
                                         "last_avail_tariff": {
-                                            "set": outletMonth.last_avail_tariff
+                                            "set": currentOutlet.outlet_month[0].last_avail_tariff
                                         },
                                         "tariff_month": {
-                                            "set": outletMonth.tariff_month
+                                            "set": currentOutlet.outlet_month[0].tariff_month
                                         },
                                         "remarks_on_eqpt_in_outlet_or_installed": {
-                                            "set": outletMonth.remarks_on_eqpt_in_outlet_or_installed
+                                            "set": currentOutlet.outlet_month[0].remarks_on_eqpt_in_outlet_or_installed
                                         },
                                         "no_of_ex_in_outlet": {
-                                            "set": outletMonth.no_of_ex_in_outlet
+                                            "set": currentOutlet.outlet_month[0].no_of_ex_in_outlet
                                         },
                                         "no_of_fa_in_outlet": {
-                                            "set": outletMonth.no_of_fa_in_outlet
+                                            "set": currentOutlet.outlet_month[0].no_of_fa_in_outlet
                                         },
                                         "no_of_ac_in_outlet": {
-                                            "set": outletMonth.no_of_ac_in_outlet
+                                            "set": currentOutlet.outlet_month[0].no_of_ac_in_outlet
                                         },
                                         "no_of_ex_installed": {
-                                            "set": outletMonth.no_of_ex_installed
+                                            "set": currentOutlet.outlet_month[0].no_of_ex_installed
                                         },
                                         "no_of_fa_installed": {
-                                            "set": outletMonth.no_of_fa_installed
+                                            "set": currentOutlet.outlet_month[0].no_of_fa_installed
                                         },
                                         "no_of_ac_installed": {
-                                            "set": outletMonth.no_of_ac_installed
+                                            "set": currentOutlet.outlet_month[0].no_of_ac_installed
                                         },
                                         "remarks_on_overall_outlet": {
-                                            "set": outletMonth.remarks_on_overall_outlet
+                                            "set": currentOutlet.outlet_month[0].remarks_on_overall_outlet
                                         }
                                     },
                                     "where": {
                                         "outlet_outlet_id_outlet_date": {
-                                            "outlet_outlet_id": outletMonth.outlet_outlet_id,
-                                            "outlet_date": outletMonth.outlet_date
+                                            "outlet_outlet_id": currentOutlet.outlet_month[0].outlet_outlet_id,
+                                            "outlet_date": currentOutlet.outlet_month[0].outlet_date
                                         }
                                     }
                                 }
@@ -367,21 +391,21 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
                                 "data": currentOutlet.outlet_month_shifts.map(({ outlet_id, ...shift }) => shift)
                             }
                         } : undefined,
-                        "outlet_month": {
+                        "outlet_month": currentOutlet.outlet_month && currentOutlet.outlet_month.length > 0 && {
                             "create": [
                                 {
-                                    "outlet_date": outletMonth.outlet_date,
-                                    "percent_share_of_savings": outletMonth.percent_share_of_savings,
-                                    "last_avail_tariff": outletMonth.last_avail_tariff,
-                                    "tariff_month": outletMonth.tariff_month,
-                                    "no_of_ex_in_outlet": outletMonth.no_of_ex_in_outlet,
-                                    "no_of_fa_in_outlet": outletMonth.no_of_fa_in_outlet,
-                                    "no_of_ac_in_outlet": outletMonth.no_of_ac_in_outlet,
-                                    "no_of_ex_installed": outletMonth.no_of_ex_installed,
-                                    "no_of_fa_installed": outletMonth.no_of_fa_installed,
-                                    "no_of_ac_installed": outletMonth.no_of_ac_installed,
-                                    "remarks_on_overall_outlet": outletMonth.remarks_on_overall_outlet,
-                                    "remarks_on_eqpt_in_outlet_or_installed": outletMonth.remarks_on_eqpt_in_outlet_or_installed
+                                    "outlet_date": currentOutlet.outlet_month[0].outlet_date,
+                                    "percent_share_of_savings": currentOutlet.outlet_month[0].percent_share_of_savings,
+                                    "last_avail_tariff": currentOutlet.outlet_month[0].last_avail_tariff,
+                                    "tariff_month": currentOutlet.outlet_month[0].tariff_month,
+                                    "no_of_ex_in_outlet": currentOutlet.outlet_month[0].no_of_ex_in_outlet,
+                                    "no_of_fa_in_outlet": currentOutlet.outlet_month[0].no_of_fa_in_outlet,
+                                    "no_of_ac_in_outlet": currentOutlet.outlet_month[0].no_of_ac_in_outlet,
+                                    "no_of_ex_installed": currentOutlet.outlet_month[0].no_of_ex_installed,
+                                    "no_of_fa_installed": currentOutlet.outlet_month[0].no_of_fa_installed,
+                                    "no_of_ac_installed": currentOutlet.outlet_month[0].no_of_ac_installed,
+                                    "remarks_on_overall_outlet": currentOutlet.outlet_month[0].remarks_on_overall_outlet,
+                                    "remarks_on_eqpt_in_outlet_or_installed": currentOutlet.outlet_month[0].remarks_on_eqpt_in_outlet_or_installed
                                 }
                             ]
                         }
@@ -424,7 +448,7 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
                     </div>
                 </div>
                 {
-                    selectedInformation === 1 ? <OutletInformation setOutlet={setCurrentOutlet} outlet={currentOutlet} /> : <SavingsInformation outlet_month={outletMonth} setOutletMonth={setOutletMonth} setOutlet={setCurrentOutlet} outlet={currentOutlet} />
+                    selectedInformation === 1 ? <OutletInformation setOutlet={setCurrentOutlet} outlet={currentOutlet} /> : <SavingsInformation setOutlet={setCurrentOutlet} outlet={currentOutlet} />
                 }
                 <div className="flex flex-row gap-x-3 justify-between">
                     <button type='button' className="bg-white text-blue-500 border border-neutral-400 rounded-lg w-full text-sm h-11 text-center">Reset</button>

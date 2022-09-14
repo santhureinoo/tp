@@ -102,7 +102,7 @@ const ReportTable: any = () => {
       outlet {
         name
         outlet_device_ex_fa_input {
-          od_ex_fa_input_id
+          od_device_input_id
         }
         outlet_month {
           last_avail_tariff

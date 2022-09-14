@@ -5,6 +5,7 @@ import { faCircleCheck, faCircle, faXmarkCircle } from "@fortawesome/free-solid-
 import React from "react";
 import TwoTitlesHeader from "../components/TwoTitlesHeader";
 import { outlet_month_shifts } from "../types/datatype";
+import moment from "moment";
 
 export const DummyCustomerDataRow = {
     CID: 'Cust-105864',
@@ -136,7 +137,7 @@ export const dummySavingEditData = [
 export const defaultOutletMonthShifts: outlet_month_shifts[] = [
     {
         day_of_week: 'monday',
-        outlet_date: '',
+        outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
         shift_num: 1,
         startTime: '',
@@ -145,7 +146,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
     },
     {
         day_of_week: 'monday',
-        outlet_date: '',
+        outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
         shift_num: 2,
         startTime: '',
@@ -154,7 +155,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
     },
     {
         day_of_week: 'tuesday',
-        outlet_date: '',
+        outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
         shift_num: 1,
         startTime: '',
@@ -163,7 +164,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
     },
     {
         day_of_week: 'tuesday',
-        outlet_date: '',
+        outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
         shift_num: 2,
         startTime: '',
@@ -172,7 +173,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
     },
     {
         day_of_week: 'wednesday',
-        outlet_date: '',
+        outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
         shift_num: 1,
         startTime: '',
@@ -181,7 +182,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
     },
     {
         day_of_week: 'wednesday',
-        outlet_date: '',
+        outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
         shift_num: 2,
         startTime: '',
@@ -190,7 +191,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
     },
     {
         day_of_week: 'thursday',
-        outlet_date: '',
+        outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
         shift_num: 1,
         startTime: '',
@@ -199,7 +200,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
     },
     {
         day_of_week: 'thursday',
-        outlet_date: '',
+        outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
         shift_num: 2,
         startTime: '',
@@ -208,7 +209,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
     },
     {
         day_of_week: 'friday',
-        outlet_date: '',
+        outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
         shift_num: 1,
         startTime: '',
@@ -216,7 +217,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
         remarks_on_op_hours: '',
     },  {
         day_of_week: 'friday',
-        outlet_date: '',
+        outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
         shift_num: 2,
         startTime: '',
@@ -225,7 +226,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
     },
     {
         day_of_week: 'holiday',
-        outlet_date: '',
+        outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
         shift_num: 1,
         startTime: '',
@@ -234,7 +235,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
     },
     {
         day_of_week: 'holiday',
-        outlet_date: '',
+        outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
         shift_num: 2,
         startTime: '',

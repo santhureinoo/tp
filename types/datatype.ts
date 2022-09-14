@@ -223,11 +223,14 @@ export interface outlet {
     outlet_month_shifts?: outlet_month_shifts[];
     outlet_person_in_charges?: outlet_person_in_charge[];
     outlet_device_ex_fa_inputs?: outlet_device_ex_fa_input[];
+    outlet_device_ac_inputs?: outlet_device_ac_input[];
 }
 
 export namespace outlet_device_ac_inputFields {
     export type outlet_id = number;
+    export type od_device_input_id = number;
     export type outlet_date = string;
+    export type device_type = string;
     export type device_num = string;
     export type ac_baseline_kW = string | null;
     export type ac_factor_a = string | null;
@@ -242,9 +245,12 @@ export namespace outlet_device_ac_inputFields {
 }
 
 export interface outlet_device_ac_input {
+    [key: string]: any;
     outlet_id: outlet_device_ac_inputFields.outlet_id;
+    od_device_input_id: outlet_device_ac_inputFields.od_device_input_id;
     outlet_date: outlet_device_ac_inputFields.outlet_date;
     device_num: outlet_device_ac_inputFields.device_num;
+    device_type: outlet_device_ac_inputFields.device_type;
     ac_baseline_kW: outlet_device_ac_inputFields.ac_baseline_kW;
     ac_factor_a: outlet_device_ac_inputFields.ac_factor_a;
     name: outlet_device_ac_inputFields.name;
@@ -259,7 +265,7 @@ export interface outlet_device_ac_input {
 
 export namespace outlet_device_ex_fa_inputFields {
     export type outlet_id = number;
-    export type od_ex_fa_input_id = number;
+    export type od_device_input_id = number;
     export type name = string;
     export type outlet_date = string;
     export type device_type = string;
@@ -282,7 +288,7 @@ export namespace outlet_device_ex_fa_inputFields {
 export interface outlet_device_ex_fa_input {
     [key: string]: any;
     outlet_id: outlet_device_ex_fa_inputFields.outlet_id;
-    od_ex_fa_input_id: outlet_device_ex_fa_inputFields.od_ex_fa_input_id;
+    od_device_input_id: outlet_device_ex_fa_inputFields.od_device_input_id;
     name: outlet_device_ex_fa_inputFields.name;
     outlet_date: outlet_device_ex_fa_inputFields.outlet_date;
     device_type: outlet_device_ex_fa_inputFields.device_type;

@@ -10,51 +10,49 @@ const cloneDeep = rfdc();
 interface Props {
     outlet: outlet;
     setOutlet: (outlet: outlet) => void;
-    outlet_month: outlet_month;
-    setOutletMonth: (outlet_month: outlet_month) => void;
 }
 
 
-const SavingsInformation = ({ outlet, setOutlet, outlet_month, setOutletMonth }: Props) => {
+const SavingsInformation = ({ outlet, setOutlet, }: Props) => {
 
-    const getOutletMonthQuery = gql`
-    query Outlet_month($where: Outlet_monthWhereUniqueInput!) {
-        outlet_month(where: $where) {
-          outlet_outlet_id
-          percent_share_of_savings
-          last_avail_tariff
-          tariff_month
-          no_of_ex_in_outlet
-          no_of_fa_in_outlet
-          no_of_ac_in_outlet
-          no_of_ex_installed
-          no_of_fa_installed
-          no_of_ac_installed
-          remarks_on_eqpt_in_outlet_or_installed
-          remarks_on_overall_outlet
-          outlet_date
-        }
-      }
-    `;
+    // const getOutletMonthQuery = gql`
+    // query Outlet_month($where: Outlet_monthWhereUniqueInput!) {
+    //     outlet_month(where: $where) {
+    //       outlet_outlet_id
+    //       percent_share_of_savings
+    //       last_avail_tariff
+    //       tariff_month
+    //       no_of_ex_in_outlet
+    //       no_of_fa_in_outlet
+    //       no_of_ac_in_outlet
+    //       no_of_ex_installed
+    //       no_of_fa_installed
+    //       no_of_ac_installed
+    //       remarks_on_eqpt_in_outlet_or_installed
+    //       remarks_on_overall_outlet
+    //       outlet_date
+    //     }
+    //   }
+    // `;
 
-    const getOutletMonthVariable = {
-        'variables': {
-            "where": {
-                "outlet_outlet_id_outlet_date": {
-                    "outlet_outlet_id": outlet.outlet_id,
-                    "outlet_date": "0",
-                }
-            }
-        }
-    }
+    // const getOutletMonthVariable = {
+    //     'variables': {
+    //         "where": {
+    //             "outlet_outlet_id_outlet_date": {
+    //                 "outlet_outlet_id": outlet.outlet_id,
+    //                 "outlet_date": "0",
+    //             }
+    //         }
+    //     }
+    // }
 
-    const outletMonthResult = useQuery(getOutletMonthQuery, getOutletMonthVariable);
+    // const outletMonthResult = useQuery(getOutletMonthQuery, getOutletMonthVariable);
 
-    React.useEffect(() => {
-        if (outletMonthResult.data && outletMonthResult.data.outlet_month) {
-            setOutletMonth(outletMonthResult.data.outlet_month);
-        }
-    }, [outletMonthResult.data]);
+    // React.useEffect(() => {
+    //     if (outletMonthResult.data && outletMonthResult.data.outlet_month) {
+    //         setOutletMonth(outletMonthResult.data.outlet_month);
+    //     }
+    // }, [outletMonthResult.data]);
 
     const onShiftChange = (value: string, day_of_week: string, shift_num: number, attributeName: string) => {
         const cloned_outlet = cloneDeep(outlet);
@@ -78,9 +76,12 @@ const SavingsInformation = ({ outlet, setOutlet, outlet_month, setOutletMonth }:
     }
 
     const onChange = (value: any, attributeName: string) => {
-        const cloned_outlet_month: outlet_month = cloneDeep(outlet_month);
-        cloned_outlet_month[attributeName] = value;
-        setOutletMonth(cloned_outlet_month);
+        const clonedOutlet: outlet = cloneDeep(outlet);
+        if (clonedOutlet.outlet_month && clonedOutlet.outlet_month.length > 0) {
+            clonedOutlet.outlet_month[0][attributeName] = value;
+            setOutlet(clonedOutlet);
+        }
+        
     }
 
 
@@ -88,9 +89,9 @@ const SavingsInformation = ({ outlet, setOutlet, outlet_month, setOutletMonth }:
         <React.Fragment>
             <div className="edit-sub-container">
                 <div className="grid grid-cols-2 gap-x-6 gap-y-6 pb-6">
-                    <CustomizedInput label={"% of Share of Savings"} inputType="text" onChange={(value: string) => onChange(value, 'percent_share_of_savings')} value={outlet_month.percent_share_of_savings} />
-                    <CustomizedInput label={"Tariff Month"} inputType="text" onChange={(value: string) => onChange(value, 'tariff_month')} value={outlet_month.tariff_month} />
-                    <CustomizedInput label={"Last Available Tariff"} inputType="text" onChange={(value: string) => onChange(value, 'last_avail_tariff')} value={outlet_month.last_avail_tariff} />
+                    <CustomizedInput label={"% of Share of Savings"} inputType="text" onChange={(value: string) => onChange(value, 'percent_share_of_savings')} value={outlet.outlet_month && outlet.outlet_month[0].percent_share_of_savings || ""} />
+                    <CustomizedInput label={"Tariff Month"} inputType="text" onChange={(value: string) => onChange(value, 'tariff_month')} value={outlet.outlet_month && outlet.outlet_month[0].tariff_month || ""} />
+                    <CustomizedInput label={"Last Available Tariff"} inputType="text" onChange={(value: string) => onChange(value, 'last_avail_tariff')} value={outlet.outlet_month && outlet.outlet_month[0].last_avail_tariff || ""} />
                 </div>
             </div>
             <div className="edit-sub-container">
@@ -98,15 +99,15 @@ const SavingsInformation = ({ outlet, setOutlet, outlet_month, setOutletMonth }:
                     <h2><b>Equipment</b></h2>
                 </div>
                 <div className="grid grid-cols-3 gap-x-6 gap-y-6">
-                    <CustomizedInput label={"No. of EX in Outlet"} inputType="number" onChange={(value: string) => onChange(parseInt(value), 'no_of_ex_in_outlet')} value={outlet_month.no_of_ex_in_outlet ? outlet_month.no_of_ex_in_outlet.toString() : ""} />
-                    <CustomizedInput label={"No. of EX installed"} inputType="number" onChange={(value: string) => onChange(parseInt(value), 'no_of_ex_installed')} value={outlet_month.no_of_ex_installed ? outlet_month.no_of_ex_installed.toString() : ""} />
+                    <CustomizedInput label={"No. of EX in Outlet"} inputType="number" onChange={(value: string) => onChange(parseInt(value), 'no_of_ex_in_outlet')} value={outlet.outlet_month && outlet.outlet_month[0].no_of_ex_in_outlet ? outlet.outlet_month && outlet.outlet_month[0].no_of_ex_in_outlet.toString() : ""} />
+                    <CustomizedInput label={"No. of EX installed"} inputType="number" onChange={(value: string) => onChange(parseInt(value), 'no_of_ex_installed')} value={outlet.outlet_month && outlet.outlet_month[0].no_of_ex_installed ? outlet.outlet_month && outlet.outlet_month[0].no_of_ex_installed.toString() : ""} />
                     <div className={"row-span-3"}>
-                        <CustomizedInput textAreaRows={9} label={"Remarks"} inputType="textarea" onChange={(value: string) => onChange(value, 'remarks_on_eqpt_in_outlet_or_installed')} value={outlet_month.remarks_on_eqpt_in_outlet_or_installed ? outlet_month.remarks_on_eqpt_in_outlet_or_installed : ""} />
+                        <CustomizedInput textAreaRows={9} label={"Remarks"} inputType="textarea" onChange={(value: string) => onChange(value, 'remarks_on_eqpt_in_outlet_or_installed')} value={outlet.outlet_month && outlet.outlet_month[0].remarks_on_eqpt_in_outlet_or_installed ? outlet.outlet_month && outlet.outlet_month[0].remarks_on_eqpt_in_outlet_or_installed : ""} />
                     </div>
-                    <CustomizedInput label={"No. of FA in Outlet"} inputType="number" onChange={(value: string) => onChange(parseInt(value), 'no_of_fa_in_outlet')} value={outlet_month.no_of_fa_in_outlet ? outlet_month.no_of_fa_in_outlet.toString() : ""} />
-                    <CustomizedInput label={"No. of FA installed"} inputType="number" onChange={(value: string) => onChange(parseInt(value), 'no_of_fa_installed')} value={outlet_month.no_of_fa_installed ? outlet_month.no_of_fa_installed.toString() : ""} />
-                    <CustomizedInput label={"No. of AC in Outlet"} inputType="number" onChange={(value: string) => onChange(parseInt(value), 'no_of_ac_in_outlet')} value={outlet_month.no_of_ac_in_outlet ? outlet_month.no_of_ac_in_outlet.toString() : ""} />
-                    <CustomizedInput label={"No. of AC installed"} inputType="number" onChange={(value: string) => onChange(parseInt(value), 'no_of_ac_installed')} value={outlet_month.no_of_ac_installed ? outlet_month.no_of_ac_installed.toString() : ""} />
+                    <CustomizedInput label={"No. of FA in Outlet"} inputType="number" onChange={(value: string) => onChange(parseInt(value), 'no_of_fa_in_outlet')} value={outlet.outlet_month && outlet.outlet_month[0].no_of_fa_in_outlet ? outlet.outlet_month && outlet.outlet_month[0].no_of_fa_in_outlet.toString() : ""} />
+                    <CustomizedInput label={"No. of FA installed"} inputType="number" onChange={(value: string) => onChange(parseInt(value), 'no_of_fa_installed')} value={outlet.outlet_month && outlet.outlet_month[0].no_of_fa_installed ? outlet.outlet_month && outlet.outlet_month[0].no_of_fa_installed.toString() : ""} />
+                    <CustomizedInput label={"No. of AC in Outlet"} inputType="number" onChange={(value: string) => onChange(parseInt(value), 'no_of_ac_in_outlet')} value={outlet.outlet_month && outlet.outlet_month[0].no_of_ac_in_outlet ? outlet.outlet_month && outlet.outlet_month[0].no_of_ac_in_outlet.toString() : ""} />
+                    <CustomizedInput label={"No. of AC installed"} inputType="number" onChange={(value: string) => onChange(parseInt(value), 'no_of_ac_installed')} value={outlet.outlet_month && outlet.outlet_month[0].no_of_ac_installed ? outlet.outlet_month && outlet.outlet_month[0].no_of_ac_installed.toString() : ""} />
                 </div>
             </div>
             <div className="edit-sub-container gap-y-6">
