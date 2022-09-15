@@ -390,7 +390,7 @@ export interface outlet_month {
 export namespace outlet_month_shiftsFields {
     export type outlet_id = number;
     export type outlet_date = string;
-    export type day_of_week = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'holiday';
+    export type day_of_week = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday' | 'holiday';
     export type shift_num = number;
     export type startTime = string | null;
     export type endTime = string | null;

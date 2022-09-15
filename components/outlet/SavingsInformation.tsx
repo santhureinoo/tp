@@ -157,6 +157,20 @@ const SavingsInformation = ({ outlet, setOutlet, }: Props) => {
                             "2b": <CustomizedInput inputType="text" onChange={(value) => { onShiftChange(value, 'friday', 2, 'endTime') }} value={outlet.outlet_month_shifts?.find(sf => sf.day_of_week === 'friday' && sf.shift_num === 2)?.endTime || ""} />,
                         },
                         {
+                            "Day": "Sat.",
+                            "1a": <CustomizedInput inputType="text" onChange={(value) => { onShiftChange(value, 'saturday', 1, 'startTime') }} value={outlet.outlet_month_shifts?.find(sf => sf.day_of_week === 'saturday' && sf.shift_num === 1)?.startTime || ""} />,
+                            "1b": <CustomizedInput inputType="text" onChange={(value) => { onShiftChange(value, 'saturday', 1, 'endTime') }} value={outlet.outlet_month_shifts?.find(sf => sf.day_of_week === 'saturday' && sf.shift_num === 1)?.endTime || ""} />,
+                            "2a": <CustomizedInput inputType="text" onChange={(value) => { onShiftChange(value, 'saturday', 2, 'startTime') }} value={outlet.outlet_month_shifts?.find(sf => sf.day_of_week === 'saturday' && sf.shift_num === 2)?.startTime || ""} />,
+                            "2b": <CustomizedInput inputType="text" onChange={(value) => { onShiftChange(value, 'saturday', 2, 'endTime') }} value={outlet.outlet_month_shifts?.find(sf => sf.day_of_week === 'saturday' && sf.shift_num === 2)?.endTime || ""} />,
+                        },
+                        {
+                            "Day": "Sun.",
+                            "1a": <CustomizedInput inputType="text" onChange={(value) => { onShiftChange(value, 'sunday', 1, 'startTime') }} value={outlet.outlet_month_shifts?.find(sf => sf.day_of_week === 'sunday' && sf.shift_num === 1)?.startTime || ""} />,
+                            "1b": <CustomizedInput inputType="text" onChange={(value) => { onShiftChange(value, 'sunday', 1, 'endTime') }} value={outlet.outlet_month_shifts?.find(sf => sf.day_of_week === 'sunday' && sf.shift_num === 1)?.endTime || ""} />,
+                            "2a": <CustomizedInput inputType="text" onChange={(value) => { onShiftChange(value, 'sunday', 2, 'startTime') }} value={outlet.outlet_month_shifts?.find(sf => sf.day_of_week === 'sunday' && sf.shift_num === 2)?.startTime || ""} />,
+                            "2b": <CustomizedInput inputType="text" onChange={(value) => { onShiftChange(value, 'sunday', 2, 'endTime') }} value={outlet.outlet_month_shifts?.find(sf => sf.day_of_week === 'sunday' && sf.shift_num === 2)?.endTime || ""} />,
+                        },
+                        {
                             "Day": "Holiday.",
                             "1a": <CustomizedInput inputType="text" onChange={(value) => { onShiftChange(value, 'holiday', 1, 'startTime') }} value={outlet.outlet_month_shifts?.find(sf => sf.day_of_week === 'holiday' && sf.shift_num === 1)?.startTime || ""} />,
                             "1b": <CustomizedInput inputType="text" onChange={(value) => { onShiftChange(value, 'holiday', 1, 'endTime') }} value={outlet.outlet_month_shifts?.find(sf => sf.day_of_week === 'holiday' && sf.shift_num === 1)?.endTime || ""} />,
