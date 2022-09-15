@@ -2,6 +2,7 @@ import React from 'react';
 import TinyEditDeleteMenu from "./TinyEditDeleteMenu";
 import { v4 as uuidv4 } from 'uuid';
 import { TableProps } from "../common/types";
+import { TRelayEdge } from '@apollo/client/utilities/policies/pagination';
 
 interface Props {
     handleEdit?: (selectedData: any) => any;
@@ -11,9 +12,10 @@ interface Props {
     leftSideElements: JSX.Element[];
     buttonText?: string;
     data: any;
+    onlyShowButton?: boolean;
 }
 
-const Table = ({ headers, data, hiddenDataCol = [], hiddenDataColIndex = [], handleAddNew, handleEdit, handleDelete, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
+const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataColIndex = [], handleAddNew, handleEdit, handleDelete, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
     const [openTinyMenuIndex, setOpenTinyMenuIndex] = React.useState(-1);
     return (
         <React.Fragment>
@@ -46,7 +48,7 @@ const Table = ({ headers, data, hiddenDataCol = [], hiddenDataColIndex = [], han
                         {data.map((obj: any, i: number) => {
                             return (
                                 <tr key={uuidv4()} className="odd:bg-white even:bg-slate-50">
-                                    {Object.keys(obj).filter((key,index) => !hiddenDataCol.includes(key) && !hiddenDataColIndex.includes(index)).map((key, i) => {
+                                    {Object.keys(obj).filter((key, index) => !hiddenDataCol.includes(key) && !hiddenDataColIndex.includes(index)).map((key, i) => {
                                         return (
                                             <td key={uuidv4()} className="px-6 bg-blueGray-50 text-blueGray-500 align-middle  py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-normal leading-6 text-left">
                                                 {obj[key]}
@@ -60,7 +62,7 @@ const Table = ({ headers, data, hiddenDataCol = [], hiddenDataColIndex = [], han
                                         className="relative cursor-pointer px-6 bg-blueGray-50 text-blueGray-500 align-middle  py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-normal leading-6 text-left">
                                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                                         <div className={`${openTinyMenuIndex === i ? 'absolute' : 'hidden'} z-20 top-8 -left-8`}>
-                                            <TinyEditDeleteMenu selectedData={obj} onEdit={(selectedData) => handleEdit && handleEdit(selectedData)} onDelete={(selectedData) => handleDelete && handleDelete(selectedData)} />
+                                            <TinyEditDeleteMenu onlyShowButton={onlyShowButton} selectedData={obj} onEdit={(selectedData) => handleEdit && handleEdit(selectedData)} onDelete={(selectedData) => handleDelete && handleDelete(selectedData)} />
                                         </div>
                                     </th>
                                 </tr>

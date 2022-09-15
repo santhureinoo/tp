@@ -3,7 +3,7 @@ import PillButton from "./PillButton";
 import SummaryTable from "./SummaryTable";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
-import { results } from "../types/datatype";
+import { outlet, results } from "../types/datatype";
 import React from "react";
 import { gql, useLazyQuery } from "@apollo/client";
 
@@ -17,7 +17,8 @@ interface Props {
 }
 
 const ReportEdit = ({ openReportEdit, setOpenReportEdit, result, afterOperation, billingData }: Props) => {
-    const [currentResult, setCurrentResult] = React.useState(result);
+    const [currentOutlet, setCurrentOutlet] = React.useState<outlet>();
+    const [currentResult, setCurrentResult] = React.useState<results>();
     const getResultQuery = gql`
     query FindFirstResults($where: ResultsWhereInput, $outletMonthWhere2: Outlet_monthWhereInput, $resultsWhere2: ResultsWhereInput) {
         findFirstResults(where: $where) {
@@ -25,6 +26,13 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, result, afterOperation,
             name
             customer {
               pte_ltd_name
+            }
+            outlet_device_ac_input {
+                od_device_input_id
+            }
+            outlet_device_ex_fa_input {
+                od_device_input_id
+                device_type
             }
             outlet_address
             outlet_month(where: $outletMonthWhere2) {
@@ -84,23 +92,29 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, result, afterOperation,
     React.useEffect(() => {
         if (result && result.outlet_date !== '') {
             getResultResult[0]().then(result => {
-                if (result.data && result.data.findFirstResults) {
-                    setCurrentResult(result.data.findFirstResults);
+                if (result.data && result.data.findFirstResults && result.data.findFirstResults.outlet) {
+                    setCurrentOutlet(result.data.findFirstResults.outlet);
+                    console.log(result.data.findFirstResults.outlet);
+                    if (result.data.findFirstResults.outlet && result.data.findFirstResults.outlet.results.length > 0)
+                        setCurrentResult(result.data.findFirstResults.outlet.results[0]);
                 }
 
             })
         } else {
+            setCurrentOutlet(undefined);
             setCurrentResult(undefined);
         }
     }, [result]);
 
     const getSummaryTable = React.useMemo(() => {
+
+        console.log(currentOutlet);
         return [
-            ["ACMV", currentResult?.outlet.outlet_device_ex_fa_inputs?.filter(eqpt => eqpt.device_type === 'acmv').length || 0, currentResult?.acmv_eqpt_energy_baseline_avg_hourly_kW],
-            ["Kitchen Exhaust", currentResult?.outlet.outlet_device_ex_fa_inputs?.filter(eqpt => eqpt.device_type === 'ke').length || 0, currentResult?.ke_eqpt_energy_baseline_avg_hourly_kW],
-            ["Fresh Air", currentResult?.outlet.outlet_device_ex_fa_inputs?.filter(eqpt => eqpt.device_type === 'fa').length || 0, currentResult?.ac_eqpt_energy_baseline_avg_hourly_kW]
+            ["ACMV", currentOutlet?.outlet_device_ac_input?.length || 0, currentResult?.acmv_eqpt_energy_baseline_avg_hourly_kW],
+            ["Kitchen Exhaust", currentOutlet?.outlet_device_ex_fa_input?.filter((eqpt: any) => eqpt.device_type === 'ex').length || 0, currentResult?.ke_eqpt_energy_baseline_avg_hourly_kW],
+            ["Fresh Air", currentOutlet?.outlet_device_ex_fa_input?.filter((eqpt: any) => eqpt.device_type === 'fa').length || 0, currentResult?.ac_eqpt_energy_baseline_avg_hourly_kW]
         ]
-    }, [currentResult]);
+    }, [currentOutlet]);
 
     if (billingData) {
         return (
@@ -135,20 +149,20 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, result, afterOperation,
                         <div className="grid grid-cols-3 gap-x-2 gap-y-8">
                             <div>
                                 <h4>Pte Ltd</h4>
-                                <span className="text-slate-300">{currentResult?.outlet.customer?.pte_ltd_name} </span>
+                                <span className="text-slate-300">{currentOutlet?.customer?.pte_ltd_name} </span>
                             </div>
                             <div>
                                 <h4>Outlet Name</h4>
-                                <span className="text-slate-300">{currentResult?.outlet.name}</span>
+                                <span className="text-slate-300">{currentOutlet?.name}</span>
                             </div>
                             <div>
                                 <h4>Outlet Address</h4>
-                                <span className="text-slate-300">{currentResult?.outlet.outlet_address} </ span >
+                                <span className="text-slate-300">{currentOutlet?.outlet_address} </ span >
                             </div>
 
                             <div>
                                 <h4>Last Available Tariff</h4>
-                                <span className="text-slate-300">{currentResult?.outlet.outlet_month}</span>
+                                <span className="text-slate-300">{currentOutlet && currentOutlet.outlet_month && currentOutlet.outlet_month.length && currentOutlet.outlet_month[0].last_avail_tariff}</span>
                             </div>
                         </div>
                     </div>

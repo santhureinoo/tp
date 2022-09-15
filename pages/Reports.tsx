@@ -11,6 +11,7 @@ import { gql, useQuery } from '@apollo/client';
 import { DropdownProps } from '../common/types';
 import ReportEdit from '../components/ReportEdit';
 import PillButton from '../components/PillButton';
+import moment from 'moment';
 
 const Reports: NextPage = () => {
 
@@ -52,13 +53,18 @@ const ReportTable: any = () => {
           "outlet_id": {
             "equals": parseInt(selectedOutletID)
           }
+        },
+        "omWhere": {
+          "outlet_outlet_id": {
+            "equals": parseInt(selectedOutletID)
+          }
         }
       }
     }
   }, [selectedOutletID]);
 
   const getResultsQuery = gql`
-  query FindManyResults($where: ResultsWhereInput) {
+  query FindManyResults($where: ResultsWhereInput,$omWhere: Outlet_monthWhereInput) {
     findManyResults(where: $where) {
       outlet_id
       outlet_date
@@ -104,7 +110,10 @@ const ReportTable: any = () => {
         outlet_device_ex_fa_input {
           od_device_input_id
         }
-        outlet_month {
+        outlet_device_ac_input {
+          od_device_input_id
+        }
+        outlet_month(where: $omWhere) {
           last_avail_tariff
         }
       }
@@ -150,7 +159,8 @@ const ReportTable: any = () => {
 
   const resultInArray = React.useMemo(() => {
     return results.map(res => {
-      return ["--", res.outlet.name, "--", "--", res.outlet.outlet_device_ex_fa_inputs?.length, res.outlet.outlet_month?.length ? res.outlet.outlet_month[0].last_avail_tariff : "--", "---", res.outlet_date]
+      const date = moment(res.outlet_date, 'DD/MM/YYYY');
+      return ["--", res.outlet.name, date.format("MMMM"), date.format("YYYY"), res.outlet.outlet_device_ex_fa_input.length + res.outlet.outlet_device_ac_input.length, res.outlet.outlet_month && res.outlet.outlet_month.length ? res.outlet.outlet_month[0].last_avail_tariff : "--", "---", res.outlet_date]
     })
   }, [results])
 
@@ -158,7 +168,8 @@ const ReportTable: any = () => {
     <React.Fragment>
       <Table
         headers={['Report ID', 'Outlet Name', 'Month', 'Year', 'Equipment', 'Last Avaiable Tariff ($/kWh)', 'Measured Energy']}
-        hiddenDataCol={['outlet_date']}
+        hiddenDataColIndex={[7]}
+        onlyShowButton ={true}
         data={resultInArray}
         leftSideElements={[]}
         rightSideElements={[
