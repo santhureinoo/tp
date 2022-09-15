@@ -13,7 +13,7 @@ const cloneDeep = rfdc();
 
 const GeneralSettings: NextPage = () => {
     const [openCustomerEdit, setOpenCustomerEdit] = React.useState(false);
-    
+
     const [global_input_state, setGlobal_input_state] = React.useState<global_input>({
         global_input_id: -1,
         poss_tariff_increase: "0",
@@ -61,8 +61,8 @@ const GeneralSettings: NextPage = () => {
 
 const SettingComp: any = ({ setGlobal_input_state, global_input_state }: any) => {
     const QUERY = gql`
-    query Global_input($where: Global_inputWhereUniqueInput!) {
-        global_input(where: $where) {
+    query Global_inputs($take: Int) {
+        global_inputs(take: $take) {
           global_input_id
           poss_tariff_increase
           ke_factor_1_1
@@ -150,9 +150,7 @@ const SettingComp: any = ({ setGlobal_input_state, global_input_state }: any) =>
 
     const VARIABLES = {
         variables: {
-            "where": {
-                "global_input_id": 2
-            }
+            "take": 1
         }
     }
 
@@ -164,8 +162,8 @@ const SettingComp: any = ({ setGlobal_input_state, global_input_state }: any) =>
 
     React.useEffect(() => {
         if (data) {
-            const { global_input } = data;
-            global_input && setGlobal_input_state(global_input);
+            const { global_inputs } = data;
+            global_inputs && global_inputs.length > 0 && setGlobal_input_state(global_inputs[0]);
             errorElem = undefined;
         } else {
             if (loading) {
@@ -194,9 +192,12 @@ const SettingComp: any = ({ setGlobal_input_state, global_input_state }: any) =>
             const MUTATE_VARIABLES = {
                 variables: {
                     "where": {
-                        "global_input_id": 2
+                        "global_input_id": global_input_state.global_input_id
                     },
                     "data": {
+                        "poss_tariff_increase": {
+                            "set": global_input_state.poss_tariff_increase
+                        },
                         "ke_factor_1_1": {
                             "set": global_input_state.ke_factor_1_1
                         },
@@ -268,28 +269,28 @@ const SettingComp: any = ({ setGlobal_input_state, global_input_state }: any) =>
             const MUTATE_VARIABLES = {
                 variables: {
                     "data": {
-                        "ke_factor_1_1":  global_input_state.ke_factor_1_1,
-                        "ke_factor_1_2":global_input_state.ke_factor_1_2,
+                        "ke_factor_1_1": global_input_state.ke_factor_1_1,
+                        "ke_factor_1_2": global_input_state.ke_factor_1_2,
                         "ke_factor_1f": global_input_state.ke_factor_1f,
-                        "ke_factor_2_1":global_input_state.ke_factor_2_1,
-                        "ke_factor_2_2":global_input_state.ke_factor_2_2,
-                        "ke_factor_2f":global_input_state.ke_factor_2f,
+                        "ke_factor_2_1": global_input_state.ke_factor_2_1,
+                        "ke_factor_2_2": global_input_state.ke_factor_2_2,
+                        "ke_factor_2f": global_input_state.ke_factor_2f,
                         "ke_factor_3_1": global_input_state.ke_factor_3_1,
                         "ke_factor_3_2": global_input_state.ke_factor_3_2,
-                        "ke_factor_3f":global_input_state.ke_factor_3f,
-                        "ke_factor_4_1":global_input_state.ke_factor_4_1,
+                        "ke_factor_3f": global_input_state.ke_factor_3f,
+                        "ke_factor_4_1": global_input_state.ke_factor_4_1,
                         "ke_factor_4_2": global_input_state.ke_factor_4_2,
                         "ke_factor_4f": global_input_state.ke_factor_4f,
-                        "ke_factor_5_1":global_input_state.ke_factor_5_1,
+                        "ke_factor_5_1": global_input_state.ke_factor_5_1,
                         "ke_factor_5_2": global_input_state.ke_factor_5_2,
                         "ke_factor_5f": global_input_state.ke_factor_5f,
-                        "ke_factor_6_1":global_input_state.ke_factor_6_1,
+                        "ke_factor_6_1": global_input_state.ke_factor_6_1,
                         "ke_factor_6_2": global_input_state.ke_factor_6_2,
                         "ke_factor_6f": global_input_state.ke_factor_6f,
                         "ke_factor_7f": global_input_state.ke_factor_7f,
-                        "ac_factor_p":  global_input_state.ac_factor_p,
-                        "ac_factor_m":global_input_state.ac_factor_m,
-                        "poss_tariff_increase" : global_input_state.poss_tariff_increase
+                        "ac_factor_p": global_input_state.ac_factor_p,
+                        "ac_factor_m": global_input_state.ac_factor_m,
+                        "poss_tariff_increase": global_input_state.poss_tariff_increase
                     }
                 }
             };
@@ -300,7 +301,7 @@ const SettingComp: any = ({ setGlobal_input_state, global_input_state }: any) =>
 
     return !errorElem ? (<div className="flex flex-col gap-y-2">
         <div className="drop-shadow-lg rounded-lg p-4 bg-white">
-            <CustomizedInput label={"Poss tariff increase"} inputType="text" value={global_input_state.poss_tariff_increase} />
+            <CustomizedInput label={"Poss tariff increase"} inputType="text" onChange={(val) => onChange(val, 'poss_tariff_increase')} value={global_input_state.poss_tariff_increase} />
         </div>
         <div className="drop-shadow-lg rounded-lg p-4 bg-white">
             <div className="edit-sub-container">

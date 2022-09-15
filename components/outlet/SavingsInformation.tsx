@@ -114,11 +114,11 @@ const SavingsInformation = ({ outlet, setOutlet, }: Props) => {
                 <div className="flex justify-between">
                     <h2><b>Energy Baseline & Schedule</b></h2>
                 </div>
-                <div className="grid grid-cols-3 gap-x-6 gap-y-6">
+                {/* <div className="grid grid-cols-3 gap-x-6 gap-y-6">
                     <CustomizedInput label={<React.Fragment><b>KE. Eqpt. </b><span>Energy Baseline</span></React.Fragment>} inputType="text" value={""} />
                     <CustomizedInput label={<React.Fragment><b>AC. Eqpt. </b><span>Energy Baseline</span></React.Fragment>} inputType="text" value={""} />
                     <CustomizedInput label={<React.Fragment><b>ACMV. Eqpt. </b><span>Energy Baseline</span></React.Fragment>} inputType="text" value={""} />
-                </div>
+                </div> */}
                 <div className="w-full overflow-auto max-h-summaryOutletSavingsHeights">
                     <SummaryTable headers={dummySavingEditHeaders} data={[
                         {
