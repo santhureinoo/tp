@@ -28,6 +28,14 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
         outlet_address: "",
         outlet_type: "Restaurant",
         outlet_month_shifts: defaultOutletMonthShifts,
+        outlet_device_live_date: [
+            {
+                outlet_id: -1,
+                outlet_date: moment().format("DD/MM/YYYY"),
+                ke_live_date: "",
+                ac_live_date: "",
+            }
+        ],
         outlet_month: [
             {
                 no_of_ac_in_outlet: 0,
@@ -72,6 +80,11 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
             remarks_on_eqpt_in_outlet_or_installed
             remarks_on_overall_outlet
           }
+          outlet_device_live_date {
+            ke_live_date
+            ac_live_date
+            outlet_date
+          }
           outlet_month_shifts {
             outlet_id
             outlet_date
@@ -80,6 +93,12 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
             startTime
             endTime
             remarks_on_op_hours
+          }
+          outlet_device_live_date {
+            outlet_id
+            ke_live_date
+            ac_live_date
+            outlet_date
           }
           outlet_person_in_charges {
             outlet_id
@@ -171,7 +190,23 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
         if (outlet && outlet.outlet_id !== -1) {
             getOutletQuery[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(result => {
                 if (result.data && result.data.outlet) {
+                    // const cloned_outlet: outlet = cloneDeep(result.data.outlet);
+                    // if (cloned_outlet.outlet_device_live_date && cloned_outlet.outlet_device_live_date.length > 0) {
+                    //     setCurrentOutlet(result.data.outlet);
+                    // } else {
+                    //     // Quick Fix
+                    //     cloned_outlet.outlet_device_live_date = [
+                    //         {
+                    //             outlet_id: cloned_outlet.outlet_id,
+                    //             outlet_date: moment().format("DD/MM/YYYY"),
+                    //             ke_live_date: "",
+                    //             ac_live_date: "",
+                    //         }
+                    //     ]
+                    //     setCurrentOutlet(cloned_outlet);
+                    // }
                     setCurrentOutlet(result.data.outlet);
+
                 }
             })
         } else {
@@ -183,6 +218,14 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
                 outlet_address: "",
                 outlet_type: "Restaurant",
                 outlet_month_shifts: defaultOutletMonthShifts,
+                outlet_device_live_date: [
+                    {
+                        outlet_id: -1,
+                        outlet_date: moment().format("DD/MM/YYYY"),
+                        ke_live_date: "",
+                        ac_live_date: "",
+                    }
+                ],
                 outlet_month: [
                     {
                         no_of_ac_in_outlet: 0,
@@ -198,7 +241,7 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
                         percent_share_of_savings: "",
                         last_avail_tariff: "",
                         tariff_month: "",
-        
+
                     }
                 ]
             });
@@ -311,12 +354,36 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
                                 }
                             ]
                         } : undefined,
+                        "outlet_device_live_date": currentOutlet?.outlet_device_live_date && currentOutlet.outlet_device_live_date.length > 0 ? {
+                            "update": [
+                                {
+                                    "data": {
+                                        "outlet_date": {
+                                            "set": moment().format("DD/MM/YYYY")
+                                        },
+                                        "ac_live_date": {
+                                            "set": currentOutlet.outlet_device_live_date[0].ac_live_date
+                                        },
+                                        "ke_live_date": {
+                                            "set": currentOutlet.outlet_device_live_date[0].ke_live_date
+                                        },
+
+                                    },
+                                    "where": {
+                                        "outlet_date_outlet_id": {
+                                            "outlet_id": currentOutlet.outlet_device_live_date[0].outlet_id,
+                                            "outlet_date": currentOutlet.outlet_device_live_date[0].outlet_date
+                                        }
+                                    }
+                                }
+                            ]
+                        } : undefined,
                         "outlet_month": selectedInformation === 2 && currentOutlet?.outlet_month && currentOutlet.outlet_month.length > 0 ? {
                             "update": [
                                 {
                                     "data": {
                                         "outlet_date": {
-                                            "set":  moment().format("DD/MM/YYYY")
+                                            "set": moment().format("DD/MM/YYYY")
                                         },
                                         "percent_share_of_savings": {
                                             "set": currentOutlet.outlet_month[0].percent_share_of_savings
@@ -391,6 +458,15 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
                                 "data": currentOutlet.outlet_month_shifts.map(({ outlet_id, ...shift }) => shift)
                             }
                         } : undefined,
+                        "outlet_device_live_date": currentOutlet.outlet_device_live_date && currentOutlet.outlet_device_live_date.length > 0 && {
+                            "create": [
+                                {
+                                    "outlet_date": currentOutlet.outlet_device_live_date[0].outlet_date,
+                                    "ke_live_date": currentOutlet.outlet_device_live_date[0].ke_live_date,
+                                    "ac_live_date": currentOutlet.outlet_device_live_date[0].ac_live_date,
+                                }
+                            ]
+                        },
                         "outlet_month": currentOutlet.outlet_month && currentOutlet.outlet_month.length > 0 && {
                             "create": [
                                 {

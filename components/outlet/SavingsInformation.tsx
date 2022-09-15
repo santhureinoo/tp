@@ -81,7 +81,16 @@ const SavingsInformation = ({ outlet, setOutlet, }: Props) => {
             clonedOutlet.outlet_month[0][attributeName] = value;
             setOutlet(clonedOutlet);
         }
-        
+
+    }
+
+    const onLiveDateChange = (value: any, attributeName: string) => {
+        const clonedOutlet: outlet = cloneDeep(outlet);
+        if (clonedOutlet.outlet_device_live_date && clonedOutlet.outlet_device_live_date.length > 0) {
+            clonedOutlet.outlet_device_live_date[0][attributeName] = value;
+            setOutlet(clonedOutlet);
+        }
+
     }
 
 
@@ -92,6 +101,15 @@ const SavingsInformation = ({ outlet, setOutlet, }: Props) => {
                     <CustomizedInput label={"% of Share of Savings"} inputType="text" onChange={(value: string) => onChange(value, 'percent_share_of_savings')} value={outlet.outlet_month && outlet.outlet_month[0].percent_share_of_savings || ""} />
                     <CustomizedInput label={"Tariff Month"} inputType="text" onChange={(value: string) => onChange(value, 'tariff_month')} value={outlet.outlet_month && outlet.outlet_month[0].tariff_month || ""} />
                     <CustomizedInput label={"Last Available Tariff"} inputType="text" onChange={(value: string) => onChange(value, 'last_avail_tariff')} value={outlet.outlet_month && outlet.outlet_month[0].last_avail_tariff || ""} />
+                </div>
+            </div>
+            <div className="edit-sub-container">
+                <div className="flex justify-between">
+                    <h2><b>KE & AC Live Date</b></h2>
+                </div>
+                <div className="grid grid-cols-3 gap-x-6 gap-y-6">
+                    <CustomizedInput label={"Ke. live date"} inputType="text" onChange={(value: string) => onLiveDateChange(value, 'ke_live_date')} value={outlet.outlet_device_live_date && outlet.outlet_device_live_date[0].ke_live_date ? outlet.outlet_device_live_date && outlet.outlet_device_live_date[0].ke_live_date.toString() : ""} />
+                    <CustomizedInput label={"Ac. live date"} inputType="text" onChange={(value: string) => onLiveDateChange(value, 'ac_live_date')} value={outlet.outlet_device_live_date && outlet.outlet_device_live_date[0].ac_live_date ? outlet.outlet_device_live_date && outlet.outlet_device_live_date[0].ac_live_date.toString() : ""} />
                 </div>
             </div>
             <div className="edit-sub-container">

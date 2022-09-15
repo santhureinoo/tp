@@ -222,6 +222,7 @@ export interface outlet {
     outlet_month?: outlet_month[];
     outlet_month_shifts?: outlet_month_shifts[];
     outlet_person_in_charges?: outlet_person_in_charge[];
+    outlet_device_live_date?: outlet_device_live_date[];
     outlet_device_ex_fa_inputs?: outlet_device_ex_fa_input[];
     outlet_device_ac_inputs?: outlet_device_ac_input[];
 }
@@ -345,6 +346,7 @@ export namespace outlet_device_live_dateFields {
 }
 
 export interface outlet_device_live_date {
+    [key: string]: any;
     outlet_id: outlet_device_live_dateFields.outlet_id;
     outlet_date: outlet_device_live_dateFields.outlet_date;
     ke_live_date: outlet_device_live_dateFields.ke_live_date;
