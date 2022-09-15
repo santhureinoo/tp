@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 import { customer, customer_person_in_charge } from "../types/datatype";
 import rfdc from 'rfdc';
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery, WatchQueryFetchPolicy } from "@apollo/client";
 
 const cloneDeep = rfdc();
 
@@ -108,7 +108,8 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
                     "equals": currentCustomer.customer_id
                 }
             }
-        }
+        },
+        'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy
     }
 
     const getOutletsResult = useQuery(getOutletsQuery, getOUtletsVariable);
@@ -240,7 +241,20 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
                     }
                 }
             };
-            createMutationQuery(MUTATE_VARIABLES).then((val) => { afterOperation && afterOperation(); setOpenCustomerEdit(false); });
+            createMutationQuery(MUTATE_VARIABLES).then((val) => {
+                setCurrentCustomer({
+                    name: "",
+                    pic_name: "",
+                    pic_phone: "",
+                    pte_ltd_name: "",
+                    country: "",
+                    city: "",
+                    current_address: "",
+                    postal_code: "",
+                    customer_id: -1,
+                });
+                afterOperation && afterOperation(); setOpenCustomerEdit(false);
+            });
         }
 
     }

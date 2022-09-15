@@ -453,7 +453,7 @@ const OutletEdit = ({ openEquipmentEdit, setOpenEquipmentEdit, eqpt, afterOperat
                 }
             }
         }
-    }, [currentEqpt]);
+    }, [currentEqpt, currentSelectedOutletID]);
 
     const onClick = (event: any) => {
         if (currentEqpt.od_device_input_id === -1) {
@@ -481,6 +481,29 @@ const OutletEdit = ({ openEquipmentEdit, setOpenEquipmentEdit, eqpt, afterOperat
                 };
                 createFaMutationQuery(MUTATE_VARIABLES).then((val) => { afterOperation && afterOperation(); setOpenEquipmentEdit(false); });
             }
+
+            setCurrentEqpt({
+                name: "",
+                outlet_id: -1,
+                od_device_input_id: -1,
+                outlet_date: moment().format("DD/MM/YYYY"),
+                device_type: "ex",
+                device_num: "",
+                vfd_kW: "",
+                display_baseline_kW: "",
+                display_low_kW: "",
+                dmm_baseline_kW: "",
+                ac_baseline_kW: "",
+                ac_factor_a: "",
+                dmm_low_kW: "",
+                caltr_type: "",
+                last_update: "",
+                eqpt_serial_no: "",
+                eqpt_manufacturer: "",
+                live_date: "",
+                eqpt_model: "",
+                eqpt_photo: "",
+            });
 
         } else {
             const updateEqptVariable = {

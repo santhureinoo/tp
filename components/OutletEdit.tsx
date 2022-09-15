@@ -491,6 +491,41 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
             };
 
             createMutationQuery(MUTATE_VARIABLES).then((val) => {
+                setCurrentOutlet({
+                    outlet_id: -1,
+                    customer_id: selectedCustomerID,
+                    name: "",
+                    outlet_status: "Live",
+                    outlet_address: "",
+                    outlet_type: "Restaurant",
+                    outlet_month_shifts: defaultOutletMonthShifts,
+                    outlet_device_live_date: [
+                        {
+                            outlet_id: -1,
+                            outlet_date: moment().format("DD/MM/YYYY"),
+                            ke_live_date: "",
+                            ac_live_date: "",
+                        }
+                    ],
+                    outlet_month: [
+                        {
+                            no_of_ac_in_outlet: 0,
+                            no_of_ex_in_outlet: 0,
+                            no_of_fa_in_outlet: 0,
+                            no_of_ex_installed: 0,
+                            no_of_fa_installed: 0,
+                            no_of_ac_installed: 0,
+                            remarks_on_eqpt_in_outlet_or_installed: "",
+                            remarks_on_overall_outlet: "",
+                            outlet_date: moment().format("DD/MM/YYYY"),
+                            outlet_outlet_id: -1,
+                            percent_share_of_savings: "",
+                            last_avail_tariff: "",
+                            tariff_month: "",
+
+                        }
+                    ]
+                });
                 afterOperation && afterOperation();
                 setOpenOutletEdit(false);
             });
