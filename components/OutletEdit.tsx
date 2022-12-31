@@ -4,7 +4,7 @@ import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 import OutletInformation from "./outlet/OutletInformation";
 import SavingsInformation from "./outlet/SavingsInformation";
 import { gql, useLazyQuery, useMutation, WatchQueryFetchPolicy } from "@apollo/client";
-import { outlet, outlet_month, outlet_person_in_charge } from "../types/datatype"; import rfdc from 'rfdc';
+import { outlet, outlet_month, outlet_month_shifts, outlet_person_in_charge } from "../types/datatype"; import rfdc from 'rfdc';
 import { defaultOutletMonthShifts } from '../common/constant';
 import moment from 'moment';
 const cloneDeep = rfdc();
@@ -274,7 +274,7 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
                             "set": currentOutlet.outlet_type
                         },
                         "outlet_month_shifts": currentOutlet.outlet_month_shifts ? {
-                            "updateMany": currentOutlet.outlet_month_shifts.map(shift => {
+                            "updateMany": currentOutlet.outlet_month_shifts.map((shift: outlet_month_shifts) => {
                                 return {
                                     "where": {
                                         "outlet_id": {
@@ -308,7 +308,7 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
                             })
                         } : undefined,
                         "outlet_person_in_charges": selectedInformation === 1 && currentOutlet.outlet_person_in_charges ? {
-                            "upsert": currentOutlet.outlet_person_in_charges.map(contact => {
+                            "upsert": currentOutlet.outlet_person_in_charges.map((contact: outlet_person_in_charge) => {
                                 return {
                                     "where": {
                                         "outlet_id_contact_person_index": {
@@ -455,7 +455,7 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
                         } : undefined,
                         "outlet_month_shifts": currentOutlet.outlet_month_shifts ? {
                             "createMany": {
-                                "data": currentOutlet.outlet_month_shifts.map(({ outlet_id, ...shift }) => shift)
+                                "data": currentOutlet.outlet_month_shifts.map(({ outlet_id, ...shift }: outlet_month_shifts) => shift)
                             }
                         } : undefined,
                         "outlet_device_live_date": currentOutlet.outlet_device_live_date && currentOutlet.outlet_device_live_date.length > 0 && {

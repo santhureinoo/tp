@@ -554,8 +554,8 @@ const OutletEdit = ({ openEquipmentEdit, setOpenEquipmentEdit, eqpt, afterOperat
                         {
                             currentEqpt.device_type === 'ac' &&
                             <React.Fragment>
-                                <CustomizedInput label={boldAndNormalLabel("AC Baseline", "(kW)")} inputType="text" value={currentEqpt.ac_baseline_kW} onChange={(val: any) => { onChange(val, 'ac_baseline_kW') }} />
-                                <CustomizedInput label={boldAndNormalLabel("AC Factor a", "(Basic, Advanced)")} inputType="text" value={currentEqpt.ac_factor_a} onChange={(val: any) => { onChange(val, 'ac_factor_a') }} />
+                                <CustomizedInput label={boldAndNormalLabel("AC Baseline", "(kW)")} inputType="text" value={currentEqpt.ac_baseline_kW || ""} onChange={(val: any) => { onChange(val, 'ac_baseline_kW') }} />
+                                <CustomizedInput label={boldAndNormalLabel("AC Factor a", "(Basic, Advanced)")} inputType="text" value={currentEqpt.ac_factor_a || ""} onChange={(val: any) => { onChange(val, 'ac_factor_a') }} />
                             </React.Fragment>
                         }
                         {
