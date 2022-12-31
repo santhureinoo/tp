@@ -9,10 +9,12 @@ const cloneDeep = rfdc();
 
 interface Props {
     uploadedFile: File | undefined;
+    hidePreview?: boolean;
+    uploadFileDescription?: string;
     setUploadedFile(uploadeFiles: File): void;
 }
 
-const FileUpload = ({ uploadedFile, setUploadedFile }: Props) => {
+const FileUpload = ({ uploadedFile, setUploadedFile, hidePreview = false, uploadFileDescription = "Supports: JPG, PNG" }: Props) => {
 
     const handleUploadFile = (e: React.ChangeEvent<HTMLInputElement>): void => {
         if (e.currentTarget.files) {
@@ -24,7 +26,7 @@ const FileUpload = ({ uploadedFile, setUploadedFile }: Props) => {
 
     const getImage = React.useMemo(() => {
         if (uploadedFile) {
-            return <Image alt="uploadedFile" width={80} height={80}  className="object-contain" src={URL.createObjectURL(uploadedFile)} />
+            return <Image alt="uploadedFile" width={80} height={80} className="object-contain" src={URL.createObjectURL(uploadedFile)} />
         } else {
             return <FontAwesomeIcon icon={faImage} className="p-4 text-3xl text-[#147CFC] rounded-full bg-[#E8F2FF]" />
         }
@@ -33,13 +35,13 @@ const FileUpload = ({ uploadedFile, setUploadedFile }: Props) => {
     return (
         <React.Fragment>
             <div className="flex flex-row gap-x-2 items-center">
-                {getImage}
+                {!hidePreview && getImage}
                 <div className="w-full flex items-center flex-col justify-center bg-grey-lighter">
                     <label className="w-full flex flex-col items-center px-4 py-2 bg-[#147CFC] text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-white">
                         <span className="text-white text-base leading-normal">Upload</span>
-                        <input type='file' accept="image/*" onChange={handleUploadFile} className="hidden" />
+                        <input type='file' accept="*" onChange={handleUploadFile} className="hidden" />
                     </label>
-                    <span className="text-xs pt-1">Supports: JPG, PNG</span>
+                    <span className="text-xs pt-1">{uploadFileDescription}</span>
                 </div>
             </div>
         </React.Fragment>

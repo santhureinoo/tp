@@ -169,7 +169,7 @@ const SettingComp: any = ({ setGlobal_input_state, global_input_state }: any) =>
             if (loading) {
                 errorElem = <h2>Loading Data...</h2>;
             } else if (error) {
-                errorElem = <h2>Sorry, there's been an error...</h2>;
+                errorElem = <h2>{`Sorry, there's been an error...`}</h2>;
             } else {
                 errorElem = <></>;
             }

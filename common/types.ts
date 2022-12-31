@@ -17,3 +17,17 @@ export interface DropdownProps {
     key : string;
     value: string;
 }
+
+
+export interface ButtonProps {
+    text : string;
+    onClick? : () => void;
+    disable? : boolean;
+    css : string;
+}
+
+export interface FileInfo {
+    name: string;
+    type: string;
+    downloadURL? : string;
+}

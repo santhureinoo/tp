@@ -5,7 +5,7 @@ import SummaryTable from "./SummaryTable";
 import ContactList from "./ContactList";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faCircleXmark } from '@fortawesome/free-regular-svg-icons';
-import { customer, customer_person_in_charge } from "../types/datatype";
+import { customer, group, outlet_person_in_charge } from "../types/datatype";
 import rfdc from 'rfdc';
 import { gql, useMutation, useQuery, WatchQueryFetchPolicy } from "@apollo/client";
 
@@ -21,7 +21,7 @@ interface Props {
 
 const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, customer }: Props) => {
 
-    const [contactList, setContactList] = React.useState<customer_person_in_charge[]>([]);
+    const [contactList, setContactList] = React.useState<outlet_person_in_charge[]>([]);
     const [currentCustomer, setCurrentCustomer] = React.useState<customer>({
         name: "",
         pic_name: "",
@@ -32,6 +32,7 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
         current_address: "",
         postal_code: "",
         customer_id: -1,
+        group_id: 1,
     });
 
     const get_custome_pics_query = gql`
@@ -47,7 +48,7 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
         }
       }`;
 
-    const mutate_customer_query = gql`mutation DeleteOneGlobal_input($data: CustomerCreateInput!) {
+    const mutate_customer_query = gql`mutation createOneGlobal_input($data: CustomerCreateInput!) {
         createOneCustomer(data: $data) {
           customer_id
           name
@@ -58,6 +59,7 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
           city
           current_address
           postal_code
+          group_id
         }
       }`;
 
@@ -121,8 +123,8 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
 
     React.useEffect(() => {
         if (getOutletsResult.data) {
-            setFilteredOutletsInArray(getOutletsResult.data.outlets.map((out: any) => [out.outlet_id, out.name, out._count.outlet_device_ex_fa_input + out._count.outlet_device_ac_input, <FontAwesomeIcon style={{ fontSize: '2em', color: '#E8F2FF' }} icon={faCircle}></FontAwesomeIcon>]));
-            setOutletsInArray(getOutletsResult.data.outlets.map((out: any) => [out.outlet_id, out.name, out._count.outlet_device_ex_fa_input, <FontAwesomeIcon style={{ fontSize: '2em', color: '#E8F2FF' }} icon={faCircle}></FontAwesomeIcon>]));
+            setFilteredOutletsInArray(getOutletsResult.data.outlets.map((out: any, index: number) => [out.outlet_id, out.name, out._count.outlet_device_ex_fa_input + out._count.outlet_device_ac_input, <FontAwesomeIcon key={'frag ' + index} style={{ fontSize: '2em', color: '#E8F2FF' }} icon={faCircle}></FontAwesomeIcon>]));
+            setOutletsInArray(getOutletsResult.data.outlets.map((out: any, index: number) => [out.outlet_id, out.name, out._count.outlet_device_ex_fa_input, <FontAwesomeIcon key={'frag ' + index} style={{ fontSize: '2em', color: '#E8F2FF' }} icon={faCircle}></FontAwesomeIcon>]));
         }
     }, [getOutletsResult.data]);
 
@@ -226,13 +228,18 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
                 variables: {
                     "data": {
                         "name": currentCustomer.name,
-                        "pte_ltd_name": currentCustomer.pte_ltd_name,
+                        "pte_ltd_name": currentCustomer.name,
                         "pic_name": currentCustomer.pic_name,
                         "pic_phone": currentCustomer.pic_phone,
                         "country": currentCustomer.country,
                         "city": currentCustomer.city,
                         "current_address": currentCustomer.current_address,
                         "postal_code": currentCustomer.postal_code,
+                        "group": {
+                            "create": {
+                                group_name: "group for " + currentCustomer.name,
+                            } as group
+                        },
                         "customer_person_in_charges": {
                             "createMany": {
                                 "data": contactList
@@ -252,6 +259,7 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
                     current_address: "",
                     postal_code: "",
                     customer_id: -1,
+                    group_id: 2
                 });
                 afterOperation && afterOperation(); setOpenCustomerEdit(false);
             });
@@ -273,6 +281,7 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
                 current_address: "",
                 postal_code: "",
                 customer_id: -1,
+                group_id: 1
             });
         }
     }, [customer]);
@@ -302,7 +311,7 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
                     <div className="flex">
                         <h2><b>Person In Charge</b><br /> Information</h2>
                     </div>
-                    <ContactList contactList={contactList} setContactList={setContactList} />
+                    <ContactList contactType="Customer" contactList={contactList} setContactList={setContactList} />
                 </div>
                 <div className="edit-sub-container">
                     <div className="flex justify-between">

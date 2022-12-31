@@ -1,5 +1,5 @@
 import { TableProps } from "../common/types";
-import { v4 as uuidv4 } from 'uuid'; 
+import { v4 as uuidv4 } from 'uuid';
 
 const SummaryTable = ({ headers, data, headerColor }: TableProps) => {
     return (
@@ -13,7 +13,7 @@ const SummaryTable = ({ headers, data, headerColor }: TableProps) => {
                     })}
                 </tr>
             </thead>
-            <tbody>
+            <tbody className="relative">
                 {data.map((obj, idx) => {
                     return (
                         <tr key={idx}>
@@ -27,8 +27,31 @@ const SummaryTable = ({ headers, data, headerColor }: TableProps) => {
                         </tr>
                     )
                 })}
+
+                {/* <tr className=" bottom-0 left-0 right-0">
+                    <td key={'total'} className="col-span-2 px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-normal text-left">
+                        Total
+                    </td>
+                    <td key={'measuredEnergy1'} className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-normal text-left">
+                        12345kWh
+                    </td>
+                    <td key={'measuredEnergy2'} className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-normal text-left">
+                        12345kWh
+                    </td>
+                    <td key={'measuredEnergy3'} className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-normal text-left">
+                        80<sup>%</sup>
+                    </td>
+                    <td key={'co2'} className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-normal text-left">
+                        10,986kg
+                    </td>
+                    <td key={'measuredEnergy3'} className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-normal text-left">
+                        <sup>$</sup>29,390
+                    </td>
+                </tr> */}
+
             </tbody>
         </table>
+
     )
 }
 

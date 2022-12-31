@@ -10,18 +10,43 @@ interface Props {
     handleAddNew?: () => any;
     rightSideElements: JSX.Element[];
     leftSideElements: JSX.Element[];
+    leftSideFlexDirection?: 'Horizontal' | 'Vertical';
     buttonText?: string;
     data: any;
     onlyShowButton?: boolean;
+    hideDetailMenu?: boolean;
+    totalNumberOfPages?: number;
+    currentSelectedPage?: number;
+    setCurrentSelectedPage?: (pageNum: number) => void;
 }
 
-const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataColIndex = [], handleAddNew, handleEdit, handleDelete, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
+const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataColIndex = [], currentSelectedPage = 1, setCurrentSelectedPage, totalNumberOfPages = 0, handleAddNew, leftSideFlexDirection = "Horizontal", handleEdit, handleDelete, hideDetailMenu = false, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
     const [openTinyMenuIndex, setOpenTinyMenuIndex] = React.useState(-1);
+
+
+    const pages = React.useMemo(() => {
+        const pageArr = [];
+        for (let i = 1; i <= totalNumberOfPages; i++) {
+            pageArr.push(
+                <a
+                    href="#"
+                    onClick={event => {
+                        setCurrentSelectedPage && setCurrentSelectedPage(i);
+                    }}
+                    className={i !== currentSelectedPage ? `bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium` : `z-10 bg-indigo-50 border-indigo-500 text-indigo-600 rounded-md relative inline-flex items-center px-4 py-2 border text-sm font-medium`}
+                >
+                    {i}
+                </a>
+            )
+        }
+        return pageArr;
+    }, [totalNumberOfPages, currentSelectedPage])
+
     return (
         <React.Fragment>
-            <div className="drop-shadow-lg h-100 rounded-lg p-4 bg-white">
-                <div className="grid grid-cols-2 justify-between items-start py-2 grow-0">
-                    <div className="flex flex-row gap-x-2">
+            <div className="drop-shadow-lg w-full h-100 rounded-lg p-4 bg-white w-auto">
+                {leftSideFlexDirection === 'Horizontal' ? <div className={`grid grid-cols-2 justify-between items-start py-2 grow-0`}>
+                    <div className={`flex flex-row gap-x-2`}>
                         {leftSideElements}
                     </div>
                     <div className="flex flex-row justify-end gap-x-2">
@@ -32,8 +57,10 @@ const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataCo
                             {buttonText}
                         </button>}
                     </div>
-                </div>
-                <table className="items-center w-full bg-transparent border-collapse">
+                </div> : <div className='flex flex-col gap-y-4 px-2'>
+                    {leftSideElements}
+                </div>}
+                <table className="items-center w-full bg-transparent border-collapse overflow-x-hidden">
                     <thead>
                         <tr>
                             {headers.map((header, idx) => {
@@ -55,7 +82,7 @@ const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataCo
                                             </td>
                                         )
                                     })}
-                                    <th onClick={(e: React.MouseEvent<HTMLElement>) => {
+                                    {!hideDetailMenu && <th onClick={(e: React.MouseEvent<HTMLElement>) => {
                                         if (i === openTinyMenuIndex) setOpenTinyMenuIndex(-1)
                                         else setOpenTinyMenuIndex(i);
                                     }}
@@ -64,9 +91,10 @@ const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataCo
                                         <div className={`${openTinyMenuIndex === i ? 'absolute' : 'hidden'} z-20 top-8 -left-8`}>
                                             <TinyEditDeleteMenu onlyShowButton={onlyShowButton} selectedData={obj} onEdit={(selectedData) => handleEdit && handleEdit(selectedData)} onDelete={(selectedData) => handleDelete && handleDelete(selectedData)} />
                                         </div>
-                                    </th>
+                                    </th>}
                                 </tr>
                             )
+
                         })}
                     </tbody>
                 </table>
@@ -74,46 +102,27 @@ const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataCo
             <div className="flex justify-end p-3 px-8">
                 <div>
                     <nav className="relative z-0 inline-flex rounded-md shadow-sm space-x-3" aria-label="Pagination">
-                        <a
+                        {totalNumberOfPages > 1 && <a
                             href="#"
+                            onClick={event => {
+                                setCurrentSelectedPage && currentSelectedPage > 1 && setCurrentSelectedPage(currentSelectedPage - 1);
+                            }}
                             className="relative inline-flex items-center px-2 py-2 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
                         >
                             <span className="sr-only">Previous</span>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
-                        </a>
-                        {/* Current: "z-10 bg-indigo-50 border-indigo-500 text-indigo-600", Default: "bg-white border-gray-300 text-gray-500 hover:bg-gray-50" */}
-                        <a
+                        </a>}
+                        {totalNumberOfPages > 1 && pages}
+                        {totalNumberOfPages > 1 && <a
                             href="#"
-                            aria-current="page"
-                            className="z-10 bg-indigo-50 border-indigo-500 text-indigo-600 rounded-md relative inline-flex items-center px-4 py-2 border text-sm font-medium"
-                        >
-                            1
-                        </a>
-                        <a
-                            href="#"
-                            className="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative rounded-md inline-flex items-center px-4 py-2 border text-sm font-medium"
-                        >
-                            2
-                        </a>
-                        <a
-                            href="#"
-                            className="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium"
-                        >
-                            3
-                        </a>
-                        <a
-                            href="#"
-                            className="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium"
-                        >
-                            4
-                        </a>
-                        <a
-                            href="#"
+                            onClick={event => {
+                                setCurrentSelectedPage && currentSelectedPage < totalNumberOfPages && setCurrentSelectedPage(currentSelectedPage + 1);
+                            }}
                             className="relative inline-flex items-center px-2 py-2 rounded-r-md border rounded-md border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
                         >
                             <span className="sr-only">Next</span>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
-                        </a>
+                        </a>}
                     </nav>
                 </div>
             </div>

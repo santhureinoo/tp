@@ -9,13 +9,15 @@ interface Props {
     data?: Array<string | DropdownProps>;
     selected: string;
     textColor?: string;
+    hideBorder?: boolean;
     inputType: 'dropdown' | 'autocomplete';
     hidePrefixIcons: boolean;
     extraIcon?: JSX.Element;
+    customCSS?: string;
     setSelected(selected: string): void;
 }
 
-const CustomizedDropDown = ({ data, selected, extraIcon, textColor = 'text-black', inputType, setSelected, hidePrefixIcons = false }: Props): React.ReactElement => {
+const CustomizedDropDown = ({ customCSS, data, selected, extraIcon, hideBorder = false, textColor = 'text-black', inputType, setSelected, hidePrefixIcons = false }: Props): React.ReactElement => {
     // const [openOutletList, setOpenOutletList] = React.useState(false);
     const [dropdownRef, isOpen, setIsOpen] = useDropdown(false, () => { });
     const [disabled, setDisabled] = React.useState(false)
@@ -90,8 +92,8 @@ const CustomizedDropDown = ({ data, selected, extraIcon, textColor = 'text-black
     }
 
     return (
-        <div ref={dropdownRef} className={`relative outline-none border-2 rounded-lg ${isOpen ? 'focus-within:border focus-within:border-black' : ''} `}>
-            <div className={`w-full ${textColor} font-medium rounded-lg text-sm px-4 py-2.5  items-center`}>
+        <div ref={dropdownRef} className={`relative outline-none ${hideBorder ? '' : 'border-2'} rounded-lg ${isOpen ? 'focus-within:border focus-within:border-black' : ''} `}>
+            <div className={customCSS ? `w-full ${textColor} ${customCSS} rounded-lg items-center` : `w-full ${textColor} font-medium rounded-lg text-sm px-4 py-2.5 items-center`}>
                 <div className="flex w-full gap-x-2">
                     {!hidePrefixIcons && <svg className="text-slate-400 h-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />

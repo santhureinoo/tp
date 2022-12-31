@@ -28,7 +28,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: Props) => {
             <div onClick={e => {
                 setSidebarOpen(!sidebarOpen);
             }} className={`${sidebarOpen ? 'block' : 'hidden'} drop-shadow-lg fixed z-20 inset-0 bg-white opacity-50 transition-opacity lg:hidden`}></div>
-            <div className={`${sidebarOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'} fixed flex flex-col justify-between z-30 inset-y-0 left-0 w-64 transition duration-300 transform bg-white overflow-y-auto lg:translate-x-0 lg:static lg:inset-0`}>
+            <div className={`${sidebarOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'} fixed flex flex-col justify-between z-30 inset-y-0 left-0 w-1/6 transition duration-300 transform bg-white overflow-y-auto lg:translate-x-0 lg:static lg:inset-0`}>
                 <div className="flex items-start pt-8 px-4">
                     <div className="flex">
                         <h2 className="text-3xl mx-2 font-bold">Welcome,<br />Admin</h2>

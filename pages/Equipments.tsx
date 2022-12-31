@@ -10,9 +10,9 @@ import ClientOnly from '../components/ClientOnly';
 import { gql, useLazyQuery, useMutation, useQuery, WatchQueryFetchPolicy } from '@apollo/client';
 import { DropdownProps } from '../common/types';
 import { cloneDeep } from '@apollo/client/utilities';
+import { calculatePagination } from '../common/helper';
 
 const Equipments: NextPage = () => {
-
 
   return (
     <React.Fragment>
@@ -32,6 +32,8 @@ const EquipmentTable: any = () => {
   const [openEquipmentEdit, setOpenEquipmentEdit] = React.useState(false);
   const [selectedCustomerID, setSelectedCustomerID] = React.useState("");
   const [selectedOutletID, setSelectedOutletID] = React.useState("");
+  const [totalPage, setTotalpage] = React.useState(0);
+  const [currentPageIndex, setCurrentPageIndex] = React.useState(1);
   const [selectedEqpt, setSelectedEqpt] = React.useState<outlet_device_ex_fa_input>();
   const [equipments, setEquipments] = React.useState<outlet_device_ex_fa_input[]>([]);
   const [filteredEquipmentsInArray, setFilteredEquipmentsInArray] = React.useState<any[][]>([]);
@@ -72,8 +74,8 @@ const EquipmentTable: any = () => {
   `
 
   const getEqptsQuery = gql`
-  query OutletsWithEqpt($where: OutletWhereInput) {
-    outlets(where: $where) {
+  query OutletsWithEqpt($where: OutletWhereInput, $take: Int, $skip: Int) {
+    outlets(where: $where, take: $take, skip: $skip) {
       outlet_device_ac_input {
         outlet_id
         od_device_input_id
@@ -152,10 +154,42 @@ const EquipmentTable: any = () => {
           "outlet_id": {
             "equals": selectedOutletID
           }
+        },
+        "take": 5,
+        "skip": (currentPageIndex * 5) - 5
+      }
+    }
+  }, [selectedCustomerID, selectedOutletID, currentPageIndex]);
+
+  const getTotalAcQuery = gql`
+  query AggregateOutlet_device_ac_input($where: Outlet_device_ac_inputWhereInput) {
+    aggregateOutlet_device_ac_input(where: $where) {
+      _count {
+        _all
+      }
+    }
+  }
+  `;
+
+  const getTotalAcExFaVariable = {
+    "variables": {
+      "where": {
+        "outlet_id": {
+          "equals": selectedOutletID
         }
       }
     }
-  }, [selectedCustomerID, selectedOutletID]);
+  };
+
+  const getTotalExFaQuery = gql`
+  query AggregateOutlet_device_ex_fa_input($where: Outlet_device_ex_fa_inputWhereInput) {
+    aggregateOutlet_device_ex_fa_input(where: $where) {
+      _count {
+        _all
+      }
+    }
+  }
+  `
 
 
 
@@ -164,6 +198,8 @@ const EquipmentTable: any = () => {
   const eqptsResult = useLazyQuery(getEqptsQuery, getEqptsVariable);
   const deleteAcEqptResult = useMutation(deleteAcEqptQuery);
   const deleteFaEqptResult = useMutation(deleteFaEqptQuery);
+  const getTotalAcResult = useQuery(getTotalAcQuery, getTotalAcExFaVariable);
+  const getTotalExFaResult = useQuery(getTotalExFaQuery, getTotalAcExFaVariable);
 
   const customerDropdown: DropdownProps[] = React.useMemo(() => {
 
@@ -190,14 +226,6 @@ const EquipmentTable: any = () => {
 
   // Hooks 
   React.useEffect(() => {
-    // if (eqptsResult.data && eqptsResult.data.outlets.length > 0) {
-    //   const outletsWithEqpts = eqptsResult.data.outlets as outlet[];
-    //   const eqptList: any[] = [];
-    //   outletsWithEqpts.map(oe => {
-    //     eqptList.push([...oe.outlet_device_ex_fa_inputs || [], ...oe.outlet_device_ac_inputs || []]);
-    //   })
-    //   setEquipments(eqptList);
-    // }
     eqptsResult[0]().then(res => {
       if (res.data && res.data.outlets) {
         const outletsWithEqpts = res.data.outlets as outlet[];
@@ -216,10 +244,20 @@ const EquipmentTable: any = () => {
           eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
         })
         setEquipments(eqptList);
+        getTotalAcResult.refetch();
+        getTotalExFaResult.refetch();
       }
 
     })
-  }, [selectedCustomerID, selectedOutletID]);
+  }, [selectedCustomerID, selectedOutletID, currentPageIndex,eqptsResult,getTotalAcResult]);
+
+  React.useEffect(() => {
+    if (getTotalExFaResult.data && getTotalAcResult.data && getTotalExFaResult.data.aggregateOutlet_device_ex_fa_input && getTotalAcResult.data.aggregateOutlet_device_ac_input) {
+      setTotalpage(calculatePagination(getTotalExFaResult.data.aggregateOutlet_device_ex_fa_input._count._all, getTotalAcResult.data.aggregateOutlet_device_ac_input._count._all));
+    } else {
+      setTotalpage(0);
+    }
+  }, [getTotalExFaResult.data && getTotalAcResult.data]);
 
   React.useEffect(() => {
     if (equipments) {
@@ -246,6 +284,7 @@ const EquipmentTable: any = () => {
           <TableOptionField key={uuidv4()} label={'Outlet'} onChange={(selectedValue: string) => { setSelectedOutletID(selectedValue) }}
             selectedValue={selectedOutletID} data={outletDropdown} />,
         ]}
+        // totalNumberOfPages={totalPage} setCurrentSelectedPage={setCurrentPageIndex} currentSelectedPage={currentPageIndex}
         handleAddNew={() => {
           setSelectedEqpt(undefined);
           setOpenEquipmentEdit(true);
@@ -279,6 +318,8 @@ const EquipmentTable: any = () => {
                     eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
                   })
                   setEquipments(eqptList);
+                  getTotalAcResult.refetch();
+                  getTotalExFaResult.refetch();
                 }
 
               })
@@ -309,6 +350,8 @@ const EquipmentTable: any = () => {
                     eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
                   })
                   setEquipments(eqptList);
+                  getTotalAcResult.refetch();
+                  getTotalExFaResult.refetch();
                 }
 
               })
@@ -334,6 +377,8 @@ const EquipmentTable: any = () => {
               eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
             })
             setEquipments(eqptList);
+            getTotalAcResult.refetch();
+            getTotalExFaResult.refetch();
           }
 
         })

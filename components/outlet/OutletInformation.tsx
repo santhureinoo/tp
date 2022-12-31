@@ -85,7 +85,7 @@ const OutletInformation = ({ outlet, setOutlet }: Props) => {
             <div className="edit-sub-container">
                 <div className="grid grid-cols-2 gap-x-4 pb-6">
                     <CustomizedInput label={"Business"} inputType="select" value={outlet.customer_id.toString()} dropDownData={customerDropdown} onChange={(value: string) => onChange(parseInt(value), 'customer_id')} />
-                    <CustomizedInput label={"Status"} hideDropDownPrefixIcon={true} inputType="select" value={outlet.outlet_status} onChange={(value: string) => onChange(value, 'outlet_status')} dropDownData={['Live', 'Pending']} />
+                    <CustomizedInput label={"Status"} hideDropDownPrefixIcon={true} inputType="select" value={outlet.outlet_status} onChange={(value: string) => onChange(value, 'outlet_status')} dropDownData={['Live', 'Not Live']} />
                     <CustomizedInput label={"Type"} hideDropDownPrefixIcon={true} inputType="select" value={outlet.outlet_type} onChange={(value: string) => onChange(value, 'outlet_type')} dropDownData={['Restaurant', 'Station']} />
                 </div>
             </div>
@@ -117,7 +117,7 @@ const OutletInformation = ({ outlet, setOutlet }: Props) => {
                 <div className="flex">
                     <h2><b>Person In Charge</b><br /> Information</h2>
                 </div>
-                <ContactList contactList={outlet.outlet_person_in_charges || []} setContactList={onPicChange} />
+                <ContactList contactType="Outlet" contactList={outlet.outlet_person_in_charges || []} setContactList={onPicChange} />
             </div>
             {/* <div className="flex flex-row gap-x-3 justify-between">
                 <button type='button' className="bg-white text-blue-500 border border-neutral-400 rounded-lg w-full text-sm h-11 text-center">Reset</button>

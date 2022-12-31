@@ -5,9 +5,10 @@ import OutletEdit from '../components/OutletEdit';
 import TableOptionField from '../components/TableOptionField';
 import { DummyOutletDataRow } from '../common/constant';
 import { v4 as uuidv4 } from 'uuid';
-import { gql, useLazyQuery, useMutation, useQuery } from '@apollo/client';
+import { gql, useMutation, useQuery } from '@apollo/client';
 import { customer, outlet } from '../types/datatype';
 import ClientOnly from '../components/ClientOnly';
+import { calculatePagination } from '../common/helper';
 // import SavingsEdit from '../components/outlet/SavingsEdit';
 
 const Outlets: NextPage = () => {
@@ -30,12 +31,14 @@ const OutletTable: any = () => {
   const [outlets, setOutlets] = React.useState<outlet[]>([]);
   const [openOutletEdit, setOpenOutletEdit] = React.useState(false);
   const [selectedOutlet, setSelectedOutlet] = React.useState<outlet>();
+  const [totalPage, setTotalpage] = React.useState(0);
+  const [currentPageIndex, setCurrentPageIndex] = React.useState(1);
   const [selectedCustomerID, setSelectedCustomerID] = React.useState("");
 
   // GraphQL
   const getOutletsQuery = gql`
-  query Outlets($where: OutletWhereInput) {
-    outlets(where: $where) {
+  query Outlets($where: OutletWhereInput, $take: Int, $skip: Int) {
+    outlets(where: $where,take: $take, skip: $skip) {
       outlet_id
       name
       customer_id
@@ -61,6 +64,25 @@ const OutletTable: any = () => {
     }
   }`;
 
+  const getTotalQuery = gql`
+  query _count($where: OutletWhereInput) {
+    aggregateOutlet(where: $where) {
+      _count {
+        _all
+      }
+    }
+  }`;
+
+  const getTotalVariable = {
+    "variables": {
+      "where": {
+        "customer_id": {
+          "equals": selectedCustomerID ? parseInt(selectedCustomerID) : -1
+        }
+      },
+    }
+  }
+
   const mutate_delete_outlet_query = gql`
   mutation DeleteOneOutlet($where: OutletWhereUniqueInput!) {
     deleteOneOutlet(where: $where) {
@@ -75,12 +97,15 @@ const OutletTable: any = () => {
           "customer_id": {
             "equals": selectedCustomerID ? parseInt(selectedCustomerID) : -1
           }
-        }
+        },
+        "take": 5,
+        "skip": (currentPageIndex * 5) - 5
       }
     }
-  }, [selectedCustomerID]);
+  }, [selectedCustomerID, currentPageIndex]);
 
   const outletsResult = useQuery(getOutletsQuery, getOutletsVariable);
+  const getTotalResult = useQuery(getTotalQuery, getTotalVariable);
   const deleteOutletResult = useMutation(mutate_delete_outlet_query);
   const customersResult = useQuery(getCustomersQuery);
 
@@ -93,8 +118,21 @@ const OutletTable: any = () => {
     }
   }, [outletsResult.data]);
 
+  React.useEffect(() => {
+    if (getTotalResult.data && getTotalResult.data.aggregateOutlet) {
+      setTotalpage(calculatePagination(getTotalResult.data.aggregateOutlet._count._all));
+    } else {
+      setTotalpage(0);
+    }
+  }, [getTotalResult.data]);
+
+  React.useEffect(() => {
+    getTotalResult.refetch();
+    outletsResult.refetch();
+  }, [currentPageIndex]);
+
   const resultInArray = React.useMemo(() => {
-    return outlets ? outlets.map((out) => [out.outlet_id, out.customer?.name, out.name, out.outlet_month ? out.outlet_month[0]?.last_avail_tariff : '', out.outlet_month ? out.outlet_month[0]?.tariff_month : "", out.outlet_month ? out.outlet_month[0]?.percent_share_of_savings : ""]) : [];
+    return outlets ? outlets.map((out) => [out.outlet_id, out.customer?.name, out.name, out.outlet_month ? out.outlet_month[0]?.last_avail_tariff : '', out.outlet_month ? out.outlet_month[0]?.tariff_month : "", out.outlet_month && out.outlet_month[0]?.percent_share_of_savings !== '' ? out.outlet_month[0]?.percent_share_of_savings + " %" : ""]) : [];
   }, [outlets]);
 
   const customerDropdown = React.useMemo(() => {
@@ -113,6 +151,7 @@ const OutletTable: any = () => {
       <Table
         headers={['Outlet ID', 'Customer', 'Outlet Name', 'Tariff Rate', 'Date of Tariff', 'Share of Savings']}
         data={resultInArray}
+        totalNumberOfPages={totalPage} setCurrentSelectedPage={setCurrentPageIndex} currentSelectedPage={currentPageIndex}
         leftSideElements={[
           <TableOptionField key={uuidv4()} label={'Outlet'} selectedValue={selectedCustomerID} data={customerDropdown} onChange={(selectedValue: string) => { setSelectedCustomerID(selectedValue) }} />
         ]}
@@ -129,9 +168,10 @@ const OutletTable: any = () => {
           })
             .then((value) => {
               outletsResult.refetch();
+              getTotalResult.refetch();
             })
         }} buttonText={"+ Add New Outlet"} rightSideElements={[]} />
-      <OutletEdit outlet={selectedOutlet} afterOperation={() => outletsResult.refetch()} openOutletEdit={openOutletEdit} setOpenOutletEdit={setOpenOutletEdit} selectedCustomerID={parseInt(selectedCustomerID)} />
+      <OutletEdit outlet={selectedOutlet} afterOperation={() => { getTotalResult.refetch(); outletsResult.refetch(); }} openOutletEdit={openOutletEdit} setOpenOutletEdit={setOpenOutletEdit} selectedCustomerID={parseInt(selectedCustomerID)} />
     </React.Fragment>
   )
 

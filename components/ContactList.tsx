@@ -4,18 +4,19 @@ import CustomizedInput from "./CustomizedInput";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleCheck, faXmarkCircle } from '@fortawesome/free-solid-svg-icons'
 import Image from "next/image";
-import { outlet_person_in_charge } from "../types/datatype";
+import { customer_person_in_charge, outlet_person_in_charge } from "../types/datatype";
 
 
 const cloneDeep = rfdc();
 
 interface Props {
-    contactList: outlet_person_in_charge[];
+    contactList: any[];
     outletID?: number;
-    setContactList(contacts: outlet_person_in_charge[]): void;
+    contactType: "Outlet" | "Customer";
+    setContactList(contacts: any[]): void;
 }
 
-const ContactList = ({ outletID, contactList, setContactList }: Props): React.ReactElement => {
+const ContactList = ({ outletID, contactList, contactType, setContactList }: Props): React.ReactElement => {
 
     const onChange = (value: any, attributeName: string, index: number) => {
         const cloned_contactList = cloneDeep(contactList);
@@ -37,7 +38,7 @@ const ContactList = ({ outletID, contactList, setContactList }: Props): React.Re
         setContactList(cloned_contactList);
     }
 
-    const revalidateIndexOfPIC = (picList: outlet_person_in_charge[]) => {
+    const revalidateIndexOfPIC = (picList: outlet_person_in_charge[] | customer_person_in_charge[]) => {
         return picList.map((pic, idx) => {
             pic.contact_person_index = idx;
             return pic;
@@ -75,15 +76,32 @@ const ContactList = ({ outletID, contactList, setContactList }: Props): React.Re
                 })}
                 <div className="flex justify-end">
                     <span onClick={e => {
-                        setContactList([...contactList, {
-                            outlet_id: outletID && outletID,
-                            contact_person_index: contactList.length,
-                            contact_person_name: 'New Person',
-                            contact_person_position: 'Finance Manager',
-                            contact_person_address: 'andrew@gmail.com',
-                            contact_person_phone: '+628788719580',
-                            primary_contact: false,
-                        }])
+                        if (contactType === 'Customer') {
+                            const newContact: outlet_person_in_charge = {
+                                outlet_id: outletID && outletID,
+                                contact_person_index: contactList.length,
+                                contact_person_name: 'New Person',
+                                contact_person_position: 'Finance Manager',
+                                contact_person_address: 'andrew@gmail.com',
+                                contact_person_phone: '+628788719580',
+                                primary_contact: false,
+                            };
+
+                            setContactList([...contactList, newContact]);
+                        } else {
+                            const newContact: customer_person_in_charge = {
+                                customer_id: outletID && outletID,
+                                contact_person_index: contactList.length,
+                                contact_person_name: 'New Person',
+                                contact_person_position: 'Finance Manager',
+                                contact_person_address: 'andrew@gmail.com',
+                                contact_person_phone: '+628788719580',
+                                primary_contact: false,
+                            };
+
+                            setContactList([...contactList, newContact]);
+                        }
+
                     }} className="cursor-pointer text-sm text-sky-400">Add More Person in Charge</span>
                 </div>
             </div>

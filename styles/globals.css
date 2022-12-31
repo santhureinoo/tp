@@ -4,7 +4,15 @@
 
 @layer base {
     h2 {
-        @apply text-lg font-bold
+        @apply font-bold text-lg
+    }
+
+    h1 {
+        @apply font-bold text-2xl
+    }
+
+    h5 {
+        @apply font-bold
     }
 }
 
@@ -26,5 +34,53 @@
     }
     .header-thin {
         @apply font-thin text-[20px]
+    }
+
+    .report-main-header-text {
+        @apply text-report-main-header text-5xl
+    }
+
+    .report-text {
+        @apply text-report-non-table-text text-lg
+    }
+
+    .report-table {
+        @apply border border-slate-500;
+    }
+
+    .report-table thead tr {
+        @apply bg-report-table-header-background text-center;
+    }
+
+    .report-table th {
+        @apply border border-slate-600 p-2;
+    }
+
+    .report-table td {
+        @apply border border-slate-600 p-2 text-center;
+    }
+
+    .invoice-table {
+        @apply text-center;
+    }
+
+    .invoice-table thead tr {
+        @apply text-center border border-slate-600 p-2;
+    }
+
+    .invoice-table th {
+        @apply border border-slate-600 p-2;
+    }
+
+    .invoice-table tbody th {
+        @apply border border-slate-600 p-2;
+    }
+
+    .invoice-table td {
+        @apply border border-slate-600 p-2;
+    }
+
+    .invoice-table tfoot td {
+        @apply border-none;
     }
 }

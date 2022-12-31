@@ -5,6 +5,7 @@ import CustomerEdit from '../components/CustomerEdit';
 import ClientOnly from '../components/ClientOnly';
 import { customer } from '../types/datatype';
 import { gql, useMutation, useQuery } from '@apollo/client';
+import { calculatePagination } from '../common/helper';
 
 const Customers: NextPage = () => {
   return (
@@ -24,10 +25,22 @@ Customers.getInitialProps = async () => {
 const CustomerTable: any = () => {
   const [customers, setCustomers] = React.useState<customer[]>([]);
   const [openCustomerEdit, setOpenCustomerEdit] = React.useState(false);
+  const [totalPage, setTotalpage] = React.useState(0);
+  const [currentPageIndex, setCurrentPageIndex] = React.useState(1);
   const [selectedCustomer, setSelectedCustomer] = React.useState<customer>();
+
+  const getTotalQuery = gql`
+  query _count {
+    aggregateCustomer {
+      _count {
+        _all
+      }
+    }
+  }`;
+
   const getCustomersQuery = gql`
-  query Customers {
-    customers {
+  query Customers($take: Int, $skip: Int) {
+    customers(take: $take, skip: $skip)  {
       customer_id
       name
       pte_ltd_name
@@ -44,7 +57,14 @@ const CustomerTable: any = () => {
       }
     }
   }`;
-  
+
+  const getCustomersVariable = {
+    "variables": {
+      "take": 5,
+      "skip": (currentPageIndex * 5) - 5
+    },
+  };
+
   const mutate_delete_customer_query = gql`
     mutation DeleteOneCustomer($where: CustomerWhereUniqueInput!) {
         deleteOneCustomer(where: $where) {
@@ -52,7 +72,8 @@ const CustomerTable: any = () => {
         }
       }`;
 
-  const { loading, error, data, refetch } = useQuery(getCustomersQuery);
+  const { loading, error, data, refetch } = useQuery(getCustomersQuery, getCustomersVariable);
+  const getTotalResult = useQuery(getTotalQuery);
   const [deleteMutationQuery, deleteMutationResult = { data, loading, error }] = useMutation(mutate_delete_customer_query);
 
   React.useEffect(() => {
@@ -60,6 +81,19 @@ const CustomerTable: any = () => {
       setCustomers(data.customers);
     }
   }, [data]);
+
+  React.useEffect(() => {
+    if (getTotalResult.data && getTotalResult.data.aggregateCustomer) {
+      setTotalpage(calculatePagination(getTotalResult.data.aggregateCustomer._count._all));
+    } else {
+      setTotalpage(0);
+    }
+  }, [getTotalResult.data]);
+
+  React.useEffect(() => {
+    getTotalResult.refetch();
+    refetch();
+  }, [currentPageIndex]);
 
   const resultInArray = React.useMemo(() => {
     return customers ? customers.map((cur) => [cur.customer_id, cur.name, cur.pic_name, cur.pic_phone, 0, 0]) : [];
@@ -77,9 +111,10 @@ const CustomerTable: any = () => {
           }
         }).then((value) => {
           refetch();
+          getTotalResult.refetch();
         })
-      }} rightSideElements={[]} leftSideElements={[]} buttonText={'+ Add New Customer'} />
-      <CustomerEdit afterOperation={() => refetch()} customer={selectedCustomer} openCustomerEdit={openCustomerEdit} setOpenCustomerEdit={setOpenCustomerEdit} />
+      }} rightSideElements={[]} leftSideElements={[]} buttonText={'+ Add New Customer'} totalNumberOfPages={totalPage} setCurrentSelectedPage={setCurrentPageIndex} currentSelectedPage={currentPageIndex} />
+      <CustomerEdit afterOperation={() => { refetch(); getTotalResult.refetch(); }} customer={selectedCustomer} openCustomerEdit={openCustomerEdit} setOpenCustomerEdit={setOpenCustomerEdit} />
     </React.Fragment>
 
   )
