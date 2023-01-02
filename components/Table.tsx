@@ -47,11 +47,19 @@ const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataCo
             <div className="drop-shadow-lg w-full h-100 rounded-lg p-4 bg-white w-auto">
                 {leftSideFlexDirection === 'Horizontal' ? <div className={`grid grid-cols-2 justify-between items-start py-2 grow-0`}>
                     <div className={`flex flex-row gap-x-2`}>
-                        {leftSideElements}
+                        {leftSideElements.map(elem => {
+                            return <React.Fragment key={uuidv4()}>
+                                {elem}
+                            </React.Fragment>
+                        })}
                     </div>
                     <div className="flex flex-row justify-end gap-x-2">
                         <div className='flex justify-between gap-x-4'>
-                            {rightSideElements}
+                            {rightSideElements.map(elem => {
+                                return <React.Fragment key={uuidv4()}>
+                                    {elem}
+                                </React.Fragment>
+                            })}
                         </div>
                         {buttonText && <button type="button" onClick={(e) => { handleAddNew && handleAddNew() }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             {buttonText}

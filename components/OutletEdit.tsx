@@ -15,9 +15,10 @@ interface Props {
     selectedCustomerID: number;
     outlet?: outlet;
     afterOperation?: () => void;
+    customerDropdown: any[];
 }
 
-const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustomerID, afterOperation }: Props) => {
+const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustomerID, afterOperation, customerDropdown }: Props) => {
     // const [contactList, setContactList] = React.useState<outlet_person_in_charge[]>([]);
     const [selectedInformation, setSelectedinformation] = React.useState(1);
     const [currentOutlet, setCurrentOutlet] = React.useState<outlet>({
@@ -558,9 +559,7 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
                         </div>
                     </div>
                 </div>
-                {
-                    selectedInformation === 1 ? <OutletInformation setOutlet={setCurrentOutlet} outlet={currentOutlet} /> : <SavingsInformation setOutlet={setCurrentOutlet} outlet={currentOutlet} />
-                }
+                {selectedInformation === 1 ? <OutletInformation customers={customerDropdown} setOutlet={setCurrentOutlet} outlet={currentOutlet} /> : <SavingsInformation setOutlet={setCurrentOutlet} outlet={currentOutlet} />}
                 <div className="flex flex-row gap-x-3 justify-between">
                     <button type='button' className="bg-white text-blue-500 border border-neutral-400 rounded-lg w-full text-sm h-11 text-center">Reset</button>
                     <button type='button' onClick={onClick} className="bg-blue-500 text-white rounded-lg w-full text-sm h-11 text-center">Save</button>

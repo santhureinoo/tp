@@ -9,65 +9,10 @@ const cloneDeep = rfdc();
 interface Props {
     outlet: outlet;
     setOutlet: (outlet: outlet) => void;
+    customers: any[];
 }
 
-const OutletInformation = ({ outlet, setOutlet }: Props) => {
-
-    const getCustomersQuery = gql`
-    query Customers {
-      customers {
-        customer_id
-        name
-      }
-    }`;
-
-    // const getOutletPICsQuery = gql`
-    // query Outlet_person_in_charges($where: Outlet_person_in_chargeWhereInput) {
-    //     outlet_person_in_charges(where: $where) {
-    //       outlet_id
-    //       contact_person_index
-    //       contact_person_name
-    //       contact_person_position
-    //       contact_person_address
-    //       contact_person_phone
-    //       primary_contact
-    //     }
-    //   }
-    // `;
-
-    // const getOutletPICsVariable = {
-    //     'variables': {
-    //         "where": {
-    //             "outlet_id": {
-    //                 "equals": outlet.outlet_id
-    //             }
-    //         }
-    //     }
-    // }
-
-
-    const customersResult = useQuery(getCustomersQuery);
-    // const outletPicResult = useQuery(getOutletPICsQuery, getOutletPICsVariable);
-
-    const customerDropdown = React.useMemo(() => {
-        if (customersResult.data && customersResult.data.customers && customersResult.data.customers.length > 0) {
-            const cloned_outlet: outlet = cloneDeep(outlet);
-            cloned_outlet.customer_id = customersResult.data.customers[0].customer_id;
-            setOutlet(cloned_outlet);
-            return customersResult.data.customers.map((cust: any) => {
-                return { key: cust.customer_id.toString(), value: cust.name }
-            })
-        } else {
-            return [];
-        }
-    }, [customersResult.data]);
-
-    // React.useEffect(() => {
-    //     if (outletPicResult.data && outletPicResult.data.outlet_person_in_charges) {
-    //         setContactList(outletPicResult.data.outlet_person_in_charges);
-    //     }
-    // }, [outletPicResult.data]);
-
+const OutletInformation = ({ outlet, setOutlet, customers }: Props) => {
     const onChange = (value: any, attributeName: string) => {
         const cloned_outlet: outlet = cloneDeep(outlet);
         cloned_outlet[attributeName] = value;
@@ -80,11 +25,15 @@ const OutletInformation = ({ outlet, setOutlet }: Props) => {
         setOutlet(cloned_outlet);
     }
 
+    const customerElem = React.useMemo(() => {
+       return <CustomizedInput label={"Business"} inputType="select" value={outlet.customer_id.toString()} dropDownData={customers} onChange={(value: string) => onChange(parseInt(value), 'customer_id')} />
+    },[outlet, customers])
+
     return (
         <React.Fragment>
             <div className="edit-sub-container">
                 <div className="grid grid-cols-2 gap-x-4 pb-6">
-                    <CustomizedInput label={"Business"} inputType="select" value={outlet.customer_id.toString()} dropDownData={customerDropdown} onChange={(value: string) => onChange(parseInt(value), 'customer_id')} />
+                    {customerElem}
                     <CustomizedInput label={"Status"} hideDropDownPrefixIcon={true} inputType="select" value={outlet.outlet_status} onChange={(value: string) => onChange(value, 'outlet_status')} dropDownData={['Live', 'Not Live']} />
                     <CustomizedInput label={"Type"} hideDropDownPrefixIcon={true} inputType="select" value={outlet.outlet_type} onChange={(value: string) => onChange(value, 'outlet_type')} dropDownData={['Restaurant', 'Station']} />
                 </div>

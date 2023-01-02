@@ -198,8 +198,8 @@ const EquipmentTable: any = () => {
   const eqptsResult = useLazyQuery(getEqptsQuery, getEqptsVariable);
   const deleteAcEqptResult = useMutation(deleteAcEqptQuery);
   const deleteFaEqptResult = useMutation(deleteFaEqptQuery);
-  const getTotalAcResult = useQuery(getTotalAcQuery, getTotalAcExFaVariable);
-  const getTotalExFaResult = useQuery(getTotalExFaQuery, getTotalAcExFaVariable);
+  // const getTotalAcResult = useQuery(getTotalAcQuery, getTotalAcExFaVariable);
+  // const getTotalExFaResult = useQuery(getTotalExFaQuery, getTotalAcExFaVariable);
 
   const customerDropdown: DropdownProps[] = React.useMemo(() => {
 
@@ -226,38 +226,31 @@ const EquipmentTable: any = () => {
 
   // Hooks 
   React.useEffect(() => {
-    eqptsResult[0]().then(res => {
-      if (res.data && res.data.outlets) {
-        const outletsWithEqpts = res.data.outlets as outlet[];
-        let eqptList: any[] = [];
+    if (selectedCustomerID !== '' && selectedOutletID !== '')
+      eqptsResult[0]().then(res => {
+        if (res.data && res.data.outlets) {
+          const outletsWithEqpts = res.data.outlets as outlet[];
+          let eqptList: any[] = [];
 
-        outletsWithEqpts.map(oe => {
-          let ac_list = oe.outlet_device_ac_input as any[];
-          if (ac_list.length > 0) {
-            ac_list = ac_list.map(ac => {
-              const cloned_ac = cloneDeep(ac);
-              cloned_ac.device_type = 'ac';
-              return cloned_ac;
-            })
-          }
+          outletsWithEqpts.map(oe => {
+            let ac_list = oe.outlet_device_ac_input as any[];
+            if (ac_list.length > 0) {
+              ac_list = ac_list.map(ac => {
+                const cloned_ac = cloneDeep(ac);
+                cloned_ac.device_type = 'ac';
+                return cloned_ac;
+              })
+            }
 
-          eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
-        })
-        setEquipments(eqptList);
-        getTotalAcResult.refetch();
-        getTotalExFaResult.refetch();
-      }
+            eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
+          })
+          setEquipments(eqptList);
+          // getTotalAcResult.refetch();
+          // getTotalExFaResult.refetch();
+        }
 
-    })
-  }, [selectedCustomerID, selectedOutletID, currentPageIndex,eqptsResult,getTotalAcResult]);
-
-  React.useEffect(() => {
-    if (getTotalExFaResult.data && getTotalAcResult.data && getTotalExFaResult.data.aggregateOutlet_device_ex_fa_input && getTotalAcResult.data.aggregateOutlet_device_ac_input) {
-      setTotalpage(calculatePagination(getTotalExFaResult.data.aggregateOutlet_device_ex_fa_input._count._all, getTotalAcResult.data.aggregateOutlet_device_ac_input._count._all));
-    } else {
-      setTotalpage(0);
-    }
-  }, [getTotalExFaResult.data && getTotalAcResult.data]);
+      })
+  }, [selectedCustomerID, selectedOutletID]);
 
   React.useEffect(() => {
     if (equipments) {
@@ -267,6 +260,14 @@ const EquipmentTable: any = () => {
       }));
     }
   }, [equipments]);
+
+   // React.useEffect(() => {
+  //   if (getTotalExFaResult.data && getTotalAcResult.data && getTotalExFaResult.data.aggregateOutlet_device_ex_fa_input && getTotalAcResult.data.aggregateOutlet_device_ac_input) {
+  //     setTotalpage(calculatePagination(getTotalExFaResult.data.aggregateOutlet_device_ex_fa_input._count._all, getTotalAcResult.data.aggregateOutlet_device_ac_input._count._all));
+  //   } else {
+  //     setTotalpage(0);
+  //   }
+  // }, [getTotalExFaResult.data getTotalAcResult.data]);
 
   return (
     <React.Fragment>
@@ -318,8 +319,8 @@ const EquipmentTable: any = () => {
                     eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
                   })
                   setEquipments(eqptList);
-                  getTotalAcResult.refetch();
-                  getTotalExFaResult.refetch();
+                  // getTotalAcResult.refetch();
+                  // getTotalExFaResult.refetch();
                 }
 
               })
@@ -350,8 +351,8 @@ const EquipmentTable: any = () => {
                     eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
                   })
                   setEquipments(eqptList);
-                  getTotalAcResult.refetch();
-                  getTotalExFaResult.refetch();
+                  // getTotalAcResult.refetch();
+                  // getTotalExFaResult.refetch();
                 }
 
               })
@@ -377,8 +378,8 @@ const EquipmentTable: any = () => {
               eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
             })
             setEquipments(eqptList);
-            getTotalAcResult.refetch();
-            getTotalExFaResult.refetch();
+            // getTotalAcResult.refetch();
+            // getTotalExFaResult.refetch();
           }
 
         })

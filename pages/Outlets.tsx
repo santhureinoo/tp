@@ -139,7 +139,7 @@ const OutletTable: any = () => {
     if (customersResult.data && customersResult.data.customers && customersResult.data.customers.length > 0) {
       setSelectedCustomerID(customersResult.data.customers[0].customer_id)
       return customersResult.data.customers.map((cust: any) => {
-        return { key: cust.customer_id, value: cust.name }
+        return { key: cust.customer_id.toString(), value: cust.name }
       })
     } else {
       return [];
@@ -153,7 +153,7 @@ const OutletTable: any = () => {
         data={resultInArray}
         totalNumberOfPages={totalPage} setCurrentSelectedPage={setCurrentPageIndex} currentSelectedPage={currentPageIndex}
         leftSideElements={[
-          <TableOptionField key={uuidv4()} label={'Outlet'} selectedValue={selectedCustomerID} data={customerDropdown} onChange={(selectedValue: string) => { setSelectedCustomerID(selectedValue) }} />
+          <TableOptionField key={uuidv4()} label={'Outlet'} selectedValue={selectedCustomerID.toString()} data={customerDropdown} onChange={(selectedValue: string) => { setSelectedCustomerID(selectedValue) }} />
         ]}
         handleAddNew={() => {
           setSelectedOutlet(undefined);
@@ -171,7 +171,7 @@ const OutletTable: any = () => {
               getTotalResult.refetch();
             })
         }} buttonText={"+ Add New Outlet"} rightSideElements={[]} />
-      <OutletEdit outlet={selectedOutlet} afterOperation={() => { getTotalResult.refetch(); outletsResult.refetch(); }} openOutletEdit={openOutletEdit} setOpenOutletEdit={setOpenOutletEdit} selectedCustomerID={parseInt(selectedCustomerID)} />
+      <OutletEdit outlet={selectedOutlet} customerDropdown={customerDropdown} afterOperation={() => { getTotalResult.refetch(); outletsResult.refetch(); }} openOutletEdit={openOutletEdit} setOpenOutletEdit={setOpenOutletEdit} selectedCustomerID={parseInt(selectedCustomerID)} />
     </React.Fragment>
   )
 
