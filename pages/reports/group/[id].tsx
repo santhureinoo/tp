@@ -189,7 +189,7 @@ const GroupReport: NextPage = () => {
     return <div>
         <div>
             <h1 className='report-main-header-text'>
-                {"Portfolio Savings & Substainability" + month + " ==-== " + year}
+                {"Portfolio Savings & Substainability"}
             </h1>
             <span>
                 {"Burger King Holdings"}
