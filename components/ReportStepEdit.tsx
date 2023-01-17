@@ -51,45 +51,45 @@ const ReportStepEdit = ({ openReportStepEdit, setOpenReportStepEdit, fromExtensi
         </div>)
     }, [toExtension, datePeriod]);
 
-    const downloadFromS3 = React.useCallback(() => {
-        if (currentUploadedFileAttribute) {
-            axios.post(
-                "https://20ix7znzn5.execute-api.ap-southeast-1.amazonaws.com/staging/getDownloadPresignedUrl",
-                { "filename": currentUploadedFileAttribute.name }
-            ).then(response => {
-                // uploadURL and filename
-                const result = response.data;
-                axios.get(result.uploadURL, {
-                    responseType: 'blob',
-                }).then(result => {
-                    // create file link in browser's memory
-                    var binaryData = [];
-                    binaryData.push(response.data);
-                    const href = URL.createObjectURL(new Blob(binaryData, { type: currentUploadedFileAttribute.type }));
+    // const downloadFromS3 = React.useCallback(() => {
+    //     if (currentUploadedFileAttribute) {
+    //         axios.post(
+    //             "https://20ix7znzn5.execute-api.ap-southeast-1.amazonaws.com/staging/getDownloadPresignedUrl",
+    //             { "filename": currentUploadedFileAttribute.name }
+    //         ).then(response => {
+    //             // uploadURL and filename
+    //             const result = response.data;
+    //             axios.get(result.uploadURL, {
+    //                 responseType: 'blob',
+    //             }).then(result => {
+    //                 // create file link in browser's memory
+    //                 var binaryData = [];
+    //                 binaryData.push(response.data);
+    //                 const href = URL.createObjectURL(new Blob(binaryData, { type: currentUploadedFileAttribute.type }));
 
-                    // create "a" HTML element with href to file & click
-                    const link = document.createElement('a');
-                    link.href = href;
-                    link.setAttribute('download', currentUploadedFileAttribute.name); //or any other extension
-                    document.body.appendChild(link);
-                    link.click();
+    //                 // create "a" HTML element with href to file & click
+    //                 const link = document.createElement('a');
+    //                 link.href = href;
+    //                 link.setAttribute('download', currentUploadedFileAttribute.name); //or any other extension
+    //                 document.body.appendChild(link);
+    //                 link.click();
 
-                    // clean up "a" element & remove ObjectURL
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(href);
+    //                 // clean up "a" element & remove ObjectURL
+    //                 document.body.removeChild(link);
+    //                 URL.revokeObjectURL(href);
 
-                    setIsSuccess(true);
+    //                 setIsSuccess(true);
 
-                }).catch(error => {
-                    console.log(error);
-                })
-            })
-            // uploadFiles.forEach(uploadFile => {
+    //             }).catch(error => {
+    //                 console.log(error);
+    //             })
+    //         })
+    //         // uploadFiles.forEach(uploadFile => {
 
-            // })
-        }
+    //         // })
+    //     }
 
-    }, [currentUploadedFileAttribute]);
+    // }, [currentUploadedFileAttribute]);
 
     const startComp = React.useMemo(() => {
         return (<div>
@@ -103,7 +103,7 @@ const ReportStepEdit = ({ openReportStepEdit, setOpenReportStepEdit, fromExtensi
                 </div>
                 <div className="flex flex-row gap-x-3 justify-between">
                     <button type='button' className="bg-white text-blue-500 border border-neutral-400 rounded-lg w-full text-sm h-11 text-center">Cancel</button>
-                    <button type='button' onClick={() => { downloadFromS3() }} className="bg-blue-500 text-white rounded-lg w-full text-sm h-11 text-center">Yes</button>
+                    <button type='button' onClick={() => { onConfirm && onConfirm() }} className="bg-blue-500 text-white rounded-lg w-full text-sm h-11 text-center">Yes</button>
                 </div>
             </div>
         </div>)

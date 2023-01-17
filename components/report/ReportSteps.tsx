@@ -24,13 +24,15 @@ const ReportSteps = (): React.ReactElement => {
     const getDownloadPresigned = async (name: string, index: number) => {
         const data = index === 1 ? { "filename": name } : { "filename": name, "outlet_id": 3, "outlet_date": "01/10/2022" }
         const response = await axios.post(
-            `http://13.214.191.184:4001/process_step_${index}`,
+            `http://localhost:4001/process_step_${index}`,
             data
         );
         if (index === 1) {
             return response.data.downloadUrl;
-        } else {
+        } else if(index == 2){
             return response.data.response;
+        } else {
+            return response.data.download_url;
         }
 
     }
@@ -67,7 +69,7 @@ const ReportSteps = (): React.ReactElement => {
                     // setAlreadyUploaded(clonedAlreadyUploaded);
 
                     // if (index === 1 || index === 2) {
-                       
+
 
                     // } else {
                     //     clonedUploadedFileAttr[index] = {
@@ -239,7 +241,7 @@ const ReportSteps = (): React.ReactElement => {
                 <div className="flex flex-col gap-y-14">
                     <ReportStep isUploading={uploadingNow[1]} disabled={false} onVerify={verifyStep1} setOnVerify={setVerifyStep1} titleChar={"1"} subTitle={"Upload Input-Sheet"} texts={["Upload Input-SheetUpload the latest Input-Sheet", "to generate the input-sheet.csv"]} buttons={btnList(1)} nonButtons={nonBtnList(1)} ></ReportStep>
                     <ReportStep isUploading={uploadingNow[2]} disabled={verifyStep1 ? false : true} onVerify={verifyStep2} setOnVerify={setVerifyStep2} titleChar={"2"} subTitle={"Generate Output-Sheet"} texts={["Upload the input-sheet.csv", "to download output-sheet.csv"]} buttons={btnList(2)} nonButtons={nonBtnList(2)}></ReportStep>
-                    <ReportStep isUploading={uploadingNow[1]} disabled={verifyStep2 ? false : true} onVerify={verifyStep3} setOnVerify={setVerifyStep3} titleChar={"3"} subTitle={"Generate Report & Invoice"} texts={["Upload the output-sheet.csv", "to generate Report & Invoice"]} buttons={btnList(3)} nonButtons={nonBtnList(3)}></ReportStep>
+                    <ReportStep isUploading={uploadingNow[3]} disabled={verifyStep2 ? false : true} onVerify={verifyStep3} setOnVerify={setVerifyStep3} titleChar={"3"} subTitle={"Generate Report & Invoice"} texts={["Upload the output-sheet.csv", "to generate Report & Invoice"]} buttons={btnList(3)} nonButtons={nonBtnList(3)}></ReportStep>
                 </div>
             </div>
         </div>
