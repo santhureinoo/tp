@@ -103,7 +103,7 @@ const ReportStepEdit = ({ openReportStepEdit, setOpenReportStepEdit, fromExtensi
                 </div>
                 <div className="flex flex-row gap-x-3 justify-between">
                     <button type='button' className="bg-white text-blue-500 border border-neutral-400 rounded-lg w-full text-sm h-11 text-center">Cancel</button>
-                    <button type='button' onClick={() => { onConfirm && onConfirm() }} className="bg-blue-500 text-white rounded-lg w-full text-sm h-11 text-center">Yes</button>
+                    <button type='button' onClick={() => { onConfirm && onConfirm(); setIsSuccess(true); }} className="bg-blue-500 text-white rounded-lg w-full text-sm h-11 text-center">Yes</button>
                 </div>
             </div>
         </div>)

@@ -5,7 +5,7 @@ import OutletEdit from '../components/OutletEdit';
 import TableOptionField from '../components/TableOptionField';
 import { DummyOutletDataRow } from '../common/constant';
 import { v4 as uuidv4 } from 'uuid';
-import { gql, useMutation, useQuery } from '@apollo/client';
+import { gql, useMutation, useQuery, WatchQueryFetchPolicy } from '@apollo/client';
 import { customer, outlet } from '../types/datatype';
 import ClientOnly from '../components/ClientOnly';
 import { calculatePagination } from '../common/helper';
@@ -84,6 +84,7 @@ const OutletTable: any = () => {
           "equals": selectedCustomerID ? parseInt(selectedCustomerID) : -1
         }
       },
+      'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy
     }
   }
 
@@ -103,7 +104,8 @@ const OutletTable: any = () => {
           }
         },
         "take": 5,
-        "skip": (currentPageIndex * 5) - 5
+        "skip": (currentPageIndex * 5) - 5,
+        'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy
       }
     }
   }, [selectedCustomerID, currentPageIndex]);
