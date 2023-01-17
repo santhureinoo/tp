@@ -28,7 +28,7 @@ const FileUpload = ({ uploadedFile, setUploadedFile, hidePreview = false, upload
         if (uploadedFile) {
             return <Image alt="uploadedFile" width={80} height={80} className="object-contain" src={URL.createObjectURL(uploadedFile)} />
         } else {
-            return <FontAwesomeIcon icon={faImage} className="p-4 text-3xl text-[#147CFC] rounded-full bg-[#E8F2FF]" />
+            return <FontAwesomeIcon icon={faImage} className="p-4 text-3xl text-[custom-active-link] rounded-full bg-[#E8F2FF]" />
         }
     }, [uploadedFile]);
 
@@ -37,7 +37,7 @@ const FileUpload = ({ uploadedFile, setUploadedFile, hidePreview = false, upload
             <div className="flex flex-row gap-x-2 items-center">
                 {!hidePreview && getImage}
                 <div className="w-full flex items-center flex-col justify-center bg-grey-lighter">
-                    <label className="w-full flex flex-col items-center px-4 py-2 bg-[#147CFC] text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-white">
+                    <label className="w-full flex flex-col items-center px-4 py-2 bg-[custom-active-link] text-blue rounded-lg shadow-lg tracking-wide uppercase border border-blue cursor-pointer hover:bg-blue hover:text-white">
                         <span className="text-white text-base leading-normal">Upload</span>
                         <input type='file' accept="*" onChange={handleUploadFile} className="hidden" />
                     </label>

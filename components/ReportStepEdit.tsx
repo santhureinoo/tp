@@ -37,7 +37,6 @@ const ReportStepEdit = ({ openReportStepEdit, setOpenReportStepEdit, fromExtensi
         if (uploadedFileAttribute) {
             setCurrentUploadedFileAttribute(uploadedFileAttribute);
         }
-        console.log(uploadedFileAttribute, 'in comp');
     }, [uploadedFileAttribute])
 
     const successComp = React.useMemo(() => {

@@ -24,19 +24,16 @@ const ReportSteps = (): React.ReactElement => {
     const getDownloadPresigned = async (name: string, index: number) => {
         const data = index === 1 ? { "filename": name } : { "filename": name, "outlet_id": 3, "outlet_date": "01/10/2022" }
         const response = await axios.post(
-            `http://13.214.191.184:4001/process_step_${index}`,
+            `http://localhost:4001/process_step_${index}`,
             data
         );
         if (index === 1) {
             return response.data.downloadUrl;
         } else {
-            console.log(response.data.response);
             return response.data.response;
         }
 
     }
-
-
 
     const uploadToS3 = React.useCallback((index) => {
         const currentUploadedFile = uploadedFile[index];
@@ -47,9 +44,7 @@ const ReportSteps = (): React.ReactElement => {
             ).then(response => {
                 // uploadURL and filename
                 const result = response.data.result;
-                axios.put(result.body.uploadURL, {
-                    data: currentUploadedFile,
-                }, {
+                axios.put(result.body.uploadURL, currentUploadedFile, {
                     headers: {
                         'Content-Type': currentUploadedFile.type
                     }
@@ -71,32 +66,32 @@ const ReportSteps = (): React.ReactElement => {
                     // setUploadedFile(clonedUploadedFile);
                     // setAlreadyUploaded(clonedAlreadyUploaded);
 
-                    if (index === 1 || index === 2) {
-                        const clonedUploadingNow = cloneDeep(uploadingNow);
-                        clonedUploadingNow[index] = true;
-                        setUploadingNow(clonedUploadingNow);
-                        getDownloadPresigned(currentUploadedFile.name, index).then(presignedUrl => {
-                            clonedUploadingNow[index] = false;
-                            clonedUploadedFileAttr[index] = {
-                                name: currentUploadedFile.name,
-                                type: currentUploadedFile.type,
-                                downloadURL: presignedUrl
-                            };
+                    // if (index === 1 || index === 2) {
+                       
 
-                            clonedUploadedFile[index] = undefined;
-                            clonedAlreadyUploaded[index] = true;
+                    // } else {
+                    //     clonedUploadedFileAttr[index] = {
+                    //         name: currentUploadedFile.name,
+                    //         type: currentUploadedFile.type,
+                    //     };
 
-                            setUploadedFileAttribute(clonedUploadedFileAttr);
-                            setUploadedFile(clonedUploadedFile);
-                            setAlreadyUploaded(clonedAlreadyUploaded);
-                            setUploadingNow(clonedUploadingNow);
+                    //     clonedUploadedFile[index] = undefined;
+                    //     clonedAlreadyUploaded[index] = true;
 
-                        })
+                    //     setUploadedFileAttribute(clonedUploadedFileAttr);
+                    //     setUploadedFile(clonedUploadedFile);
+                    //     setAlreadyUploaded(clonedAlreadyUploaded);
+                    // }
 
-                    } else {
+                    const clonedUploadingNow = cloneDeep(uploadingNow);
+                    clonedUploadingNow[index] = true;
+                    setUploadingNow(clonedUploadingNow);
+                    getDownloadPresigned(currentUploadedFile.name, index).then(presignedUrl => {
+                        clonedUploadingNow[index] = false;
                         clonedUploadedFileAttr[index] = {
                             name: currentUploadedFile.name,
                             type: currentUploadedFile.type,
+                            downloadURL: presignedUrl
                         };
 
                         clonedUploadedFile[index] = undefined;
@@ -105,7 +100,9 @@ const ReportSteps = (): React.ReactElement => {
                         setUploadedFileAttribute(clonedUploadedFileAttr);
                         setUploadedFile(clonedUploadedFile);
                         setAlreadyUploaded(clonedAlreadyUploaded);
-                    }
+                        setUploadingNow(clonedUploadingNow);
+
+                    })
 
 
                 }).catch(error => {

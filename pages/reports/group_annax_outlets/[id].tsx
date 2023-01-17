@@ -34,7 +34,7 @@ import { useRouter } from 'next/router';
 import { first_intermediary_table, group, outlet, reports, secondary_intermediary_table } from '../../../types/datatype';
 import React from 'react';
 import { gql, useQuery, WatchQueryFetchPolicy } from '@apollo/client';
-import { convertDate, formatCurrency } from '../../../common/helper';
+import { convertDate, numberWithCommas } from '../../../common/helper';
 
 
 ChartJS.register(
@@ -244,7 +244,7 @@ const GroupReport: NextPage = () => {
                             </td>
                             <td>
                                 <div className='flex flex-row justify-between'>
-                                    <span>$</span><span>{formatCurrency(Number(result.outlet_eqpt_energy_usage_with_TP_month_expenses))}</span>
+                                    <span>$</span><span>{numberWithCommas(Number(result.outlet_eqpt_energy_usage_with_TP_month_expenses))}</span>
                                 </div>
 
                             </td>
@@ -253,7 +253,7 @@ const GroupReport: NextPage = () => {
                             </td>
                             <td>
                                 <div className='flex flex-row justify-between'>
-                                    <span>$</span><span>{formatCurrency(Number(result.outlet_eqpt_energy_usage_without_TP_month_expenses))}</span>
+                                    <span>$</span><span>{numberWithCommas(Number(result.outlet_eqpt_energy_usage_without_TP_month_expenses))}</span>
                                 </div>
                             </td>
                             <td>
@@ -261,14 +261,14 @@ const GroupReport: NextPage = () => {
                             </td>
                             <td>
                                 <div className='flex flex-row justify-between'>
-                                    <span>$</span><span>{formatCurrency(Number(result.savings_tariff_expenses))}</span>
+                                    <span>$</span><span>{numberWithCommas(Number(result.savings_tariff_expenses))}</span>
                                 </div>
                             </td>
                             <td>
                                 {Number(result.outlet_measured_savings_kWh)}
                             </td>
                             <td>
-                                {formatCurrency(Number(result.outlet_measured_savings_expenses))}
+                                {numberWithCommas(Number(result.outlet_measured_savings_expenses))}
                             </td>
                             <td>
                                 {Number(result.outlet_measured_savings_percent)}%
@@ -277,7 +277,7 @@ const GroupReport: NextPage = () => {
                                 {Number(result.co2_savings_kg).toLocaleString()}
                             </td>
                             <td>
-                                {formatCurrency(Number(result.savings_tariff_expenses))}
+                                {numberWithCommas(Number(result.savings_tariff_expenses))}
                             </td>
                         </tr>
                         <tr>
@@ -299,12 +299,12 @@ const GroupReport: NextPage = () => {
                                     <div className='flex flex-col items-start'>
                                         <div className='flex gap-x-4'>
                                             <span>$</span>
-                                            <span>{formatCurrency(Number(result.acmv_25percent_benchmark_comparison_expenses))}</span>
+                                            <span>{numberWithCommas(Number(result.acmv_25percent_benchmark_comparison_expenses))}</span>
                                             <span>  --&gt; 25% benchmark comparison</span>
                                         </div>
                                         <div className='flex gap-x-4'>
                                             <span>$</span>
-                                            <span>{formatCurrency(Number(result.acmv_10percent_benchmark_comparison_expenses))}</span>
+                                            <span>{numberWithCommas(Number(result.acmv_10percent_benchmark_comparison_expenses))}</span>
                                             <span>  --&gt; 10% benchmark comparison</span>
                                         </div>
                                     </div>
@@ -348,12 +348,12 @@ const GroupReport: NextPage = () => {
                                     <div className='flex flex-col items-start'>
                                         <div className='flex gap-x-4'>
                                             <span>$</span>
-                                            <span>{formatCurrency(Number(result.ke_and_ac_25percent_benchmark_comparison_expenses))}</span>
+                                            <span>{numberWithCommas(Number(result.ke_and_ac_25percent_benchmark_comparison_expenses))}</span>
                                             <span>  --&gt; 25% benchmark comparison</span>
                                         </div>
                                         <div className='flex gap-x-4'>
                                             <span>$</span>
-                                            <span>{formatCurrency(Number(result.ke_and_ac_10percent_benchmark_comparison_expenses))}</span>
+                                            <span>{numberWithCommas(Number(result.ke_and_ac_10percent_benchmark_comparison_expenses))}</span>
                                             <span>  --&gt; 10% benchmark comparison</span>
                                         </div>
                                     </div>

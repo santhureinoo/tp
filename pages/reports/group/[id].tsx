@@ -30,7 +30,7 @@ import { NextPage } from "next";
 import { useRouter } from 'next/router';
 import { gql, useMutation, useQuery, WatchQueryFetchPolicy } from "@apollo/client";
 import React from 'react';
-import { group, reports } from '../../../types/datatype';
+import { group, outlet, reports, results } from '../../../types/datatype';
 import { report } from 'process';
 import axios from 'axios';
 import { downloadFile } from '../../../common/helper';
@@ -151,7 +151,7 @@ const GroupReport: NextPage = () => {
             reports.forEach(rep => {
                 if (rep.customer) {
                     if (rep.customer.outlet) {
-                        rep.customer.outlet.forEach(outlet => {
+                        rep.customer.outlet.forEach((outlet: outlet) => {
                             axios.get(
                                 '/api/download',
                                 {
@@ -167,7 +167,7 @@ const GroupReport: NextPage = () => {
                                 downloadFile(response.data, 'Group (Annax) Report');
                             });
                             attributes.outletCount += 1;
-                            outlet.results && outlet.results.forEach(result => {
+                            outlet.results && outlet.results.forEach((result: results) => {
                                 attributes.eqptWTP += Number(result.outlet_eqpt_energy_usage_with_TP_month_kW);
                                 attributes.eqptWTPExpense += Number(result.outlet_eqpt_energy_usage_with_TP_month_expenses);
                                 attributes.eqptWoTP += Number(result.outlet_eqpt_energy_usage_without_TP_month_kW);

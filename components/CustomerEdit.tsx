@@ -8,6 +8,7 @@ import { faCircle, faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 import { customer, group, outlet_person_in_charge } from "../types/datatype";
 import rfdc from 'rfdc';
 import { gql, useMutation, useQuery, WatchQueryFetchPolicy } from "@apollo/client";
+import { useRouter } from "next/router";
 
 const cloneDeep = rfdc();
 
@@ -21,6 +22,7 @@ interface Props {
 
 const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, customer }: Props) => {
 
+    const router = useRouter();
     const [contactList, setContactList] = React.useState<outlet_person_in_charge[]>([]);
     const [currentCustomer, setCurrentCustomer] = React.useState<customer>({
         name: "",
@@ -324,6 +326,7 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
                         </div>
                         <div className="flex justify-end">
                             <span onClick={e => {
+                                router.push(`Outlets?cus_id=${currentCustomer.customer_id}`)
                             }} className="cursor-pointer text-sm text-sky-400">Add Outlet Data</span>
                         </div>
 

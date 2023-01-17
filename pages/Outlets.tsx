@@ -9,6 +9,7 @@ import { gql, useMutation, useQuery } from '@apollo/client';
 import { customer, outlet } from '../types/datatype';
 import ClientOnly from '../components/ClientOnly';
 import { calculatePagination } from '../common/helper';
+import { useRouter } from 'next/router';
 // import SavingsEdit from '../components/outlet/SavingsEdit';
 
 const Outlets: NextPage = () => {
@@ -28,6 +29,9 @@ Outlets.getInitialProps = async () => {
 };
 
 const OutletTable: any = () => {
+
+  const router = useRouter();
+
   const [outlets, setOutlets] = React.useState<outlet[]>([]);
   const [openOutletEdit, setOpenOutletEdit] = React.useState(false);
   const [selectedOutlet, setSelectedOutlet] = React.useState<outlet>();
@@ -110,6 +114,12 @@ const OutletTable: any = () => {
   const customersResult = useQuery(getCustomersQuery);
 
   // Hooks
+
+  React.useEffect(() => {
+    const { cus_id } = router.query;
+    (cus_id && typeof cus_id === 'string') && setSelectedCustomerID(cus_id);
+  }, [router.query])
+
   React.useEffect(() => {
     if (outletsResult.data && outletsResult.data.outlets) {
       setOutlets(outletsResult.data.outlets);

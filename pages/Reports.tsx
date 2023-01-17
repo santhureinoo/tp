@@ -2,19 +2,17 @@ import type { NextPage } from 'next'
 import Table from '../components/Table'
 import React from 'react';
 import TableOptionField from '../components/TableOptionField';
-import Searchfield from '../components/Searchfield';
-import EquipmentEdit from '../components/EquipmentEdit';
 import { v4 as uuidv4 } from 'uuid';
-import { customer, group, outlet, outlet_device_ex_fa_input, reports, results } from '../types/datatype';
+import { customer, group, invoice, outlet, reports, results } from '../types/datatype';
 import ClientOnly from '../components/ClientOnly';
 import { gql, useLazyQuery, useQuery, WatchQueryFetchPolicy } from '@apollo/client';
 import { DropdownProps } from '../common/types';
 import ReportEdit from '../components/ReportEdit';
 import PillButton from '../components/PillButton';
-import moment from 'moment';
 import CustomizedDropDown from '../components/CustomizedDropDown';
 import ReportSteps from '../components/report/ReportSteps';
 import InvoiceEdit from '../components/InvoiceEdit';
+import { numberWithCommas } from '../common/helper';
 
 const Reports: NextPage = () => {
   return (
@@ -36,23 +34,17 @@ const ReportTable: any = () => {
   const [selectedSubTitle, setSelectedSubTitle] = React.useState("Generate");
   const [selectedOutletID, setSelectedOutletID] = React.useState("");
   const [results, setResults] = React.useState<results[]>([]);
-  // const [equipments, setEquipments] = React.useState<outlet_device_ex_fa_input[]>([]);
   const [selectedResult, setSelectedResult] = React.useState<results>();
 
   //Invoice
-  const [selectedInvoicePte, setSelectedInvoicePte] = React.useState("1");
+  const [selectedInvoicePte, setSelectedInvoicePte] = React.useState(0);
   const [selectedInvoiceMonth, setSelectedInvoiceMonth] = React.useState("All");
   const [selectedInvoiceYear, setSelectedInvoiceYear] = React.useState("All");
+  const [totalInvoicePage, setTotalInvoicePage] = React.useState(1);
+  const [selectedInvoicePageIndex, setSelectedInvoicePageIndex] = React.useState(1);
   const [allPte, setAllPte] = React.useState<DropdownProps[]>([]);
-  const [invoices, setInvoices] = React.useState<
-    {
-      id: String, pte: String,
-      month: String, year: String,
-      outlets: number, lastAvailTariff: String,
-      mesKwh: String, mesExpenses: String,
-      mesPercent: String
-    }[]
-  >([]);
+  const [invoices, setInvoices] = React.useState<invoice[]>([]);
+  const [selectedInvoice, setSelectedInvoice] = React.useState<invoice>();
 
   //Savings
   const [selectedCustomerType, setSelectedCustomerType] = React.useState<'Group' | 'Outlet'>('Group');
@@ -70,6 +62,124 @@ const ReportTable: any = () => {
   const [totalSavingPage, setTotalSavingPage] = React.useState(1);
   const [selectedSavingPageIndex, setSelectedSavingPageIndex] = React.useState(1);
 
+  //Generate 
+  const [selectedGenerateMonth, setSelectedGenerateMonth] = React.useState("All");
+  const [selectedGenerateYear, setSelectedGenerateYear] = React.useState("All");
+  const [reports, setReports] = React.useState<reports[]>([]);
+  const [totalGeneratePage, setTotalGeneratePage] = React.useState(1);
+  const [selectedGeneratePageIndex, setSelectedGeneratePageIndex] = React.useState(1);
+
+
+  const getReportsQuery = gql`
+  query FindManyReports($where: ReportsWhereInput) {
+    findManyReports(where: $where) {
+      updated_at
+      year
+      input_type
+      month
+      report_id
+      status
+      total_updated_outlets
+      total_error_found
+      invoice_status
+      report_status
+    }
+  }`;
+
+  const getReportsVariable = {
+    "variables": {
+      "where": {
+        ...(selectedGenerateMonth !== 'All') && {
+          "month": {
+            "equals": selectedGenerateMonth
+          }
+        },
+        ...(selectedGenerateYear !== 'All') && {
+          "year": {
+            "equals": selectedGenerateYear
+          }
+        },
+      }
+    }
+  };
+
+
+  const getInvoicesQuery = gql`
+  query Invoices($where: InvoiceWhereInput) {
+    invoices(where: $where) {
+      invoice_id
+      customer_id
+      month
+      year
+      outlet_ids
+      outlet_count
+      last_available_tariff
+      outlet_measured_savings_kWh
+      outlet_measured_savings_expenses
+      outlet_measured_savings_percent
+      eqpt_energy_usage_without_TP_month_kW
+      eqpt_energy_usage_without_TP_month_expenses
+      eqpt_energy_usage_with_TP_month_kW
+      eqpt_energy_usage_with_TP_month_expenses
+      customer {
+        name
+        pte_ltd_name
+      }
+    }
+  }`;
+
+  const getInvoicesVariable = {
+    "variables": {
+      "where": {
+        "customer_id": {
+          "equals": selectedInvoicePte
+        },
+        ...(selectedInvoiceMonth !== 'All') && {
+          "month": {
+            "equals": selectedSavingsMonth
+          }
+        },
+        ...(selectedInvoiceYear !== 'All') && {
+          "year": {
+            "equals": selectedSavingsYear
+          }
+        },
+      },
+      "take": 5,
+      "skip": (selectedInvoicePageIndex * 5) - 5,
+    }
+  }
+
+  const getInvoiceTotalQuery = gql`
+  query _count($where: InvoiceWhereInput) {
+    aggregateInvoice(where: $where) {
+      _count {
+        _all
+      }
+    }
+  }`
+
+  const getInvoiceTotalVariable =
+  {
+    "variables": {
+      "where": {
+        "customer_id": {
+          "equals": selectedInvoicePte
+        },
+        ...(selectedInvoiceMonth !== 'All') && {
+          "month": {
+            "equals": selectedSavingsMonth
+          }
+        },
+        ...(selectedInvoiceYear !== 'All') && {
+          "year": {
+            "equals": selectedSavingsYear
+          }
+        },
+      }
+    }
+  }
+
   const getOutletsQuery = gql`
   query Outlets{
     outlets {
@@ -83,6 +193,7 @@ const ReportTable: any = () => {
     customers {
       customer_id
       pte_ltd_name
+      name
       outlet {
         outlet_id
         name
@@ -93,8 +204,8 @@ const ReportTable: any = () => {
   const getReportsByOutletIDVariable = {
     "variables": {
       "where": {
-        "outlet_id": {
-          "equals": parseInt(selectedSavingsOutletID)
+        "outlet_ids": {
+          "contains": selectedSavingsOutletID.toString()
         },
         ...(selectedSavingsMonth !== 'All') && {
           "month": {
@@ -109,29 +220,42 @@ const ReportTable: any = () => {
 
       },
       "take": 5,
-      "skip": (selectedSavingPageIndex * 5) - 5
+      "skip": (selectedSavingPageIndex * 5) - 5,
+      "customersWhere2": {
+        "customer_id": {
+          "equals": parseInt(selectedCustomerId),
+        }
+      },
+      "outletWhere2": {
+        "outlet_id": {
+          "equals": parseInt(selectedSavingsOutletID)
+        }
+      }
     },
   };
 
   const getReportsByOutletIdQuery = gql`
-  query FindManyReports($where: ReportsWhereInput,$take: Int, $skip: Int) {
-    findManyReports(where: $where,take: $take, skip: $skip) {
+  query FindManyReports($where: ReportsWhereInput, $take: Int, $skip: Int, $customersWhere2: CustomerWhereInput, $outletWhere2: OutletWhereInput) {
+    findManyReports(where: $where, take: $take, skip: $skip) {
       report_id
-      outlet_id
-      customer_id
-      group_id
       year
       month
-      last_avail_tariff
-      outlet_measured_savings_kWh
       outlet_measured_savings_expenses
+      outlet_measured_savings_kWh
       outlet_measured_savings_percent
-      outlet {
-        name
+      total_updated_outlets
+      last_avail_tariff
+      invoice_status
+      input_type
+      group {
+        customers(where: $customersWhere2) {
+          outlet(where: $outletWhere2) {
+            name
+          }
+          name
+        }
       }
-      customer {
-        pte_ltd_name
-      }
+      group_id
     }
   }`;
 
@@ -163,8 +287,8 @@ const ReportTable: any = () => {
   const reportTotalVariable = {
     "variables": {
       "where": {
-        "outlet_id": {
-          "equals": parseInt(selectedSavingsOutletID)
+        "outlet_ids": {
+          "contains": selectedSavingsOutletID.toString()
         },
         ...(selectedSavingsMonth !== 'All') && {
           "month": {
@@ -189,6 +313,7 @@ const ReportTable: any = () => {
       }
     }
   }`;
+
 
   const groupReportTotalVariable = {
     "variables": {
@@ -223,18 +348,45 @@ const ReportTable: any = () => {
     groups {
       group_id
       group_name
-      reports(where: $where) {
-        customer {
-          outlet {
-            outlet_id
-          }
+      customers {
+        outlet {
+          outlet_id
         }
+      }
+      reports(where: $where) {
         month
         year
         outlet_measured_savings_expenses
         outlet_measured_savings_kWh
         outlet_measured_savings_percent
         last_avail_tariff
+      }
+    }
+  }`;
+
+  const getGenerateTotalVariable = {
+    "variables": {
+      "where": {
+        ...(selectedGenerateMonth !== 'All') && {
+          "month": {
+            "equals": selectedGenerateMonth
+          }
+        },
+        ...(selectedGenerateYear !== 'All') && {
+          "year": {
+            "equals": selectedGenerateYear
+          }
+        },
+
+      },
+    },
+  };
+
+  const getGenerateTotalQuery = gql`
+  query _count($where: ReportsWhereInput) {
+    aggregateReports(where: $where) {
+      _count {
+        _all
       }
     }
   }`;
@@ -338,7 +490,11 @@ const ReportTable: any = () => {
   const customerResult = useQuery(getCustomerQuery);
   const reportTotalResult = useLazyQuery(reportTotalQuery, reportTotalVariable);
   const groupReportTotalResult = useLazyQuery(groupReportTotalQuery, groupReportTotalVariable);
+  const getInvoicesResult = useLazyQuery(getInvoicesQuery, getInvoicesVariable);
+  const invoiceTotalResult = useLazyQuery(getInvoiceTotalQuery, getInvoiceTotalVariable);
   const getPteResult = useLazyQuery(getPteQuery);
+  const getGenerateResult = useLazyQuery(getReportsQuery, getReportsVariable);
+  const getGenerateTotalResult = useLazyQuery(getGenerateTotalQuery, getGenerateTotalVariable);
 
   const outletDropdown: DropdownProps[] = React.useMemo(() => {
     if (outletsResult.data && outletsResult.data.outlets.length > 0) {
@@ -355,7 +511,7 @@ const ReportTable: any = () => {
     if (customerResult.data && customerResult.data.customers.length > 0) {
       setSelectedCustomerId(customerResult.data.customers[0].customer_id);
       return customerResult.data.customers.map((customer: any) => {
-        return { key: customer.customer_id, value: customer.pte_ltd_name };
+        return { key: customer.customer_id, value: customer.name };
       })
     } else {
       return [];
@@ -406,60 +562,116 @@ const ReportTable: any = () => {
   // Need to use Lazy Query on each sub title changes instead of fetching all at once.
   React.useEffect(() => {
     if (selectedSubTitle === 'Invoice') {
-      getPteResult[0]().then(res => {
+      getPteResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
         if (res.data && res.data.customers) {
           const customers: customer[] = res.data.customers;
           setAllPte(customers.map((cus, index) => {
             if (index === 0) {
-              setSelectedInvoicePte(cus.customer_id.toString());
+              setSelectedInvoicePte(cus.customer_id);
             }
             return {
               key: cus.customer_id.toString(),
-              value: cus.pte_ltd_name || ''
+              value: cus.name || ''
             }
           }))
         }
       })
+    } else if (selectedSubTitle === 'Generate') {
+      getGenerateTotalResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(totalRes => {
+        if (totalRes.data && totalRes.data.aggregateInvoice && totalRes.data.aggregateInvoice._count._all) {
+          const total = totalRes.data.aggregateInvoice._count._all;
+          setTotalInvoicePage(total);
+        }
+        getGenerateResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
+          if (res.data && res.data.findManyReports) {
+            setReports(res.data.findManyReports);
+          }
+        })
+      })
     }
-  }, [selectedSubTitle])
+  }, [selectedSubTitle]);
 
-
-  const dummyDatForGenerate = (): any[][] => {
-
-    const arr = [];
-
-    for (let i = 1; i < 10; i++) {
-      arr.push([
-        "", `10/0${i}/2022`, '2022', 'Jan', 'Bulk', 'ID30599608', 'Success', '30', '0', '0', 'Available'
-      ]);
+  //Invoice Hooks
+  React.useEffect(() => {
+    if (selectedInvoicePte !== 0) {
+      invoiceTotalResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(totalRes => {
+        if (totalRes.data && totalRes.data.aggregateInvoice && totalRes.data.aggregateInvoice._count._all) {
+          const total = totalRes.data.aggregateInvoice._count._all;
+          setTotalInvoicePage(total);
+        }
+        getInvoicesResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
+          if (res && res.data && res.data.invoices) {
+            setInvoices(res.data.invoices as invoice[]);
+          }
+        })
+      })
     }
-    return arr;
-  }
 
-  const month = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  }, [selectedInvoicePte, selectedInvoiceMonth, selectedInvoiceYear])
+
+  //Generate Hooks
+  React.useEffect(() => {
+    getGenerateTotalResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(totalRes => {
+      if (totalRes.data && totalRes.data.aggregateInvoice && totalRes.data.aggregateInvoice._count._all) {
+        const total = totalRes.data.aggregateInvoice._count._all;
+        setTotalInvoicePage(total);
+      }
+      getGenerateResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
+        if (res.data && res.data.findManyReports) {
+          setReports(res.data.findManyReports);
+        }
+      })
+    })
+  }, [selectedGenerateMonth, selectedGenerateYear])
+
+  const month: DropdownProps[] = [
+    { key: 'All', value: 'All' },
+    { key: '01', value: 'Jan' },
+    { key: '02', value: 'Feb' },
+    { key: '03', value: 'Mar' },
+    { key: '04', value: 'Apr' },
+    { key: '05', value: 'May' },
+    { key: '06', value: 'Jun' },
+    { key: '07', value: 'Jul' },
+    { key: '08', value: 'Aug' },
+    { key: '09', value: 'Sep' },
+    { key: '10', value: 'Oct' },
+    { key: '11', value: 'Nov' },
+    { key: '12', value: 'Dec' }
+  ];
 
   const action = ["Create", "Update", "Delete"];
 
   const generateTable = React.useMemo(() => {
+    const generateRows = (): any[][] => {
+      return reports.map((rep, index) => {
+        return [
+          rep.updated_at, rep.year, rep.month, rep.input_type, rep.report_id, <span key={`status-${index}`} className='text-custom-active-link'>{rep.status}</span>, rep.total_updated_outlets, rep.total_error_found, <span key={`rp-status-${index}`} className='text-custom-active-link'>{rep.report_status}</span>, <span key={`invoice-status-${index}`} className='text-custom-active-link'>{rep.invoice_status}</span>
+        ];
+      });
+    }
     return <React.Fragment>
       <Table
-        headers={['', 'Uploaded at', 'Year', 'Month', 'Input Type', 'Report ID', 'Status', 'Total Updated Outlet', 'Total Error Found', 'Report Status', 'Invoice Status']}
+        headers={['Uploaded at', 'Year', 'Month', 'Input Type', 'Report ID', 'Status', 'Total Updated Outlet', 'Total Error Found', 'Report Status', 'Invoice Status']}
         onlyShowButton={true}
-        data={dummyDatForGenerate()}
+        data={generateRows()}
         leftSideElements={[]}
         hideDetailMenu={true}
+        totalNumberOfPages={totalGeneratePage}
+        setCurrentSelectedPage={setSelectedGeneratePageIndex}
+        currentSelectedPage={selectedGeneratePageIndex}
         rightSideElements={[
-          <TableOptionField key={uuidv4()} label={'Select Month'} onChange={(selectedValue: string) => { setSelectedOutletID(selectedValue) }}
-            selectedValue={"Jan"} data={month} />,
-          <TableOptionField key={uuidv4()} label={'Select Month'} onChange={(selectedValue: string) => { setSelectedOutletID(selectedValue) }}
-            selectedValue={"Jan"} data={month} />,
+          <TableOptionField key={uuidv4()} label={'Select Month'} onChange={(selectedValue: string) => { setSelectedGenerateMonth(selectedValue) }}
+            selectedValue={selectedGenerateMonth} data={month} />,
+          <TableOptionField key={uuidv4()} label={'Select Year'} onChange={(selectedValue: string) => { setSelectedGenerateYear(selectedValue) }}
+            selectedValue={selectedGenerateYear} data={['All', '2021', '2020', '2022', '2023']} />,
           <span key={uuidv4()} className='w-12'></span>,
-          <TableOptionField key={uuidv4()} label={'Action'} onChange={(selectedValue: string) => { setSelectedOutletID(selectedValue) }}
-            selectedValue={"Delete"} data={action} />
+          // <TableOptionField key={uuidv4()} label={'Action'} onChange={(selectedValue: string) => { setSelectedOutletID(selectedValue) }}
+          //   selectedValue={"Delete"} data={action} />
         ]}
         handleEdit={(selectedData) => { setSelectedResult(results.find(res => res.outlet_date === selectedData[7])); setOpenReportEdit(true) }} handleDelete={() => setOpenReportEdit(true)} />
     </React.Fragment>
-  }, []);
+  }, [reports, selectedGenerateMonth, selectedGenerateYear]);
 
   React.useEffect(() => {
     const arr: any[] = [];
@@ -469,6 +681,28 @@ const ReportTable: any = () => {
         if (res && res.data && res.data.groups) {
           const groups = res.data.groups as group[];
           groups.forEach(group => {
+            let outletCount = 0;
+            let measuredKwh = 0;
+            let measuredExpense = 0;
+            let measuredPercent = 0;
+
+            if (group.reports) {
+              group.reports.forEach(res => {
+                measuredKwh = measuredKwh + parseInt(res.outlet_measured_savings_kWh || "0");
+                measuredExpense = measuredExpense + parseInt(res.outlet_measured_savings_expenses || "0");
+                measuredPercent = measuredPercent + parseInt(res.outlet_measured_savings_percent || "0");
+              })
+            }
+
+            //Get the total outlet count by the customer.
+            if (group.customers) {
+              group.customers.forEach(customer => {
+                if (customer.outlet) {
+                  outletCount = outletCount + customer.outlet.length;
+                }
+
+              })
+            }
             if (group.reports) {
               let innerArr: any[] = [];
               let totalSavingTariff = "$0";
@@ -483,14 +717,9 @@ const ReportTable: any = () => {
                 if (isFound < 0) {
                   innerArr.push(group.group_id);
                   innerArr.push(group.group_name);
-                  let outletCount = 0;
+
                   innerArr.push(report.month, report.year);
                   totalSavingTariff = "$ 0.40";
-
-                  //Get the total outlet count by the customer.
-                  if (report.customer && report.customer.outlet) {
-                    outletCount = outletCount + report.customer.outlet.length;
-                  }
                   innerArr.push(outletCount);
                   innerArr.push(totalSavingTariff);
                   innerArr.push(<div className='flex flex-row gap-x-4'>
@@ -499,7 +728,7 @@ const ReportTable: any = () => {
                         (kWH)
                       </span>
                       <span>
-                        97
+                        {numberWithCommas(measuredKwh)}
                       </span>
                     </div>
                     <div className='flex flex-col'>
@@ -507,7 +736,7 @@ const ReportTable: any = () => {
                         ($)
                       </span>
                       <span>
-                        $0.20
+                        $ {numberWithCommas(measuredExpense)}
                       </span>
                     </div>
                     <div className='flex flex-col'>
@@ -515,7 +744,7 @@ const ReportTable: any = () => {
                         (%)
                       </span>
                       <span>
-                        30%
+                        {measuredPercent}%
                       </span>
                     </div>
                   </div>);
@@ -552,35 +781,38 @@ const ReportTable: any = () => {
           const reports = res.data.findManyReports as reports[];
           for (let i = 0; i < reports.length; i++) {
             const cur = reports[i];
-            arr.push([
-              cur.report_id, cur.outlet?.name, cur.month, cur.year, '1', '$ 0.20',
-              <div key={'frag ' + i} className='flex flex-row gap-x-4'>
-                <div className='flex flex-col'>
-                  <span className='text-custom-xs'>
-                    (kWH)
-                  </span>
-                  <span>
-                    97
-                  </span>
+            if (cur.group && cur.group.customers && cur.group.customers.length > 0 && cur.group.customers[0].outlet) {
+              arr.push([
+                cur.report_id, cur.group.customers[0]?.outlet[0]?.name, cur.month, cur.year, '1', '$ 0.20',
+                <div key={'frag ' + i} className='flex flex-row gap-x-4'>
+                  <div className='flex flex-col'>
+                    <span className='text-custom-xs'>
+                      (kWH)
+                    </span>
+                    <span>
+                      97
+                    </span>
+                  </div>
+                  <div className='flex flex-col'>
+                    <span className='text-custom-xs'>
+                      ($)
+                    </span>
+                    <span>
+                      $0.20
+                    </span>
+                  </div>
+                  <div className='flex flex-col'>
+                    <span className='text-custom-xs'>
+                      (%)
+                    </span>
+                    <span>
+                      30%
+                    </span>
+                  </div>
                 </div>
-                <div className='flex flex-col'>
-                  <span className='text-custom-xs'>
-                    ($)
-                  </span>
-                  <span>
-                    $0.20
-                  </span>
-                </div>
-                <div className='flex flex-col'>
-                  <span className='text-custom-xs'>
-                    (%)
-                  </span>
-                  <span>
-                    30%
-                  </span>
-                </div>
-              </div>
-            ]);
+              ]);
+            }
+
           }
           setSavingReportData(arr);
         } else {
@@ -612,7 +844,7 @@ const ReportTable: any = () => {
       if (selectedCustomerType === 'Outlet') {
         return ['Report ID', 'Outlet Name', 'Month', 'Year', 'Equipment', 'Last Avaiable Tariff ($/kWh)', 'Measured Energy Savings'];
       } else {
-        return ['Report ID', 'Group Name', 'Month', 'Year', 'Live Outlets', 'Savings @ Tariff', 'Measured Energy Savings'];
+        return ['Group ID', 'Group Name', 'Month', 'Year', 'Live Outlets', 'Savings @ Tariff', 'Measured Energy Savings'];
       }
     }
 
@@ -628,7 +860,7 @@ const ReportTable: any = () => {
           <TableOptionField key={uuidv4()} label={'Month'} onChange={(selectedValue: string) => { setSelectedSavingsMonth(selectedValue) }}
             selectedValue={selectedSavingsMonth} data={month} />
           <TableOptionField key={uuidv4()} label={'Year'} onChange={(selectedValue: string) => { setSelectedSavingsYear(selectedValue) }}
-            selectedValue={selectedSavingsYear} data={['All', '2021', '2020', '2022']} />
+            selectedValue={selectedSavingsYear} data={['All', '2021', '2020', '2022', '2023']} />
         </div>
       </div>)
     }
@@ -694,23 +926,56 @@ const ReportTable: any = () => {
   }
 
   const invoiceTable = React.useMemo(() => {
+    const invoiceRows = (): any[][] => {
+      return invoices.map(inv => {
+        return [
+          inv.invoice_id, inv.customer?.name, inv.month, inv.year, inv.outlet_count, inv.last_available_tariff,
+          <div key={'frag ' + inv.invoice_id} className='flex flex-row gap-x-4'>
+            <div className='flex flex-col'>
+              <span className='text-custom-xs'>
+                (kWH)
+              </span>
+              <span>
+                {numberWithCommas(parseInt(inv.outlet_measured_savings_kWh))}
+              </span>
+            </div>
+            <div className='flex flex-col'>
+              <span className='text-custom-xs'>
+                ($)
+              </span>
+              <span>
+                ${numberWithCommas(parseInt(inv.outlet_measured_savings_expenses))}
+              </span>
+            </div>
+            <div className='flex flex-col'>
+              <span className='text-custom-xs'>
+                (%)
+              </span>
+              <span>
+                {numberWithCommas(parseInt(inv.outlet_measured_savings_percent))}%
+              </span>
+            </div>
+          </div>
+        ];
+      });
+    }
     return <React.Fragment>
       <Table
         headers={['Invoice ID', 'Pte Ltd Name', 'Month', 'Year', 'Outlets', 'Last Avaiable Tariff', 'Measured Energy Savings']}
         hiddenDataColIndex={[7]}
         onlyShowButton={true}
-        data={dummyDatForInvoices()}
-        leftSideElements={[<TableOptionField key={uuidv4()} label={'Pte Ltd'} onChange={(selectedValue: string) => { setSelectedInvoicePte(selectedValue) }}
-          selectedValue={selectedInvoicePte} data={allPte} />,]}
+        data={invoiceRows()}
+        leftSideElements={[<TableOptionField key={uuidv4()} label={'Pte Ltd'} onChange={(selectedValue: string) => { setSelectedInvoicePte(parseInt(selectedValue)) }}
+          selectedValue={selectedInvoicePte.toString() || ''} data={allPte} />,]}
         rightSideElements={[
           <TableOptionField key={uuidv4()} label={'Month'} onChange={(selectedValue: string) => { setSelectedInvoiceMonth(selectedValue) }}
             selectedValue={selectedInvoiceMonth} data={month} />,
           <TableOptionField key={uuidv4()} label={'Year'} onChange={(selectedValue: string) => { setSelectedInvoiceYear(selectedValue) }}
             selectedValue={selectedInvoiceYear} data={["All", "2022", "2020"]} />,
         ]}
-        handleEdit={(selectedData) => { setSelectedResult(results[0]); setOpenReportEdit(true) }} handleDelete={() => setOpenReportEdit(true)} />
+        handleEdit={(selectedData) => { setSelectedInvoice(invoices.find(inv => inv.invoice_id === selectedData[0])); setOpenReportEdit(true) }} handleDelete={() => setOpenReportEdit(true)} />
     </React.Fragment>
-  }, [selectedInvoiceMonth, selectedInvoiceYear, selectedInvoicePte, setSelectedInvoicePte, allPte]);
+  }, [selectedInvoiceMonth, selectedInvoiceYear, selectedInvoicePte, selectedInvoice, setSelectedInvoicePte, allPte, invoices]);
 
 
   const reportEditComp = React.useMemo(() => {
@@ -730,7 +995,7 @@ const ReportTable: any = () => {
   }, [selectedCustomerType]);
 
   return (
-    <React.Fragment>
+    <React.Fragment >
       <div className='flex flex-row'>
         <h3 className="text-gray-700 text-3xl font-bold">Reports: </h3>
         <CustomizedDropDown hideBorder={true} customCSS='text-3xl' inputType={'dropdown'} hidePrefixIcons={true} data={["Generate", "Savings", "Invoice", "ReportStep"]} selected={selectedSubTitle} setSelected={(selected: string) => { setSelectedSubTitle(selected) }} />
@@ -746,21 +1011,12 @@ const ReportTable: any = () => {
                 savingTable : selectedSubTitle === "Invoice" ? invoiceTable : <React.Fragment><ReportSteps></ReportSteps></React.Fragment>
             }
             {selectedSubTitle === "Savings" ?
-              <ReportEdit selectedReportID={selectedReportID.reportId} result={selectedResult} openReportEdit={openReportEdit} customerType={selectedCustomerType} setOpenReportEdit={setOpenReportEdit} month={selectedReportID.selectedMonth} year={selectedReportID.selectedYear} /> :
-              <InvoiceEdit result={selectedResult} openReportEdit={openReportEdit} setOpenReportEdit={setOpenReportEdit} billingData={{
-                IID: 'Set-2095860',
-                CUS: 'KFC Holding Indonesia',
-                PER: 'Sep, 2022',
-                OUT: '5',
-                TSF: '$485.09',
-                TSS: '$250',
-                TSK: (<div className="flex flex-row gap-x-6 items-center justify-between"><span>470</span><PillButton className={"w-40 h-8"} text={"Invoice Generated"} /></div>),
-                STA: 'Generated',
-              }} />}
+              <ReportEdit selectedReportID={selectedReportID.reportId} selectedCustomerID={selectedCustomerId ? parseInt(selectedCustomerId) : 0} selectedOutletID={selectedOutletID ? parseInt(selectedOutletID) : 0} result={selectedResult} openReportEdit={openReportEdit} customerType={selectedCustomerType} setOpenReportEdit={setOpenReportEdit} month={selectedReportID.selectedMonth} year={selectedReportID.selectedYear} /> :
+              <InvoiceEdit openReportEdit={openReportEdit} setOpenReportEdit={setOpenReportEdit} invoice={selectedInvoice} />}
           </div>
         </div>
       </div>
-    </React.Fragment>
+    </React.Fragment >
   )
 }
 

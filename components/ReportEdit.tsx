@@ -10,22 +10,22 @@ import DropdownMenu from "./DropdownMenu";
 import { useRouter } from 'next/router';
 import { useDropdown } from '../hooks/UseDropdown';
 import axios from "axios";
-import { downloadFile } from "../common/helper";
-
+import { downloadFile, numberWithCommas } from "../common/helper";
 
 interface Props {
     openReportEdit: boolean;
     afterOperation?: () => void;
     customerType: 'Group' | 'Outlet';
     selectedReportID: number;
+    selectedOutletID?: number;
+    selectedCustomerID?: number;
     month: string;
     year: string;
     result?: results;
     setOpenReportEdit(openReportEdit: boolean): void;
 }
 
-const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, result, month, year, afterOperation, customerType }: Props) => {
-    const [currentOutlet, setCurrentOutlet] = React.useState<outlet>();
+const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selectedOutletID, selectedCustomerID, result, month, year, afterOperation, customerType }: Props) => {
     const [dropdownRef, openDownloadReport, setOpenDownloadReport] = useDropdown(false, () => { });
     const [currentReport, setCurrentReport] = React.useState<reports>();
     const [currentGroup, setCurrentGroup] = React.useState<group>();
@@ -49,7 +49,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
             "findFirstGroupWhere2": {
                 "group_id": {
                     "equals": selectedReportID
-                }
+                },
             }
         },
     };
@@ -59,15 +59,10 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
         findFirstGroup(where: $findFirstGroupWhere2) {
           group_name
           group_id
-          reports(where: $where) {
-            last_avail_tariff
-            outlet_measured_savings_expenses
-            outlet_measured_savings_kWh
-            outlet_measured_savings_percent
-            customer {
-                name
-                outlet {
-                  results {
+          customers {
+            name
+            outlet {
+                results {
                     outlet_eqpt_energy_usage_with_TP_month_expenses
                     outlet_eqpt_energy_usage_with_TP_month_kW
                     outlet_eqpt_energy_usage_without_TP_month_expenses
@@ -75,9 +70,14 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
                     outlet_measured_savings_percent
                     outlet_measured_savings_kWh
                     outlet_measured_savings_expenses
-                  }
                 }
-              }
+            }
+        }
+          reports(where: $where) {
+            last_avail_tariff
+            outlet_measured_savings_expenses
+            outlet_measured_savings_kWh
+            outlet_measured_savings_percent
             month
             year
           }
@@ -89,6 +89,31 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
             "where": {
                 "report_id": {
                     "equals": selectedReportID
+                },
+                ...(month !== 'All') && {
+                    "month": {
+                        "equals": month
+                    }
+                },
+                ...(year !== 'All') && {
+                    "year": {
+                        "equals": year
+                    }
+                },
+                ...(selectedCustomerID) && {
+                    "customer_ids": {
+                        "contains": selectedCustomerID.toString()
+                    }
+                },
+            },
+            "customersWhere2": {
+                "customer_id": {
+                    "equals": selectedCustomerID || 0
+                }
+            },
+            "outletWhere2": {
+                "outlet_id": {
+                    "equals": selectedOutletID || 0
                 }
             }
         },
@@ -117,128 +142,64 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
       }`;
 
     const getReportByIdQuery = gql`
-    query FindFirstReports($where: ReportsWhereInput) {
+    query FindFirstReports($where: ReportsWhereInput, $customersWhere2: CustomerWhereInput, $outletWhere2: OutletWhereInput) {
         findFirstReports(where: $where) {
-          customer {
-            pte_ltd_name
-          }
-          outlet {
-            outlet_id
-            name
-            outlet_address
-            results {
-              outlet_eqpt_energy_usage_with_TP_month_expenses
-              outlet_eqpt_energy_usage_with_TP_month_kW
-              outlet_eqpt_energy_usage_without_TP_month_expenses
-              outlet_eqpt_energy_usage_without_TP_month_kW
-              outlet_measured_savings_expenses
-              outlet_measured_savings_kWh
-              outlet_measured_savings_percent
-              co2_savings_kg
-              savings_tariff_expenses
+            group {
+                customers(where: $customersWhere2) {
+                    name
+                    outlet(where: $outletWhere2) {
+                        outlet_id
+                        name
+                        outlet_address
+                        results {
+                            outlet_eqpt_energy_usage_with_TP_month_expenses
+                            outlet_eqpt_energy_usage_with_TP_month_kW
+                            outlet_eqpt_energy_usage_without_TP_month_expenses
+                            outlet_eqpt_energy_usage_without_TP_month_kW
+                            outlet_measured_savings_expenses
+                            outlet_measured_savings_kWh
+                            outlet_measured_savings_percent
+                            co2_savings_kg
+                            savings_tariff_expenses
+                        }
+                        outlet_device_ac_input {
+                            ac_baseline_kW
+                        }
+                        outlet_device_ex_fa_input {
+                            display_baseline_kW
+                            device_type
+                        }
+                    }
+                }
             }
-            outlet_device_ac_input {
-              ac_baseline_kW
-            }
-            outlet_device_ex_fa_input {
-              display_baseline_kW
-              device_type
-            }
-          }
           last_avail_tariff
           year
           month
         }
       }`;
-    // const getResultQuery = gql`
-    // query FindFirstResults($where: ResultsWhereInput, $outletMonthWhere2: Outlet_monthWhereInput, $resultsWhere2: ResultsWhereInput) {
-    //     findFirstResults(where: $where) {
-    //       outlet {
-    //         name
-    //         customer {
-    //           pte_ltd_name
-    //         }
-    //         outlet_device_ac_input {
-    //             od_device_input_id
-    //         }
-    //         outlet_device_ex_fa_input {
-    //             od_device_input_id
-    //             device_type
-    //         }
-    //         outlet_address
-    //         outlet_month(where: $outletMonthWhere2) {
-    //           last_avail_tariff
-    //         }
-    //         results(where: $resultsWhere2) {
-    //           acmv_measured_savings_kWh
-    //           outlet_measured_savings_kWh
-    //           outlet_measured_savings_expenses
-    //           outlet_measured_savings_percent
-    //           ke_eqpt_energy_usage_without_TP_month_kW
-    //           ac_eqpt_energy_usage_without_TP_month_kW
-    //           outlet_eqpt_energy_usage_without_TP_month_kW
-    //           outlet_eqpt_energy_usage_without_TP_month_expenses
-    //           ke_eqpt_energy_usage_with_TP_month_kW
-    //           ac_eqpt_energy_usage_with_TP_month_kW
-    //           outlet_eqpt_energy_usage_with_TP_month_kW
-    //           outlet_eqpt_energy_usage_with_TP_month_expenses
-    //           acmv_25percent_benchmark_comparison_kWh
-    //           acmv_25percent_benchmark_comparison_expenses
-    //           acmv_10percent_benchmark_comparison_kWh
-    //           acmv_10percent_benchmark_comparison_expenses
-    //           ke_and_ac__25percent_benchmark_comparison_kWh
-    //           ke_and_ac__25percent_benchmark_comparison_expenses
-    //           co2_savings_kg
-    //           savings_tariff_expenses
-    //         }
-    //       }
-    //     }
-    //   }
-    // `;
-
-    // const getResultVariable = React.useMemo(() => {
-    //     return {
-    //         'variables': {
-    //             "where": {
-    //                 "outlet_date": {
-    //                     "equals": result?.outlet_date
-    //                 }
-    //             },
-    //             "outletMonthWhere2": {
-    //                 "outlet_date": {
-    //                     "equals": result?.outlet_date
-    //                 }
-    //             },
-    //             "resultsWhere2": {
-    //                 "outlet_date": {
-    //                     "equals": result?.outlet_date
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }, [result]);
-
-    // const getResultResult = useLazyQuery(getResultQuery, getResultVariable);
     const getReportByID = useLazyQuery(getReportByIdQuery, getReportByIDVariable);
     const getGroupByID = useLazyQuery(getGroupByIDQUery, getGroupBYIDVariable);
     const getGroupResult = useLazyQuery(getGroupQuery);
 
     React.useEffect(() => {
-        if (customerType === 'Outlet') {
-            getReportByID[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
-                if (res && res.data && res.data.findFirstReports) {
-                    setCurrentReport(res.data.findFirstReports);
+        if (openReportEdit) {
+            if (customerType === 'Outlet') {
+                getReportByID[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
+                    if (res && res.data && res.data.findFirstReports) {
+                        setCurrentReport(res.data.findFirstReports);
+                    }
+                })
+            } else {
+                getGroupByID[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
+                    if (res && res.data && res.data.findFirstGroup) {
+                        setCurrentGroup(res.data.findFirstGroup);
+                    }
                 }
-            })
-        } else {
-            getGroupByID[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
-                if (res && res.data && res.data.findFirstGroup) {
-                    setCurrentGroup(res.data.findFirstGroup);
-                }
+                )
             }
-            )
         }
-    }, [customerType, selectedReportID])
+
+    }, [customerType, openReportEdit]);
 
     const getSummaryTable = React.useMemo(() => {
         let ex_data: any[] = ["Kitchen Exhaust"];
@@ -247,7 +208,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
         if (currentReport && currentReport.outlet) {
             if (currentReport.outlet.outlet_device_ac_input) {
                 ac_data.push(currentReport.outlet.outlet_device_ac_input.length.toString());
-                const elemString = currentReport.outlet.outlet_device_ac_input.map((acItem, index) => {
+                const elemString = currentReport.outlet.outlet_device_ac_input.map((acItem: any, index: number) => {
                     return <div key={'frag ' + index} className='flex flex-row justify-around gap-x-4'>
                         <div className='flex flex-col'>
                             <span>
@@ -261,7 +222,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
                         </div>
                     </div>;
                 });
-                ac_data.push(currentReport.outlet.outlet_device_ac_input.reduce((accum, obj) => { return accum + parseInt(obj.ac_baseline_kW || "0") }, 0) + "kw");
+                ac_data.push(currentReport.outlet.outlet_device_ac_input.reduce((accum: any, obj: any) => { return accum + parseInt(obj.ac_baseline_kW || "0") }, 0) + "kw");
                 ac_data.push(elemString);
                 ac_data.push(elemString.length > 0 && "30%");
             } else {
@@ -269,7 +230,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
             }
             if (currentReport.outlet.outlet_device_ex_fa_input) {
                 const exArr = currentReport.outlet.outlet_device_ex_fa_input.filter((eqpt: any) => eqpt.device_type === 'ex');
-                const elemString = exArr.map((exItem, index) => {
+                const elemString = exArr.map((exItem: any, index: any) => {
                     return <div key={'frag ' + index} className='flex flex-row justify-around gap-x-4' >
                         <div className='flex flex-col'>
                             <span>
@@ -284,7 +245,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
                     </div >;
                 })
                 ex_data.push(exArr.length.toString());
-                ex_data.push(exArr.reduce((accum, obj) => { return accum + parseInt(obj.display_baseline_kW || "0") }, 0) + "kw");
+                ex_data.push(exArr.reduce((accum: any, obj: any) => { return accum + parseInt(obj.display_baseline_kW || "0") }, 0) + "kw");
                 ex_data.push(elemString);
                 ex_data.push(elemString.length > 0 && "30%");
             } else {
@@ -292,7 +253,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
             }
             if (currentReport.outlet.outlet_device_ex_fa_input) {
                 const faArr = currentReport.outlet.outlet_device_ex_fa_input.filter((eqpt: any) => eqpt.device_type === 'fa');
-                const elemString = faArr.map((faItem, index) => {
+                const elemString = faArr.map((faItem: any, index: any) => {
                     return <div key={'frag ' + index} className='flex flex-row justify-around gap-x-4'>
                         <div className='flex flex-col'>
                             <span>
@@ -308,7 +269,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
                     </div>;
                 })
                 fa_data.push(faArr.length.toString());
-                fa_data.push(faArr.reduce((accum, obj) => { return accum + parseInt(obj.display_baseline_kW || "0") }, 0) + "kw");
+                fa_data.push(faArr.reduce((accum: any, obj: any) => { return accum + parseInt(obj.display_baseline_kW || "0") }, 0) + "kw");
                 fa_data.push(elemString);
                 fa_data.push(elemString.length > 0 && "30%");
             } else {
@@ -378,26 +339,30 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
                             const reports: reports[] = response.data.findManyReports;
                             console.log
                             reports.forEach(rep => {
-                                if (rep.customer) {
-                                    if (rep.customer.outlet) {
-                                        rep.customer.outlet.forEach(outlet => {
-                                            console.log(outlet.outlet_id);
-                                            axios.get(
-                                                '/api/download',
-                                                {
-                                                    responseType: 'arraybuffer',
-                                                    params: {
-                                                        type: 'group_annex',
-                                                        id: outlet.outlet_id,
-                                                        month: month,
-                                                        year: year,
-                                                    }
-                                                } // !!!
-                                            ).then((response) => {
-                                                downloadFile(response.data, 'Group(Annex) Report');
+                                if (rep.group && rep.group.customers) {
+                                    rep.group.customers.forEach(cus => {
+                                        if (cus.outlet) {
+                                            cus.outlet.forEach(outlet => {
+                                                axios.get(
+                                                    '/api/download',
+                                                    {
+                                                        responseType: 'arraybuffer',
+                                                        params: {
+                                                            type: 'group_annex',
+                                                            id: outlet.outlet_id,
+                                                            month: month,
+                                                            year: year,
+                                                        }
+                                                    } // !!!
+                                                ).then((response) => {
+                                                    downloadFile(response.data, 'Group(Annex) Report');
+                                                })
                                             })
-                                        })
-                                    }
+                                        }
+
+                                    })
+
+
                                 }
                             })
                         })
@@ -447,16 +412,90 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
         }
     }, [customerType, selectedReportID, month, year, currentReport]);
 
-    const outletTotalForGroup = () => {
-        if (currentGroup && currentGroup.reports && currentGroup.reports.length > 0
-            && currentGroup.reports[0].customer &&
-            currentGroup.reports[0].customer.length > 0) {
-            return currentGroup.reports[0].customer[0].outlet.length;
+    const groupMeasuredEnergySavings = React.useMemo(() => {
+        if (currentGroup && currentGroup.reports) {
+            const result = {
+                kwh: 0,
+                exp: 0,
+                percent: 0,
+                euwotp_kwh: 0,
+                euwotp_exp: 0,
+                euwtp_kwh: 0,
+                euwtp_exp: 0
+            }
+            if (currentGroup.customers) {
+                currentGroup.customers.forEach(customer => {
+                    customer.outlet && customer.outlet.forEach(outlet => {
+                        outlet.results && outlet.results.forEach(res => {
+                            result.exp += res.outlet_measured_savings_expenses ? parseInt(res.outlet_measured_savings_expenses) : 0;
+                            result.kwh += res.outlet_measured_savings_kWh ? parseInt(res.outlet_measured_savings_kWh) : 0;
+                            result.percent += res.outlet_measured_savings_percent ? parseInt(res.outlet_measured_savings_percent) : 0;
+                            result.euwotp_kwh += res.outlet_eqpt_energy_usage_without_TP_month_kW ? parseInt(res.outlet_eqpt_energy_usage_without_TP_month_kW) : 0;
+                            result.euwotp_exp += res.outlet_eqpt_energy_usage_without_TP_month_expenses ? parseInt(res.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0;
+                            result.euwtp_kwh += res.outlet_eqpt_energy_usage_with_TP_month_kW ? parseInt(res.outlet_eqpt_energy_usage_with_TP_month_kW) : 0;
+                            result.euwtp_exp += res.outlet_eqpt_energy_usage_with_TP_month_expenses ? parseInt(res.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0;
+                        })
+                    })
+                })
+            }
+
+            return result;
+        } else {
+            return undefined;
+        }
+    }, [currentGroup]);
+
+    const reportMeasuredEnergySavings = React.useMemo(() => {
+        if (currentReport?.group?.customers && currentReport?.group?.customers.length > 0) {
+            const result = {
+                kwh: 0,
+                exp: 0,
+                percent: 0,
+                euwotp_kwh: 0,
+                euwotp_exp: 0,
+                euwtp_kwh: 0,
+                euwtp_exp: 0,
+                ste: 0,
+                co2: 0,
+            }
+            currentReport.group.customers.forEach(customer => {
+                if (customer.outlet) {
+                    customer.outlet.forEach(out => {
+                        if (out.results) {
+                            out.results.forEach(res => {
+                                result.kwh = res.outlet_measured_savings_kWh ? parseInt(res.outlet_measured_savings_kWh) : 0;
+                                result.exp = res.outlet_measured_savings_expenses ? parseInt(res.outlet_measured_savings_expenses) : 0;
+                                result.percent += res.outlet_measured_savings_percent ? parseInt(res.outlet_measured_savings_percent) : 0;
+                                result.euwotp_kwh += res.outlet_eqpt_energy_usage_without_TP_month_kW ? parseInt(res.outlet_eqpt_energy_usage_without_TP_month_kW) : 0;
+                                result.euwotp_exp += res.outlet_eqpt_energy_usage_without_TP_month_expenses ? parseInt(res.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0;
+                                result.euwtp_kwh += res.outlet_eqpt_energy_usage_with_TP_month_kW ? parseInt(res.outlet_eqpt_energy_usage_with_TP_month_kW) : 0;
+                                result.euwtp_exp += res.outlet_eqpt_energy_usage_with_TP_month_expenses ? parseInt(res.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0;
+                                result.ste += res.savings_tariff_expenses ? parseInt(res.savings_tariff_expenses) : 0;
+                                result.co2 += res.co2_savings_kg ? parseInt(res.co2_savings_kg) : 0;
+                            })
+                        }
+                    })
+                }
+            })
+            return result;
+        } else {
+            return undefined;
+        }
+    }, [currentReport]);
+
+
+    const outletTotalForGroup = React.useMemo(() => {
+        if (currentGroup && currentGroup.reports) {
+            let count = 0;
+            currentGroup.customers && currentGroup.customers.forEach(cus => {
+                count = count + (cus.outlet ? cus.outlet.length : 0);
+            })
+            return count;
         }
         else {
             return 0;
         }
-    }
+    }, [currentGroup]);
 
     const savingTarifForGroup = () => {
         if (currentGroup && currentGroup.reports && currentGroup.reports.length > 0) {
@@ -465,7 +504,6 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
             return "$0.20";
         }
     }
-
 
     return (< div className={` edit-container ${openReportEdit ? "translate-x-0 " : "translate-x-full"}`
     }>
@@ -507,15 +545,15 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
                     <div className="grid grid-cols-3 gap-x-2 gap-y-8">
                         <div>
                             <h4>Pte Ltd Name</h4>
-                            <span className="text-slate-400">{currentReport?.customer?.pte_ltd_name} </span>
+                            <span className="text-slate-400">{currentReport?.group?.customers && currentReport?.group?.customers.length > 0 ? currentReport?.group?.customers[0].name : ''} </span>
                         </div>
                         <div>
                             <h4>Outlet Name</h4>
-                            <span className="text-slate-400">{currentReport?.outlet?.name}</span>
+                            <span className="text-slate-400">{currentReport?.group?.customers && currentReport?.group?.customers.length > 0 && currentReport?.group?.customers[0].outlet ? currentReport?.group?.customers[0].outlet[0].name : ''}</span>
                         </div>
                         <div>
                             <h4>Outlet Address</h4>
-                            <span className="text-slate-400">{currentReport?.outlet?.outlet_address} </ span >
+                            <span className="text-slate-400">{currentReport?.group?.customers && currentReport?.group?.customers.length > 0 && currentReport?.group?.customers[0].outlet ? currentReport?.group?.customers[0].outlet[0].outlet_address : ''} </ span >
                         </div>
 
                         <div>
@@ -531,7 +569,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
                         </div>
                         <div>
                             <h4>Live Outlets</h4>
-                            <span className="text-slate-400">{outletTotalForGroup()}</span>
+                            <span className="text-slate-400">{outletTotalForGroup}</span>
                         </div>
                         <div>
                             <h4>Group Address</h4>
@@ -559,19 +597,19 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
                     <div className="grid grid-cols-1 gap-x-2 gap-y-8">
                         {customerType === 'Outlet' ? <><div>
                             <h4>kWh</h4>
-                            <span className="text-slate-400">{currentReport?.outlet?.results && currentReport?.outlet?.results.length > 0 && currentReport?.outlet?.results.length > 0 && currentReport?.outlet?.results[0].outlet_eqpt_energy_usage_without_TP_month_kW}</span>
+                            <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.euwotp_kwh)}</span>
                         </div>
                             <div>
                                 <h4>$</h4>
-                                <span className="text-slate-400">{currentReport?.outlet?.results && currentReport?.outlet?.results.length > 0 && currentReport?.outlet?.results.length > 0 && currentReport?.outlet?.results[0].outlet_eqpt_energy_usage_without_TP_month_expenses}</span>
+                                <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.euwotp_exp)}</span>
                             </div></> :
                             <><div>
                                 <h4>kWh</h4>
-                                <span className="text-slate-400">2,549</span>
+                                <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwotp_kwh)}</span>
                             </div>
                                 <div>
                                     <h4>$</h4>
-                                    <span className="text-slate-400">180</span>
+                                    <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwotp_exp)}</span>
                                 </div></>}
                     </div>
                 </div>
@@ -587,21 +625,21 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
                     {customerType === 'Outlet' && <div className="grid grid-cols-1 gap-x-2 gap-y-8">
                         <div>
                             <h4>kWh</h4>
-                            <span className="text-slate-400">{currentReport?.outlet?.results && currentReport?.outlet?.results.length > 0 && currentReport?.outlet?.results[0].outlet_eqpt_energy_usage_with_TP_month_kW}</span>
+                            <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.euwtp_kwh)}</span>
                         </div>
                         <div>
                             <h4>$</h4>
-                            <span className="text-slate-400">{currentReport?.outlet?.results && currentReport?.outlet?.results.length > 0 && currentReport?.outlet?.results[0].outlet_eqpt_energy_usage_with_TP_month_expenses}</span>
+                            <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.euwtp_exp)}</span>
                         </div>
                     </div>}
                     {customerType === 'Group' && <div className="grid grid-cols-1 gap-x-2 gap-y-8">
                         <div>
                             <h4>kWh</h4>
-                            <span className="text-slate-400">2,001</span>
+                            <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwtp_kwh)}</span>
                         </div>
                         <div>
                             <h4>$</h4>
-                            <span className="text-slate-400">120</span>
+                            <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwtp_exp)}</span>
                         </div>
                     </div>}
                 </div>
@@ -609,30 +647,48 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, resul
             <div className="edit-sub-container">
                 <div className="flex bg-slate-200 p-4 items-center justify-between">
                     <h2><b>Measured Energy Savings</b></h2>
-                    <span><b>{currentReport?.month}. {currentReport?.year}</b></span>
+                    <span><b>{currentReport?.month || currentGroup?.reports?.pop()?.month}. {currentReport?.year || currentGroup?.reports?.pop()?.year}</b></span>
                 </div>
-                <div className="grid grid-cols-3 gap-x-2 gap-y-8">
-                    <div>
-                        <h4>kWh</h4>
-                        <span className="text-slate-400">{currentReport?.outlet?.results && currentReport?.outlet?.results.length > 0 && currentReport?.outlet?.results[0].outlet_measured_savings_kWh}</span>
-                    </div>
-                    <div>
-                        <h4>$</h4>
-                        <span className="text-slate-400">{currentReport?.outlet?.results && currentReport?.outlet?.results.length > 0 && currentReport?.outlet?.results[0].outlet_measured_savings_expenses}</span>
-                    </div>
-                    <div>
-                        <h4>%</h4>
-                        <span className="text-slate-400">{currentReport?.outlet?.results && currentReport?.outlet?.results.length > 0 && currentReport?.outlet?.results[0].outlet_measured_savings_percent}</span>
-                    </div>
-                    {customerType === 'Outlet' && <> <div>
-                        <h4>CO2</h4>
-                        <span className="text-slate-400">{currentReport?.outlet?.results && currentReport?.outlet?.results.length > 0 && currentReport?.outlet?.results[0].co2_savings_kg}</span>
-                    </div>
+                {customerType === 'Outlet' ?
+                    <div className="grid grid-cols-3 gap-x-2 gap-y-8">
+                        <div>
+                            <h4>kWh</h4>
+                            <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.kwh)}</span>
+                        </div>
+                        <div>
+                            <h4>$</h4>
+                            <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.exp)}</span>
+                        </div>
+                        <div>
+                            <h4>%</h4>
+                            <span className="text-slate-400">{reportMeasuredEnergySavings?.percent}</span>
+                        </div>
+                        <div>
+                            <h4>CO2</h4>
+                            <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.co2)}</span>
+                        </div>
                         <div>
                             <h4>Savings @</h4>
-                            <span className="text-slate-400">{currentReport?.outlet?.results && currentReport?.outlet?.results.length > 0 && currentReport?.outlet?.results[0].savings_tariff_expenses}</span>
-                        </div> </>}
-                </div>
+                            <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.ste)}</span>
+                        </div>
+                    </div>
+                    :
+                    <div className="grid grid-cols-3 gap-x-2 gap-y-8">
+                        <div>
+                            <h4>kWh</h4>
+                            <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.kwh)}</span>
+                        </div>
+                        <div>
+                            <h4>$</h4>
+                            <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.exp)}</span>
+                        </div>
+                        <div>
+                            <h4>%</h4>
+                            <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.percent)}</span>
+                        </div>
+                    </div>
+                }
+
             </div>
             {
                 customerType === 'Outlet' ?

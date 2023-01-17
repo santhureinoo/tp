@@ -18,7 +18,7 @@
 
 @layer utilities {
     .link-active {
-        @apply flex items-center py-4 px-6 bg-[#E8F2FF] text-[#147CFC] font-medium rounded-lg;
+        @apply flex items-center py-4 px-6 bg-[#E8F2FF] text-[custom-active-link] font-medium rounded-lg;
     }
     .link {
         @apply flex items-center py-4 px-6 hover:bg-[#E8F2FF] hover:text-black font-medium hover:rounded-lg;

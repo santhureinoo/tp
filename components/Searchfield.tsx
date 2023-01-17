@@ -12,8 +12,9 @@ interface Props {
 
 const Searchfield = ({ IconFront = false, WithButton = false, ButtonText = '', InputElement, data, setFilteredData }: Props) => {
     const [text, setText] = React.useState("");
-    const onChange = (value: string) => {
-        setText(value);
+    const searchBox = React.useRef<HTMLInputElement | null>(null);
+
+    const filterProcess = (value: any) => {
         if (value !== '') {
             const filtered = data.filter(e => {
                 return e.some(entry =>
@@ -24,7 +25,13 @@ const Searchfield = ({ IconFront = false, WithButton = false, ButtonText = '', I
         } else {
             setFilteredData(data);
         }
+    }
 
+    const search = (value: string) => {
+        setText(value);
+        if (!WithButton) {
+          filterProcess(value);
+        }
     }
 
     return (
@@ -35,8 +42,9 @@ const Searchfield = ({ IconFront = false, WithButton = false, ButtonText = '', I
                     {IconFront &&
                         <Image src="/asserts/main/search.svg" alt="searchSvg" unoptimized={true} width="25" height="25" />}
                     <input
+                        ref={searchBox}
                         onChange={(event) => {
-                            onChange(event.target.value);
+                            search(event.target.value);
                         }}
                         className=" font-normal text-grey-darkest font-bold w-full px-2 outline-none text-gray-600"
                         type="text" value={text} placeholder="Search" />
@@ -44,7 +52,11 @@ const Searchfield = ({ IconFront = false, WithButton = false, ButtonText = '', I
                     {!IconFront && <Image src="/asserts/main/search.svg" alt="searchSvg" unoptimized={true} width="25" height="25" />}
                 </div>
             }
-            {WithButton && <button type='button' className="bg-blue-500 text-white  rounded-lg text-sm h-11 text-center w-24 h-12">{ButtonText}</button>}
+            {WithButton && <button type='button' onClick={(event) => {
+                if (searchBox.current) {
+                    filterProcess(searchBox.current.value);
+                }
+            }} className="bg-blue-500 text-white  rounded-lg text-sm h-11 text-center w-24 h-12">{ButtonText}</button>}
         </div>
     )
 }

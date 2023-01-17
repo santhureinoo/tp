@@ -58,14 +58,26 @@ export function disableTemplate(path: string) {
   }
 }
 
-export function formatCurrency(currency: number) {
+export function numberWithCommas(x?: number) {
+  if (x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  else {
+    0;
+  }
+
+}
+
+export function formatCurrency(currency?: number) {
   let formatDollar = new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency: 'USD',
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
   });
 
   // Remove the currency symbol.
-  return formatDollar.format(currency).split('$')[1];
+  return formatDollar.format(currency || 0).split('$')[1];
 }
 
 export function convertDate(dateStr: string | null) {

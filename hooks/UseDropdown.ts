@@ -15,6 +15,7 @@ export const useDropdown = (initialState = false, onAfterClose: () => void): [Re
             if (ref.current && ref.current.contains(event.target)) {
                 return
             }
+            
             setIsOpen(false)
             onAfterClose && onAfterClose()
         },

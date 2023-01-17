@@ -50,9 +50,15 @@ const CustomerTable: any = () => {
       city
       current_address
       postal_code
+      _count {
+        outlet
+      }
       outlet {
-        _count {
-          results
+        outlet_device_ex_fa_input {
+          od_device_input_id
+        }
+        outlet_device_ac_input {
+          od_device_input_id
         }
       }
     }
@@ -96,7 +102,17 @@ const CustomerTable: any = () => {
   }, [currentPageIndex]);
 
   const resultInArray = React.useMemo(() => {
-    return customers ? customers.map((cur) => [cur.customer_id, cur.name, cur.pic_name, cur.pic_phone, 0, 0]) : [];
+    return customers ? customers.map((cur) => {
+      let eqptCount = 0;
+      if (cur.outlet) {
+        cur.outlet.forEach(out => {
+          const ac_input = out.outlet_device_ac_input ? out.outlet_device_ac_input.length : 0;
+          const ex_fa_input = out.outlet_device_ex_fa_input ? out.outlet_device_ex_fa_input.length : 0;
+          eqptCount += ac_input + ex_fa_input;
+        })
+      }
+      return [cur.customer_id, cur.name, cur.pic_name, cur.pic_phone, cur._count.outlet, eqptCount];
+    }) : [];
   }, [customers]);
 
 

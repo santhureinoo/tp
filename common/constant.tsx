@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleCheck, faCircle, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 import React from "react";
 import TwoTitlesHeader from "../components/TwoTitlesHeader";
-import { outlet_month_shifts } from "../types/datatype";
+import { group, outlet_month_shifts } from "../types/datatype";
 import moment from "moment";
 
 export const DummyCustomerDataRow = {

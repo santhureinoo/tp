@@ -28,6 +28,7 @@ module.exports = {
         'report-non-table-text' : '#fea662',
         'stack-bar-outer': '#ff7000',
         'stack-bar-inner': '#1a237e',
+        'custom-active-link' : '#147CFC',
       }
     },
   },
