@@ -193,11 +193,11 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                         <div className="grid grid-cols-1 gap-x-2 gap-y-8">
                             <div>
                                 <h4>kWh</h4>
-                                <span className="text-slate-300">{invoice?.outlet_eqpt_energy_usage_without_TP_month_kW}</span>
+                                <span className="text-slate-300">{invoice?.eqpt_energy_usage_without_TP_month_kW}</span>
                             </div>
                             <div>
                                 <h4>$</h4>
-                                <span className="text-slate-300">{invoice?.outlet_eqpt_energy_usage_without_TP_month_expenses}</span>
+                                <span className="text-slate-300">{invoice?.eqpt_energy_usage_without_TP_month_expenses}</span>
                             </div>
                         </div>
                     </div>
@@ -213,11 +213,11 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                         <div className="grid grid-cols-1 gap-x-2 gap-y-8">
                             <div>
                                 <h4>kWh</h4>
-                                <span className="text-slate-300">{invoice?.outlet_eqpt_energy_usage_with_TP_month_kW}</span>
+                                <span className="text-slate-300">{invoice?.eqpt_energy_usage_with_TP_month_kW}</span>
                             </div>
                             <div>
                                 <h4>$</h4>
-                                <span className="text-slate-300">{invoice?.outlet_eqpt_energy_usage_with_TP_month_expenses}</span>
+                                <span className="text-slate-300">{invoice?.eqpt_energy_usage_with_TP_month_expenses}</span>
                             </div>
                         </div>
                     </div>
