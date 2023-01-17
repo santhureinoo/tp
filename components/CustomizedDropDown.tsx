@@ -62,7 +62,6 @@ const CustomizedDropDown = ({ customCSS, data, selected, extraIcon, hideBorder =
                     return (
                         <li key={uuidv4()} onClick={(e: any) => {
                             setSelected(dat);
-                            alert('working');
                             setIsOpen(!isOpen);
                         }}>
                             <a href="#" className={`text-sm overflow-hidden hover:bg-gray-100 ${textColor} block px-4 py-2`}>{dat}</a>
@@ -72,7 +71,6 @@ const CustomizedDropDown = ({ customCSS, data, selected, extraIcon, hideBorder =
                     return (
                         <li key={uuidv4()} onClick={(e: any) => {
                             setSelected(dat.key);
-                            alert('working in key');
                             setIsOpen(!isOpen);
                         }}>
                             <a href="#" className={`text-sm overflow-hidden hover:bg-gray-100 ${textColor} block px-4 py-2`}>{dat.value}</a>

@@ -24,7 +24,7 @@ const ReportSteps = (): React.ReactElement => {
     const getDownloadPresigned = async (name: string, index: number) => {
         const data = index === 1 ? { "filename": name } : { "filename": name, "outlet_id": 3, "outlet_date": "01/10/2022" }
         const response = await axios.post(
-            `http://localhost:4001/process_step_${index}`,
+            `http://13.214.191.184:4001/process_step_${index}`,
             data
         );
         if (index === 1) {
