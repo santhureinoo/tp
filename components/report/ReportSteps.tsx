@@ -6,6 +6,7 @@ import TableOptionField from "../TableOptionField";
 import { v4 as uuidv4 } from 'uuid';
 import axios from "axios";
 import rfdc from 'rfdc'
+import moment from "moment";
 const ReportSteps = (): React.ReactElement => {
 
     const [openReportStepEdit, setOpenReportStepEdit] = React.useState(false);
@@ -14,6 +15,7 @@ const ReportSteps = (): React.ReactElement => {
     const [selectedFileAttribute, setSelectedFileAttribute] = React.useState<FileInfo>();
     const [alreadyUploaded, setAlreadyUploaded] = React.useState<boolean[]>([false, false, false]);
     const [uploadingNow, setUploadingNow] = React.useState<boolean[]>([false, false, false]);
+    const [date, setDate] = React.useState("");
     const [verifyStep1, setVerifyStep1] = React.useState(false);
     const [verifyStep2, setVerifyStep2] = React.useState(false);
     const [verifyStep3, setVerifyStep3] = React.useState(false);
@@ -29,12 +31,11 @@ const ReportSteps = (): React.ReactElement => {
         );
         if (index === 1) {
             return response.data.downloadUrl;
-        } else if(index == 2){
+        } else if (index == 2) {
             return response.data.response;
         } else {
             return response.data.download_url;
         }
-
     }
 
     const uploadToS3 = React.useCallback((index) => {
@@ -55,35 +56,6 @@ const ReportSteps = (): React.ReactElement => {
                     const clonedUploadedFileAttr = cloneDeep(uploadedFileAttribute);
                     const clonedUploadedFile = cloneDeep(uploadedFile);
                     const clonedAlreadyUploaded = cloneDeep(alreadyUploaded);
-
-                    // clonedUploadedFileAttr[index] = {
-                    //     name: currentUploadedFile.name,
-                    //     type: currentUploadedFile.type,
-                    // };
-
-                    // clonedUploadedFile[index] = undefined;
-                    // clonedAlreadyUploaded[index] = true;
-
-                    // setUploadedFileAttribute(clonedUploadedFileAttr);
-                    // setUploadedFile(clonedUploadedFile);
-                    // setAlreadyUploaded(clonedAlreadyUploaded);
-
-                    // if (index === 1 || index === 2) {
-
-
-                    // } else {
-                    //     clonedUploadedFileAttr[index] = {
-                    //         name: currentUploadedFile.name,
-                    //         type: currentUploadedFile.type,
-                    //     };
-
-                    //     clonedUploadedFile[index] = undefined;
-                    //     clonedAlreadyUploaded[index] = true;
-
-                    //     setUploadedFileAttribute(clonedUploadedFileAttr);
-                    //     setUploadedFile(clonedUploadedFile);
-                    //     setAlreadyUploaded(clonedAlreadyUploaded);
-                    // }
 
                     const clonedUploadingNow = cloneDeep(uploadingNow);
                     clonedUploadingNow[index] = true;
@@ -180,7 +152,18 @@ const ReportSteps = (): React.ReactElement => {
         if (e.currentTarget.files) {
             const currentUploadedFile = e.currentTarget.files[0];
             const clonedUploadedFile = cloneDeep(uploadedFile);
-
+            if (index === 3 && currentUploadedFile.type === 'text/csv') {
+                const reader = new FileReader();
+                reader.onload = function () {
+                    const text = reader.result as string;
+                    var rows = text.split('\n');
+                    if (rows.length > 0) {
+                        setDate(moment(rows[1].split(',')[1], 'MM/DD/YYYY').format("MMMM YYYY"));
+                    }
+                };
+                // start reading the file. When it is done, calls the onload event defined above.
+                reader.readAsBinaryString(currentUploadedFile);
+            }
             clonedUploadedFile[index] = currentUploadedFile;
 
             setUploadedFile(clonedUploadedFile);
@@ -246,7 +229,7 @@ const ReportSteps = (): React.ReactElement => {
                 </div>
             </div>
         </div>
-        <ReportStepEdit onConfirm={() => { downloadFromS3(3); }} openReportStepEdit={openReportStepEdit} setOpenReportStepEdit={setOpenReportStepEdit} fromExtension={"Report & Invoice"} toExtension={"Output-Sheet.csv"} datePeriod={"April 2022"} affectedRows={50} uploadedFileAttribute={selectedFileAttribute} />
+        <ReportStepEdit onConfirm={() => { downloadFromS3(3); }} openReportStepEdit={openReportStepEdit} setOpenReportStepEdit={setOpenReportStepEdit} fromExtension={"Report & Invoice"} toExtension={"Output-Sheet.csv"} datePeriod={date} affectedRows={50} uploadedFileAttribute={selectedFileAttribute} />
     </React.Fragment>;
 }
 
