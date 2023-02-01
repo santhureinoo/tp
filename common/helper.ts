@@ -95,7 +95,7 @@ export function median(arr: number[]) {
 
 export function calculatePagination(...total: string[]) {
   const totalPage = total.reduce((prev, current) => Number(current) + Number(prev), 0);
-  return Number(total) != 0 ? Math.ceil(totalPage / 5) : 1;
+  return Number(total) != 0 ? Math.ceil(totalPage / 10) : 1;
 }
 
 

@@ -103,8 +103,8 @@ const OutletTable: any = () => {
             "equals": selectedCustomerID ? parseInt(selectedCustomerID) : -1
           }
         },
-        "take": 5,
-        "skip": (currentPageIndex * 5) - 5,
+        "take": 10,
+        "skip": (currentPageIndex * 10) - 10,
         'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy
       }
     }

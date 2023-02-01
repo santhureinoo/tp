@@ -66,8 +66,8 @@ const CustomerTable: any = () => {
 
   const getCustomersVariable = {
     "variables": {
-      "take": 5,
-      "skip": (currentPageIndex * 5) - 5
+      "take": 10,
+      "skip": (currentPageIndex * 10) - 10
     },
   };
 

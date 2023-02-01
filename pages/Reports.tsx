@@ -145,7 +145,7 @@ const ReportTable: any = () => {
           }
         },
       },
-      "take": 5,
+      "take": 10,
       "skip": (selectedInvoicePageIndex * 5) - 5,
     }
   }
@@ -219,7 +219,7 @@ const ReportTable: any = () => {
         },
 
       },
-      "take": 5,
+      "take": 10,
       "skip": (selectedSavingPageIndex * 5) - 5,
       "customersWhere2": {
         "customer_id": {

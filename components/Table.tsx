@@ -3,6 +3,7 @@ import TinyEditDeleteMenu from "./TinyEditDeleteMenu";
 import { v4 as uuidv4 } from 'uuid';
 import { TableProps } from "../common/types";
 import { TRelayEdge } from '@apollo/client/utilities/policies/pagination';
+import ReactPaginate from 'react-paginate';
 
 interface Props {
     handleEdit?: (selectedData: any) => any;
@@ -20,28 +21,54 @@ interface Props {
     setCurrentSelectedPage?: (pageNum: number) => void;
 }
 
-const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataColIndex = [], currentSelectedPage = 1, setCurrentSelectedPage, totalNumberOfPages = 0, handleAddNew, leftSideFlexDirection = "Horizontal", handleEdit, handleDelete, hideDetailMenu = false, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
+const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataColIndex = [], currentSelectedPage = 1, setCurrentSelectedPage, totalNumberOfPages = 40, handleAddNew, leftSideFlexDirection = "Horizontal", handleEdit, handleDelete, hideDetailMenu = false, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
     const [openTinyMenuIndex, setOpenTinyMenuIndex] = React.useState(-1);
 
 
-    const pages = React.useMemo(() => {
-        const pageArr = [];
-        for (let i = 1; i <= totalNumberOfPages; i++) {
-            pageArr.push(
-                <a
-                    href="#"
-                    onClick={event => {
-                        setCurrentSelectedPage && setCurrentSelectedPage(i);
-                    }}
-                    className={i !== currentSelectedPage ? `bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium` : `z-10 bg-indigo-50 border-indigo-500 text-indigo-600 rounded-md relative inline-flex items-center px-4 py-2 border text-sm font-medium`}
-                >
-                    {i}
-                </a>
-            )
-        }
-        return pageArr;
-    }, [totalNumberOfPages, currentSelectedPage])
+    // const pages = React.useMemo(() => {
+    //     const pageArr = [];
 
+    //     const totalNumberOfPages = 30;
+
+    //     if (totalNumberOfPages > 4) {
+    //         let selectedPortion: number[] = [];
+    //         if (currentSelectedPage !== 1) {
+    //             selectedPortion = [currentSelectedPage - 1, currentSelectedPage, totalNumberOfPages - 1, totalNumberOfPages];
+    //             console.log(selectedPortion);
+    //         } else {
+    //             selectedPortion = [1, 2, totalNumberOfPages - 1, totalNumberOfPages];
+    //         }
+    //         for (let i = 0; i < selectedPortion.length; i++) {
+    //             pageArr.push(
+    //                 <a
+    //                     href="#"
+    //                     onClick={event => {
+    //                         setCurrentSelectedPage && setCurrentSelectedPage(selectedPortion[i]);
+    //                     }}
+    //                     className={selectedPortion[i] !== currentSelectedPage ? `bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium` : `z-10 bg-indigo-50 border-indigo-500 text-indigo-600 rounded-md relative inline-flex items-center px-4 py-2 border text-sm font-medium`}
+    //                 >
+    //                     {selectedPortion[i]}
+    //                 </a>
+    //             );
+    //         }
+    //     } else {
+    //         for (let i = 1; i <= totalNumberOfPages; i++) {
+    //             pageArr.push(
+    //                 <a
+    //                     href="#"
+    //                     onClick={event => {
+    //                         setCurrentSelectedPage && setCurrentSelectedPage(i);
+    //                     }}
+    //                     className={i !== currentSelectedPage ? `bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium` : `z-10 bg-indigo-50 border-indigo-500 text-indigo-600 rounded-md relative inline-flex items-center px-4 py-2 border text-sm font-medium`}
+    //                 >
+    //                     {i}
+    //                 </a>
+    //             );
+    //         }
+    //     }
+    //     return pageArr;
+    // }, [totalNumberOfPages, currentSelectedPage])
+    
     return (
         <React.Fragment>
             <div className="drop-shadow-lg w-full h-100 rounded-lg p-4 bg-white w-auto">
@@ -108,31 +135,24 @@ const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataCo
                 </table>
             </div>
             <div className="flex justify-end p-3 px-8">
-                <div>
-                    <nav className="relative z-0 inline-flex rounded-md shadow-sm space-x-3" aria-label="Pagination">
-                        {totalNumberOfPages > 1 && <a
-                            href="#"
-                            onClick={event => {
-                                setCurrentSelectedPage && currentSelectedPage > 1 && setCurrentSelectedPage(currentSelectedPage - 1);
-                            }}
-                            className="relative inline-flex items-center px-2 py-2 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                        >
-                            <span className="sr-only">Previous</span>
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
-                        </a>}
-                        {totalNumberOfPages > 1 && pages}
-                        {totalNumberOfPages > 1 && <a
-                            href="#"
-                            onClick={event => {
-                                setCurrentSelectedPage && currentSelectedPage < totalNumberOfPages && setCurrentSelectedPage(currentSelectedPage + 1);
-                            }}
-                            className="relative inline-flex items-center px-2 py-2 rounded-r-md border rounded-md border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                        >
-                            <span className="sr-only">Next</span>
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
-                        </a>}
-                    </nav>
-                </div>
+                <ReactPaginate
+                    breakLabel="..."
+                    nextLabel=">"
+                    onClick={(clickEvent) => {
+                        setCurrentSelectedPage && setCurrentSelectedPage(clickEvent.nextSelectedPage !== undefined ? clickEvent.nextSelectedPage + 1 : clickEvent.selected + 1);
+                    }}
+                    pageRangeDisplayed={5}
+                    pageCount={totalNumberOfPages > 1 ? totalNumberOfPages : 0}
+                    previousLabel="<"
+                    renderOnZeroPageCount={(props) => {
+                        <></>
+                    }}
+                    containerClassName={"flex flex-row gap-x-2"}
+                    pageClassName={"bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium"}
+                    activeClassName={"z-10 bg-indigo-50 border-indigo-500 text-indigo-600 rounded-md relative inline-flex items-center px-4 py-2 border text-sm font-medium"}
+                    nextClassName={"bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium"}
+                    previousClassName={"bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium"}
+                />
             </div>
         </React.Fragment >
 

@@ -155,8 +155,8 @@ const EquipmentTable: any = () => {
             "equals": selectedOutletID
           }
         },
-        "take": 5,
-        "skip": (currentPageIndex * 5) - 5
+        "take": 10,
+        "skip": (currentPageIndex * 10) - 10
       }
     }
   }, [selectedCustomerID, selectedOutletID, currentPageIndex]);

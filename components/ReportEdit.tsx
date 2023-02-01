@@ -549,11 +549,11 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                         </div>
                         <div>
                             <h4>Outlet Name</h4>
-                            <span className="text-slate-400">{currentReport?.group?.customers && currentReport?.group?.customers.length > 0 && currentReport?.group?.customers[0].outlet ? currentReport?.group?.customers[0].outlet[0].name : ''}</span>
+                            <span className="text-slate-400">{currentReport?.group?.customers && currentReport?.group?.customers.length > 0 && currentReport?.group?.customers[0].outlet && currentReport?.group?.customers[0].outlet.length > 0 ? currentReport?.group?.customers[0].outlet[0].name : ''}</span>
                         </div>
                         <div>
                             <h4>Outlet Address</h4>
-                            <span className="text-slate-400">{currentReport?.group?.customers && currentReport?.group?.customers.length > 0 && currentReport?.group?.customers[0].outlet ? currentReport?.group?.customers[0].outlet[0].outlet_address : ''} </ span >
+                            <span className="text-slate-400">{currentReport?.group?.customers && currentReport?.group?.customers.length > 0 && currentReport?.group?.customers[0].outlet && currentReport?.group?.customers[0].outlet.length > 0 ? currentReport?.group?.customers[0].outlet[0].outlet_address : ''} </ span >
                         </div>
 
                         <div>

@@ -15,7 +15,6 @@
         @apply font-bold
     }
 }
-
 @layer utilities {
     .link-active {
         @apply flex items-center py-4 px-6 bg-[#E8F2FF] text-[custom-active-link] font-medium rounded-lg;
@@ -82,5 +81,25 @@
 
     .invoice-table tfoot td {
         @apply border-none;
+    }
+
+    /* Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+    }
+
+    [data-scrollbar] {
+        position: absolute !important;
+    }
+
+    .hidden-important {
+        display: none !important;
     }
 }
