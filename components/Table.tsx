@@ -29,49 +29,6 @@ const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], setOpenDetai
     const [openTinyMenuIndex, setOpenTinyMenuIndex] = React.useState(-1);
     const drawerElem = React.useRef<HTMLDivElement | null>(null);
     const [drawerInterface, setDrawerInterface] = React.useState<DrawerInterface>();
-    // const pages = React.useMemo(() => {
-    //     const pageArr = [];
-
-    //     const totalNumberOfPages = 30;
-
-    //     if (totalNumberOfPages > 4) {
-    //         let selectedPortion: number[] = [];
-    //         if (currentSelectedPage !== 1) {
-    //             selectedPortion = [currentSelectedPage - 1, currentSelectedPage, totalNumberOfPages - 1, totalNumberOfPages];
-    //             console.log(selectedPortion);
-    //         } else {
-    //             selectedPortion = [1, 2, totalNumberOfPages - 1, totalNumberOfPages];
-    //         }
-    //         for (let i = 0; i < selectedPortion.length; i++) {
-    //             pageArr.push(
-    //                 <a
-    //                     href="#"
-    //                     onClick={event => {
-    //                         setCurrentSelectedPage && setCurrentSelectedPage(selectedPortion[i]);
-    //                     }}
-    //                     className={selectedPortion[i] !== currentSelectedPage ? `bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium` : `z-10 bg-indigo-50 border-indigo-500 text-indigo-600 rounded-md relative inline-flex items-center px-4 py-2 border text-sm font-medium`}
-    //                 >
-    //                     {selectedPortion[i]}
-    //                 </a>
-    //             );
-    //         }
-    //     } else {
-    //         for (let i = 1; i <= totalNumberOfPages; i++) {
-    //             pageArr.push(
-    //                 <a
-    //                     href="#"
-    //                     onClick={event => {
-    //                         setCurrentSelectedPage && setCurrentSelectedPage(i);
-    //                     }}
-    //                     className={i !== currentSelectedPage ? `bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium` : `z-10 bg-indigo-50 border-indigo-500 text-indigo-600 rounded-md relative inline-flex items-center px-4 py-2 border text-sm font-medium`}
-    //                 >
-    //                     {i}
-    //                 </a>
-    //             );
-    //         }
-    //     }
-    //     return pageArr;
-    // }, [totalNumberOfPages, currentSelectedPage])
 
 
     /**
@@ -90,37 +47,40 @@ const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], setOpenDetai
 
     React.useEffect(() => {
         // options with default values
-        const options: DrawerOptions = {
-            placement: 'right',
-            backdrop: true,
-            bodyScrolling: false,
-            edge: false,
-            edgeOffset: '',
-            backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-30',
-            onHide: () => {
-                setOpenDetailContent && setOpenDetailContent(false);
-            },
-            // onShow: () => {
-            //     console.log('drawer is shown');
-            // },
-            // onToggle: () => {
-            //     console.log('drawer has been toggled');
-            // }
-        };
+        if (setOpenDetailContent) {
+            const options: DrawerOptions = {
+                placement: 'right',
+                backdrop: true,
+                bodyScrolling: false,
+                edge: false,
+                edgeOffset: '',
+                backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-30',
+                onHide: () => {
+                    setOpenDetailContent(false);
+                },
+                // onShow: () => {
+                //     console.log('drawer is shown');
+                // },
+                // onToggle: () => {
+                //     console.log('drawer has been toggled');
+                // }
+            };
 
-        /*
-        * $targetEl: required
-        * options: optional
-        */
-        setDrawerInterface(new Drawer(drawerElem.current, options));
-    }, [])
+            /*
+            * $targetEl: required
+            * options: optional
+            */
+            setDrawerInterface(new Drawer(drawerElem.current, options));
+        }
+
+    }, [setOpenDetailContent])
 
     return (
         <React.Fragment>
             <div className="drop-shadow-lg w-full h-100 rounded-lg p-4 bg-white w-auto">
                 {leftSideFlexDirection === 'Horizontal' ? <div className={`grid grid-cols-2 justify-between items-start py-2 grow-0`}>
                     <div className={`flex flex-row gap-x-2`}>
-                        {leftSideElements.map((elem,index) => {
+                        {leftSideElements.map((elem, index) => {
                             return <React.Fragment key={index}>
                                 {elem}
                             </React.Fragment>
@@ -137,11 +97,11 @@ const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], setOpenDetai
                         {/* {buttonText && <button type="button" onClick={(e) => { handleAddNew && handleAddNew() }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             {buttonText}
                         </button>} */}
-                        {detailContent && <div className="text-center">
+                        {buttonText && <div className="text-center">
                             <button onClick={() => {
                                 setOpenDetailContent && setOpenDetailContent(!openDetailContent);
                             }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" aria-controls="drawer-right-example">
-                                {buttonText || "Show Detail"}
+                                {buttonText}
                             </button>
                         </div>}
                     </div>

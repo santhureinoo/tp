@@ -161,6 +161,24 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                             outlet_measured_savings_percent
                             co2_savings_kg
                             savings_tariff_expenses
+                          acmv_25percent_benchmark_comparison_kWh
+                          acmv_25percent_benchmark_comparison_expenses
+                          acmv_10percent_benchmark_comparison_kWh
+                          acmv_10percent_benchmark_comparison_expenses
+                          ke_and_ac_25percent_benchmark_comparison_kWh
+                          ke_and_ac_25percent_benchmark_comparison_expenses
+                          ke_and_ac_10percent_benchmark_comparison_kWh
+                          ke_and_ac_10percent_benchmark_comparison_expenses
+                          ac_measured_savings_kWh
+                          ke_measured_savings_kWh
+                          ke_eqpt_energy_baseline_avg_hourly_kW
+                          ac_eqpt_energy_baseline_avg_hourly_kW
+                          ke_eqpt_energy_baseline_avg_hourly_as_date
+                          acmv_eqpt_energy_baseline_avg_hourly_kW
+                          ac_eqpt_energy_baseline_avg_hourly_as_date
+                          acmv_eqpt_energy_baseline_avg_hourly_as_date
+                          acmv_measured_savings_kWh
+                          outlet_date
                         }
                         outlet_device_ac_input {
                             ac_baseline_kW
@@ -205,77 +223,215 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
         let ex_data: any[] = ["Kitchen Exhaust"];
         let fa_data: any[] = ["Fresh Air"];
         let ac_data: any[] = ["ACMV"];
-        if (currentReport && currentReport.outlet) {
-            if (currentReport.outlet.outlet_device_ac_input) {
-                ac_data.push(currentReport.outlet.outlet_device_ac_input.length.toString());
-                const elemString = currentReport.outlet.outlet_device_ac_input.map((acItem: any, index: number) => {
-                    return <div key={'frag ' + index} className='flex flex-row justify-around gap-x-4'>
-                        <div className='flex flex-col'>
-                            <span>
-                                97kWh
-                            </span>
-                        </div>
-                        <div className='flex flex-col'>
-                            <span>
-                                $0.20
-                            </span>
-                        </div>
-                    </div>;
-                });
-                ac_data.push(currentReport.outlet.outlet_device_ac_input.reduce((accum: any, obj: any) => { return accum + parseInt(obj.ac_baseline_kW || "0") }, 0) + "kw");
-                ac_data.push(elemString);
-                ac_data.push(elemString.length > 0 && "30%");
-            } else {
-                ac_data = [...ac_data, "0", "0kw"];
-            }
-            if (currentReport.outlet.outlet_device_ex_fa_input) {
-                const exArr = currentReport.outlet.outlet_device_ex_fa_input.filter((eqpt: any) => eqpt.device_type === 'ex');
-                const elemString = exArr.map((exItem: any, index: any) => {
-                    return <div key={'frag ' + index} className='flex flex-row justify-around gap-x-4' >
-                        <div className='flex flex-col'>
-                            <span>
-                                97kWh
-                            </span>
-                        </div>
-                        <div className='flex flex-col'>
-                            <span>
-                                $0.20
-                            </span>
-                        </div>
-                    </div >;
-                })
-                ex_data.push(exArr.length.toString());
-                ex_data.push(exArr.reduce((accum: any, obj: any) => { return accum + parseInt(obj.display_baseline_kW || "0") }, 0) + "kw");
-                ex_data.push(elemString);
-                ex_data.push(elemString.length > 0 && "30%");
-            } else {
-                ex_data = [...ex_data, "0", "0kw"];
-            }
-            if (currentReport.outlet.outlet_device_ex_fa_input) {
-                const faArr = currentReport.outlet.outlet_device_ex_fa_input.filter((eqpt: any) => eqpt.device_type === 'fa');
-                const elemString = faArr.map((faItem: any, index: any) => {
-                    return <div key={'frag ' + index} className='flex flex-row justify-around gap-x-4'>
-                        <div className='flex flex-col'>
-                            <span>
-                                97kWh
-                            </span>
-                        </div>
-                        <div className='flex flex-col'>
-                            <span>
-                                $0.20
-                            </span>
-                        </div>
+        if (currentReport && currentReport.group && currentReport.group.customers
+            && currentReport.group.customers.length > 0 && currentReport.group.customers[0].outlet
+            && currentReport.group.customers[0].outlet.length > 0 && currentReport.group.customers[0].outlet[0]) {
+            if (currentReport.group.customers[0].outlet[0].results) {
+                const result = currentReport.group.customers[0].outlet[0].results;
+                let exObj = {
+                    qty: 0,
+                    tfBM: {
+                        energyBase: 0,
+                        mesKWH: 0,
+                        mesEXP: 0,
+                    },
+                    tenBM: {
+                        mesKWH: 0,
+                        mesEXP: 0,
+                    }
+                };
+                let faObj = {
+                    qty: 0,
+                    tfBM: {
+                        energyBase: 0,
+                        mesKWH: 0,
+                        mesEXP: 0,
+                    },
+                    tenBM: {
+                        mesKWH: 0,
+                        mesEXP: 0,
+                    }
+                };
+                let acObj = {
+                    qty: 0,
+                    tfBM: {
+                        energyBase: 0,
+                        mesKWH: 0,
+                        mesEXP: 0,
+                    },
+                    tenBM: {
+                        mesKWH: 0,
+                        mesEXP: 0,
+                    }
+                };
+                result.forEach(res => {
+                    console.log(res);
+                    exObj.qty += 1;
+                    acObj.qty += 1;
+                    faObj.qty += 1;
 
-                    </div>;
+                    // exObj.tenBM.energyBase += parseInt(res.ke_eqpt_energy_baseline_avg_hourly_kW || '0');
+                    // acObj.tenBM.energyBase += parseInt(res.acmv_eqpt_energy_baseline_avg_hourly_kW || '0');
+                    // faObj.tenBM.energyBase += parseInt(res.ac_eqpt_energy_baseline_avg_hourly_kW || '0');
+
+                    exObj.tenBM.mesKWH += parseInt(res.ke_and_ac_10percent_benchmark_comparison_kWh || '0');
+                    acObj.tenBM.mesKWH += parseInt(res.acmv_10percent_benchmark_comparison_kWh || '0');
+                    faObj.tenBM.mesKWH += parseInt(res.ke_and_ac_10percent_benchmark_comparison_kWh || '0');
+
+                    exObj.tenBM.mesEXP += parseInt(res.ke_and_ac_10percent_benchmark_comparison_expenses || '0');
+                    acObj.tenBM.mesEXP += parseInt(res.acmv_10percent_benchmark_comparison_expenses || '0');
+                    faObj.tenBM.mesEXP += parseInt(res.ke_and_ac_10percent_benchmark_comparison_expenses || '0');
+
+                    exObj.tfBM.energyBase += parseInt(res.ke_eqpt_energy_baseline_avg_hourly_kW || '0');
+                    acObj.tfBM.energyBase += parseInt(res.ke_eqpt_energy_baseline_avg_hourly_kW || '0');
+                    faObj.tfBM.energyBase += parseInt(res.ke_eqpt_energy_baseline_avg_hourly_kW || '0');
+
+                    exObj.tfBM.mesKWH += parseInt(res.ke_and_ac_25percent_benchmark_comparison_kWh || '0');
+                    acObj.tfBM.mesKWH += parseInt(res.acmv_25percent_benchmark_comparison_kWh || '0');
+                    faObj.tfBM.mesKWH += parseInt(res.ke_and_ac_25percent_benchmark_comparison_kWh || '0');
+
+                    exObj.tfBM.mesEXP += parseInt(res.ke_and_ac_25percent_benchmark_comparison_expenses || '0');
+                    acObj.tfBM.mesEXP += parseInt(res.acmv_25percent_benchmark_comparison_expenses || '0');
+                    faObj.tfBM.mesEXP += parseInt(res.ke_and_ac_25percent_benchmark_comparison_expenses || '0');
                 })
-                fa_data.push(faArr.length.toString());
-                fa_data.push(faArr.reduce((accum: any, obj: any) => { return accum + parseInt(obj.display_baseline_kW || "0") }, 0) + "kw");
-                fa_data.push(elemString);
-                fa_data.push(elemString.length > 0 && "30%");
-            } else {
-                fa_data = [...fa_data, "0", "0kw"];
+
+                ex_data = [
+                    "Kitchen Exhaust",
+                    exObj.qty,
+                    `${exObj.tfBM.energyBase}kw`,
+                    <div key={'ex_data_first'} className="flex flex-row justify-around">
+                        <div className='flex flex-col'>
+                            <span>{exObj.tfBM.mesKWH}kWh</span>
+                            <span>{exObj.tenBM.mesKWH}kWh</span>
+                        </div>
+                        <div className='flex flex-col'>
+                            <span>${exObj.tfBM.mesEXP}</span>
+                            <span>${exObj.tenBM.mesEXP}</span>
+                        </div>
+                    </div>,
+                    <div key={'ex_data_second'} className='flex flex-col'>
+                        <span>25%</span>
+                        <span>10%</span>
+                    </div>
+                ];
+
+                ac_data = [
+                    "ACMV",
+                    acObj.qty,
+                    `${acObj.tfBM.energyBase}kw`,
+                    <div key={'ac_data_first'} className="flex flex-row justify-around">
+                        <div className='flex flex-col'>
+                            <span>{acObj.tfBM.mesKWH}kWh</span>
+                            <span>{acObj.tenBM.mesKWH}kWh</span>
+                        </div>
+                        <div className='flex flex-col'>
+                            <span>${acObj.tfBM.mesEXP}</span>
+                            <span>${acObj.tenBM.mesEXP}</span>
+                        </div>
+                    </div>,
+                    <div key={'ac_data_second'} className='flex flex-col'>
+                        <span>25%</span>
+                        <span>10%</span>
+                    </div>
+                ]
+
+                fa_data = [
+                    "Fresh Air",
+                    faObj.qty,
+                    `${faObj.tfBM.energyBase}kw`,
+                    <div key={'fa_data_first'} className="flex flex-row justify-around">
+                        <div className='flex flex-col'>
+                            <span>{faObj.tfBM.mesKWH}kWh</span>
+                            <span>{faObj.tenBM.mesKWH}kWh</span>
+                        </div>
+                        <div className='flex flex-col'>
+                            <span>${faObj.tfBM.mesEXP}</span>
+                            <span>${faObj.tenBM.mesEXP}</span>
+                        </div>
+                    </div>,
+                    <div key={'fa_data_second'} className='flex flex-col'>
+                        <span>25%</span>
+                        <span>10%</span>
+                    </div>
+                ]
+
+
+
+                // ac_data.push(currentReport.group.customers[0].outlet[0].outlet_device_ac_input.length.toString());
+                // const elemString = currentReport.group.customers[0].outlet[0].outlet_device_ac_input.map((acItem: any, index: number) => {
+                //     return <div key={'frag ' + index} className='flex flex-row justify-around gap-x-4'>
+                //         <div className='flex flex-col'>
+                //             <span>
+                //                 97kWh
+                //             </span>
+                //         </div>
+                //         <div className='flex flex-col'>
+                //             <span>
+                //                 $0.20
+                //             </span>
+                //         </div>
+                //     </div>;
+                // });
+                // ac_data.push(currentReport.group.customers[0].outlet[0].outlet_device_ac_input.reduce((accum: any, obj: any) => { return accum + parseInt(obj.ac_baseline_kW || "0") }, 0) + "kw");
+                // ac_data.push(elemString);
+                // ac_data.push(elemString.length > 0 && "30%");
             }
+            // else {
+            //     ac_data = [...ac_data, "0", "0kw"];
+            // }
+            // if (currentReport.group.customers[0].outlet[0].outlet_device_ex_fa_input) {
+            //     const exArr = currentReport.group.customers[0].outlet[0].outlet_device_ex_fa_input.filter((eqpt: any) => eqpt.device_type === 'ex');
+            //     const elemString = exArr.map((exItem: any, index: any) => {
+            //         return <div key={'frag ' + index} className='flex flex-row justify-around gap-x-4' >
+            //             <div className='flex flex-col'>
+            //                 <span>
+            //                     97kWh
+            //                 </span>
+            //             </div>
+            //             <div className='flex flex-col'>
+            //                 <span>
+            //                     $0.20
+            //                 </span>
+            //             </div>
+            //         </div >;
+            //     })
+            //     ex_data.push(exArr.length.toString());
+            //     ex_data.push(exArr.reduce((accum: any, obj: any) => { return accum + parseInt(obj.display_baseline_kW || "0") }, 0) + "kw");
+            //     ex_data.push(elemString);
+            //     ex_data.push(elemString.length > 0 && "30%");
+            // } else {
+            //     ex_data = [...ex_data, "0", "0kw"];
+            // }
+            // if (currentReport.group.customers[0].outlet[0].outlet_device_ex_fa_input) {
+            //     const faArr = currentReport.group.customers[0].outlet[0].outlet_device_ex_fa_input.filter((eqpt: any) => eqpt.device_type === 'fa');
+            //     const elemString = faArr.map((faItem: any, index: any) => {
+            //         return <div key={'frag ' + index} className='flex flex-row justify-around gap-x-4'>
+            //             <div className='flex flex-col'>
+            //                 <span>
+            //                     97kWh
+            //                 </span>
+            //             </div>
+            //             <div className='flex flex-col'>
+            //                 <span>
+            //                     $0.20
+            //                 </span>
+            //             </div>
+
+            //         </div>;
+            //     })
+            //     fa_data.push(faArr.length.toString());
+            //     fa_data.push(faArr.reduce((accum: any, obj: any) => { return accum + parseInt(obj.display_baseline_kW || "0") }, 0) + "kw");
+            //     fa_data.push(elemString);
+            //     fa_data.push(elemString.length > 0 && "30%");
+            // } else {
+            //     fa_data = [...fa_data, "0", "0kw"];
+            // }
         }
+        // console.log([
+        //     ac_data,
+        //     ex_data,
+        //     fa_data
+        // ])
         return [
             ac_data,
             ex_data,
@@ -505,8 +661,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
         }
     }
 
-    return (< div className={` edit-container ${openReportEdit ? "translate-x-0 " : "translate-x-full"}`
-    }>
+    return (<React.Fragment>
         <div className="flex justify-end">
             <button onClick={(e) => { setOpenReportEdit(!openReportEdit) }} className={`w-8 h-8`} type='button'>
                 <FontAwesomeIcon style={{ fontSize: '2em', cursor: 'pointer' }} icon={faCircleXmark} />
@@ -732,7 +887,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
             }
 
         </div>
-    </div >);
+    </React.Fragment >);
 }
 
 export default ReportEdit;

@@ -103,7 +103,7 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
 
 
     return (
-        <div className={` edit-container ${openReportEdit ? "translate-x-0 " : "translate-x-full"}`}>
+        <React.Fragment>
             <div className="flex justify-end">
                 <button onClick={(e) => { setOpenReportEdit(!openReportEdit) }} className={`w-8 h-8`} type='button'>
                     <FontAwesomeIcon style={{ fontSize: '2em', cursor: 'pointer' }} icon={faCircleXmark} />
@@ -263,7 +263,7 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                     </div>
                 </div>
             </div>
-        </div>
+        </React.Fragment>
     )
 
 }

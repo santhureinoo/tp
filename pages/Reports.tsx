@@ -124,6 +124,7 @@ const ReportTable: any = () => {
       customer {
         name
         pte_ltd_name
+        current_address
       }
     }
   }`;
@@ -558,7 +559,6 @@ const ReportTable: any = () => {
     }
   }, [savingOutletDropdown]);
 
-
   // Need to use Lazy Query on each sub title changes instead of fetching all at once.
   React.useEffect(() => {
     if (selectedSubTitle === 'Invoice') {
@@ -580,7 +580,8 @@ const ReportTable: any = () => {
       getGenerateTotalResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(totalRes => {
         if (totalRes.data && totalRes.data.aggregateInvoice && totalRes.data.aggregateInvoice._count._all) {
           const total = totalRes.data.aggregateInvoice._count._all;
-          setTotalInvoicePage(total);
+          const pageCount = total != 0 ? Math.ceil(total / 10) : 1;
+          setTotalInvoicePage(pageCount);
         }
         getGenerateResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
           if (res.data && res.data.findManyReports) {
@@ -597,7 +598,8 @@ const ReportTable: any = () => {
       invoiceTotalResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(totalRes => {
         if (totalRes.data && totalRes.data.aggregateInvoice && totalRes.data.aggregateInvoice._count._all) {
           const total = totalRes.data.aggregateInvoice._count._all;
-          setTotalInvoicePage(total);
+          const pageCount = total != 0 ? Math.ceil(total / 10) : 1;
+          setTotalInvoicePage(pageCount);
         }
         getInvoicesResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
           if (res && res.data && res.data.invoices) {
@@ -614,7 +616,8 @@ const ReportTable: any = () => {
     getGenerateTotalResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(totalRes => {
       if (totalRes.data && totalRes.data.aggregateInvoice && totalRes.data.aggregateInvoice._count._all) {
         const total = totalRes.data.aggregateInvoice._count._all;
-        setTotalInvoicePage(total);
+        const pageCount = total != 0 ? Math.ceil(total / 10) : 1;
+        setTotalInvoicePage(pageCount);
       }
       getGenerateResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
         if (res.data && res.data.findManyReports) {
@@ -675,60 +678,111 @@ const ReportTable: any = () => {
 
   React.useEffect(() => {
     const arr: any[] = [];
-    if (selectedCustomerType === 'Group') {
-      getGroupsResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then((res: any) => {
-        const arr: any[] = [];
-        if (res && res.data && res.data.groups) {
-          const groups = res.data.groups as group[];
-          groups.forEach(group => {
-            let outletCount = 0;
-            let measuredKwh = 0;
-            let measuredExpense = 0;
-            let measuredPercent = 0;
+    if (selectedSubTitle === 'Savings') {
+      if (selectedCustomerType === 'Group') {
+        getGroupsResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then((res: any) => {
+          const arr: any[] = [];
+          if (res && res.data && res.data.groups) {
+            const groups = res.data.groups as group[];
+            groups.forEach(group => {
+              let outletCount = 0;
+              let measuredKwh = 0;
+              let measuredExpense = 0;
+              let measuredPercent = 0;
 
-            if (group.reports) {
-              group.reports.forEach(res => {
-                measuredKwh = measuredKwh + parseInt(res.outlet_measured_savings_kWh || "0");
-                measuredExpense = measuredExpense + parseInt(res.outlet_measured_savings_expenses || "0");
-                measuredPercent = measuredPercent + parseInt(res.outlet_measured_savings_percent || "0");
-              })
-            }
+              if (group.reports) {
+                group.reports.forEach(res => {
+                  measuredKwh = measuredKwh + parseInt(res.outlet_measured_savings_kWh || "0");
+                  measuredExpense = measuredExpense + parseInt(res.outlet_measured_savings_expenses || "0");
+                  measuredPercent = measuredPercent + parseInt(res.outlet_measured_savings_percent || "0");
+                })
+              }
 
-            //Get the total outlet count by the customer.
-            if (group.customers) {
-              group.customers.forEach(customer => {
-                if (customer.outlet) {
-                  outletCount = outletCount + customer.outlet.length;
-                }
+              //Get the total outlet count by the customer.
+              if (group.customers) {
+                group.customers.forEach(customer => {
+                  if (customer.outlet) {
+                    outletCount = outletCount + customer.outlet.length;
+                  }
 
-              })
-            }
-            if (group.reports) {
-              let innerArr: any[] = [];
-              let totalSavingTariff = "$0";
-              group.reports.forEach(report => {
-                let isFound = -1;
-                if (arr.length > 0) {
-                  isFound = arr.findIndex(item => {
-                    return item[2] === report.month && item[3] === report.year;
-                  });
-                }
+                })
+              }
+              if (group.reports) {
+                let innerArr: any[] = [];
+                let totalSavingTariff = "$0";
+                group.reports.forEach(report => {
+                  let isFound = -1;
+                  if (arr.length > 0) {
+                    isFound = arr.findIndex(item => {
+                      return item[2] === report.month && item[3] === report.year;
+                    });
+                  }
 
-                if (isFound < 0) {
-                  innerArr.push(group.group_id);
-                  innerArr.push(group.group_name);
+                  if (isFound < 0) {
+                    innerArr.push(group.group_id);
+                    innerArr.push(group.group_name);
 
-                  innerArr.push(report.month, report.year);
-                  totalSavingTariff = "$ 0.40";
-                  innerArr.push(outletCount);
-                  innerArr.push(totalSavingTariff);
-                  innerArr.push(<div className='flex flex-row gap-x-4'>
+                    innerArr.push(report.month, report.year);
+                    totalSavingTariff = "$ 0.40";
+                    innerArr.push(outletCount);
+                    innerArr.push(totalSavingTariff);
+                    innerArr.push(<div className='flex flex-row gap-x-4'>
+                      <div className='flex flex-col'>
+                        <span className='text-custom-xs'>
+                          (kWH)
+                        </span>
+                        <span>
+                          {numberWithCommas(measuredKwh)}
+                        </span>
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className='text-custom-xs'>
+                          ($)
+                        </span>
+                        <span>
+                          $ {numberWithCommas(measuredExpense)}
+                        </span>
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className='text-custom-xs'>
+                          (%)
+                        </span>
+                        <span>
+                          {measuredPercent}%
+                        </span>
+                      </div>
+                    </div>);
+                    arr.push(innerArr);
+                    innerArr = [];
+                  } else {
+                    innerArr = []
+                  }
+                });
+              }
+            })
+            setSavingReportData(arr);
+          } else {
+            setSavingReportData([]);
+          }
+        });
+        setTotalSavingPage(0);
+      } else {
+        getReportsByOutletIdResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then((res: any) => {
+          const arr = [];
+          if (res && res.data && res.data.findManyReports) {
+            const reports = res.data.findManyReports as reports[];
+            for (let i = 0; i < reports.length; i++) {
+              const cur = reports[i];
+              if (cur.group && cur.group.customers && cur.group.customers.length > 0 && cur.group.customers[0].outlet) {
+                arr.push([
+                  cur.report_id, cur.group.customers[0]?.outlet[0]?.name, cur.month, cur.year, '1', '$ 0.20',
+                  <div key={'frag ' + i} className='flex flex-row gap-x-4'>
                     <div className='flex flex-col'>
                       <span className='text-custom-xs'>
                         (kWH)
                       </span>
                       <span>
-                        {numberWithCommas(measuredKwh)}
+                        {cur.outlet_measured_savings_kWh}
                       </span>
                     </div>
                     <div className='flex flex-col'>
@@ -736,7 +790,7 @@ const ReportTable: any = () => {
                         ($)
                       </span>
                       <span>
-                        $ {numberWithCommas(measuredExpense)}
+                        ${cur.outlet_measured_savings_expenses}
                       </span>
                     </div>
                     <div className='flex flex-col'>
@@ -744,90 +798,29 @@ const ReportTable: any = () => {
                         (%)
                       </span>
                       <span>
-                        {measuredPercent}%
+                        {cur.outlet_measured_savings_percent}%
                       </span>
                     </div>
-                  </div>);
-                  arr.push(innerArr);
-                  innerArr = [];
-                } else {
-                  innerArr = []
-                }
-              });
+                  </div>
+                ]);
+              }
+
             }
-          })
-          setSavingReportData(arr);
-        } else {
-          setSavingReportData([]);
-        }
-      });
-
-
-
-      // groupReportTotalResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
-      //   if (res.data && res.data.aggregateGroup._count._all) {
-      //     const total = res.data.aggregateGroup._count._all;
-      //     const pageCount = total != 0 ? Math.ceil(total / 5) : 1;
-      //     setTotalSavingPage(pageCount);
-      //     setSelectedSavingPageIndex(1);
-      //   }
-      // })
-
-      setTotalSavingPage(0);
-    } else {
-      getReportsByOutletIdResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then((res: any) => {
-        const arr = [];
-        if (res && res.data && res.data.findManyReports) {
-          const reports = res.data.findManyReports as reports[];
-          for (let i = 0; i < reports.length; i++) {
-            const cur = reports[i];
-            if (cur.group && cur.group.customers && cur.group.customers.length > 0 && cur.group.customers[0].outlet) {
-              arr.push([
-                cur.report_id, cur.group.customers[0]?.outlet[0]?.name, cur.month, cur.year, '1', '$ 0.20',
-                <div key={'frag ' + i} className='flex flex-row gap-x-4'>
-                  <div className='flex flex-col'>
-                    <span className='text-custom-xs'>
-                      (kWH)
-                    </span>
-                    <span>
-                      97
-                    </span>
-                  </div>
-                  <div className='flex flex-col'>
-                    <span className='text-custom-xs'>
-                      ($)
-                    </span>
-                    <span>
-                      $0.20
-                    </span>
-                  </div>
-                  <div className='flex flex-col'>
-                    <span className='text-custom-xs'>
-                      (%)
-                    </span>
-                    <span>
-                      30%
-                    </span>
-                  </div>
-                </div>
-              ]);
-            }
-
+            setSavingReportData(arr);
+          } else {
+            setSavingReportData([]);
           }
-          setSavingReportData(arr);
-        } else {
-          setSavingReportData([]);
-        }
-      });
+        });
+      }
     }
-  }, [selectedCustomerType, selectedSavingsMonth, selectedSavingsYear, selectedSavingsOutletID, selectedSavingPageIndex])
+  }, [selectedCustomerType, selectedSavingsMonth, selectedSavingsYear, selectedSavingsOutletID, selectedSavingPageIndex, selectedSubTitle])
 
   React.useEffect(() => {
     if (selectedCustomerType === "Outlet") {
       reportTotalResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
         if (res.data && res.data.aggregateReports._count._all) {
           const total = res.data.aggregateReports._count._all;
-          const pageCount = total != 0 ? Math.ceil(total / 5) : 1;
+          const pageCount = total != 0 ? Math.ceil(total / 10) : 1;
           setTotalSavingPage(pageCount > 1 ? pageCount : 0);
           setSelectedSavingPageIndex(1);
         } else {
@@ -838,7 +831,7 @@ const ReportTable: any = () => {
 
   }, [selectedSavingsOutletID, selectedCustomerType, selectedSavingsMonth, selectedSavingsYear]);
 
-  const savingTable = React.useMemo(() => {
+  const savingTable = React.useCallback((detailElem: any) => {
 
     const headers = () => {
       if (selectedCustomerType === 'Outlet') {
@@ -871,6 +864,9 @@ const ReportTable: any = () => {
         onlyShowButton={true}
         data={savingReportData}
         totalNumberOfPages={totalSavingPage}
+        openDetailContent={openReportEdit}
+        setOpenDetailContent={setOpenReportEdit}
+        detailContent={detailElem}
         setCurrentSelectedPage={setSelectedSavingPageIndex}
         currentSelectedPage={selectedSavingPageIndex}
         leftSideElements={[<TableOptionField key={uuidv4()} label={'Customer Type'} onChange={(selectedValue: any) => { setSelectedCustomerType(selectedValue); setSelectedSavingsMonth("All"); setSelectedSavingsYear("All") }}
@@ -885,7 +881,7 @@ const ReportTable: any = () => {
           }); setOpenReportEdit(true)
         }} handleDelete={() => setOpenReportEdit(true)} />
     </React.Fragment>
-  }, [selectedCustomerType, selectedCustomerId, selectedSavingPageIndex, totalSavingPage, savingReportData, selectedSavingsOutletID, selectedSavingsMonth, selectedSavingsYear, savingOutletDropdown]);
+  }, [selectedCustomerType, selectedCustomerId, openReportEdit, setOpenReportEdit, selectedSavingPageIndex, totalSavingPage, savingReportData, selectedSavingsOutletID, selectedSavingsMonth, selectedSavingsYear, savingOutletDropdown]);
 
   const dummyDatForInvoices = (): any[][] => {
 
@@ -900,7 +896,7 @@ const ReportTable: any = () => {
               (kWH)
             </span>
             <span>
-              97
+              97111
             </span>
           </div>
           <div className='flex flex-col'>
@@ -925,7 +921,7 @@ const ReportTable: any = () => {
     return arr;
   }
 
-  const invoiceTable = React.useMemo(() => {
+  const invoiceTable = React.useCallback((detailElem: any) => {
     const invoiceRows = (): any[][] => {
       return invoices.map(inv => {
         return [
@@ -965,6 +961,10 @@ const ReportTable: any = () => {
         hiddenDataColIndex={[7]}
         onlyShowButton={true}
         data={invoiceRows()}
+        openDetailContent={openReportEdit}
+        setOpenDetailContent={setOpenReportEdit}
+        detailContent={detailElem}
+        totalNumberOfPages={totalInvoicePage}
         leftSideElements={[<TableOptionField key={uuidv4()} label={'Pte Ltd'} onChange={(selectedValue: string) => { setSelectedInvoicePte(parseInt(selectedValue)) }}
           selectedValue={selectedInvoicePte.toString() || ''} data={allPte} />,]}
         rightSideElements={[
@@ -975,7 +975,7 @@ const ReportTable: any = () => {
         ]}
         handleEdit={(selectedData) => { setSelectedInvoice(invoices.find(inv => inv.invoice_id === selectedData[0])); setOpenReportEdit(true) }} handleDelete={() => setOpenReportEdit(true)} />
     </React.Fragment>
-  }, [selectedInvoiceMonth, selectedInvoiceYear, selectedInvoicePte, selectedInvoice, setSelectedInvoicePte, allPte, invoices]);
+  }, [selectedInvoiceMonth, selectedInvoiceYear, , openReportEdit, setOpenReportEdit, selectedInvoicePte, selectedInvoice, setSelectedInvoicePte, allPte, invoices]);
 
 
   const reportEditComp = React.useMemo(() => {
@@ -1008,11 +1008,9 @@ const ReportTable: any = () => {
             {selectedSubTitle === "Generate" ?
               generateTable
               : selectedSubTitle === "Savings" ?
-                savingTable : selectedSubTitle === "Invoice" ? invoiceTable : <React.Fragment><ReportSteps></ReportSteps></React.Fragment>
+                savingTable(<ReportEdit selectedReportID={selectedReportID.reportId} selectedCustomerID={selectedCustomerId ? parseInt(selectedCustomerId) : 0} selectedOutletID={selectedOutletID ? parseInt(selectedOutletID) : 0} result={selectedResult} openReportEdit={openReportEdit} customerType={selectedCustomerType} setOpenReportEdit={setOpenReportEdit} month={selectedReportID.selectedMonth} year={selectedReportID.selectedYear} />) :
+                selectedSubTitle === "Invoice" ? invoiceTable(<InvoiceEdit openReportEdit={openReportEdit} setOpenReportEdit={setOpenReportEdit} invoice={selectedInvoice} />) : <React.Fragment><ReportSteps></ReportSteps></React.Fragment>
             }
-            {selectedSubTitle === "Savings" ?
-              <ReportEdit selectedReportID={selectedReportID.reportId} selectedCustomerID={selectedCustomerId ? parseInt(selectedCustomerId) : 0} selectedOutletID={selectedOutletID ? parseInt(selectedOutletID) : 0} result={selectedResult} openReportEdit={openReportEdit} customerType={selectedCustomerType} setOpenReportEdit={setOpenReportEdit} month={selectedReportID.selectedMonth} year={selectedReportID.selectedYear} /> :
-              <InvoiceEdit openReportEdit={openReportEdit} setOpenReportEdit={setOpenReportEdit} invoice={selectedInvoice} />}
           </div>
         </div>
       </div>

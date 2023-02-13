@@ -9,11 +9,12 @@ interface Props {
     disabled: boolean;
     buttons: ButtonProps[];
     setOnVerify: (verify: boolean) => void;
+    allActionDone: boolean;
     onVerify: boolean;
     isUploading: boolean;
     nonButtons?: React.ReactElement[];
 }
-const ReportStep = ({ titleChar, subTitle, texts, buttons, disabled, isUploading = false, nonButtons = [], onVerify, setOnVerify }: Props): React.ReactElement => {
+const ReportStep = ({ titleChar, subTitle, texts, buttons, allActionDone, disabled, isUploading = false, nonButtons = [], onVerify, setOnVerify }: Props): React.ReactElement => {
 
     return <div className="relative flex flex-col border-2 border-black border-dotted rounded-lg overflow-hidden bg-white">
 
@@ -47,9 +48,9 @@ const ReportStep = ({ titleChar, subTitle, texts, buttons, disabled, isUploading
                     return <PillButton key={'frag ' + index} onClick={button.onClick} disabled={button.disable || isUploading} className={`${button.css} w-40 h-10`} text={button.text}></PillButton>
                 })}
             </div>
-            <div className="flex flex-row items-center p-8 sm:px-4 sm:h-full gap-x-2 justify-center">
+            <div className={`flex flex-row items-center p-8 sm:px-4 sm:h-full gap-x-2 justify-center ${allActionDone ? 'cursor-pointer' : 'opacity-25'} `}>
                 <span>Verified?</span>
-                <Image onClick={() => { setOnVerify(!onVerify) }} alt="confirmSvg" src={`/asserts/main/${onVerify ? 'verified' : 'unverified'}.svg`} width="24" height="24" />
+                <Image onClick={() => { allActionDone && setOnVerify(!onVerify) }} alt="confirmSvg" src={`/asserts/main/${onVerify ? 'verified' : 'unverified'}.svg`} width="24" height="24" />
             </div>
         </div>
     </div>;

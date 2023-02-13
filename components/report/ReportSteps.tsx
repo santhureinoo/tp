@@ -15,6 +15,7 @@ const ReportSteps = (): React.ReactElement => {
     const [selectedFileAttribute, setSelectedFileAttribute] = React.useState<FileInfo>();
     const [alreadyUploaded, setAlreadyUploaded] = React.useState<boolean[]>([false, false, false]);
     const [uploadingNow, setUploadingNow] = React.useState<boolean[]>([false, false, false]);
+    const [allActionDone, setAllActionDone] = React.useState<boolean[]>([false, false, false]);
     const [date, setDate] = React.useState("");
     const [verifyStep1, setVerifyStep1] = React.useState(false);
     const [verifyStep2, setVerifyStep2] = React.useState(false);
@@ -83,8 +84,6 @@ const ReportSteps = (): React.ReactElement => {
                     console.log(error);
                 })
             })
-            // uploadFiles.forEach(uploadFile => {
-
             // })
         }
 
@@ -92,7 +91,6 @@ const ReportSteps = (): React.ReactElement => {
 
     const downloadFromS3 = React.useCallback((index) => {
         const currentUploadedFileAttribute = uploadedFileAttribute[index];
-        console.log(currentUploadedFileAttribute);
         if (currentUploadedFileAttribute) {
             const downloadURL = currentUploadedFileAttribute.downloadURL ? currentUploadedFileAttribute.downloadURL : "https://20ix7znzn5.execute-api.ap-southeast-1.amazonaws.com/staging/getDownloadPresignedUrl";
             axios.get(
@@ -117,6 +115,10 @@ const ReportSteps = (): React.ReactElement => {
                 // clean up "a" element & remove ObjectURL
                 document.body.removeChild(link);
                 URL.revokeObjectURL(href);
+
+                const clonedAllActionDone = cloneDeep(allActionDone);
+                clonedAllActionDone[index] = true;
+                setAllActionDone(clonedAllActionDone);
 
                 // axios.get(result.uploadURL, {
                 //     responseType: 'blob',
@@ -181,6 +183,10 @@ const ReportSteps = (): React.ReactElement => {
             if (index === 3) {
                 setSelectedFileAttribute(uploadedFileAttribute[index]);
                 setOpenReportStepEdit(true);
+
+                const clonedAllActionDone = cloneDeep(allActionDone);
+                clonedAllActionDone[index] = true;
+                setAllActionDone(clonedAllActionDone);
             } else {
                 downloadFromS3(index);
             }
@@ -195,10 +201,10 @@ const ReportSteps = (): React.ReactElement => {
                 css: ` text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800`,
             },
             {
-                text: "Download",
+                text: index !== 3 ? "Download" : "Build Report & Invoice",
                 onClick: () => { onBtnDownload(index) },
                 disable: !alreadyUploaded[index] ? true : false,
-                css: "text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800",
+                css: `${index !== 3 ? '' : 'text-xs w-64'} text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800`,
             }
         ]
     }, [uploadedFile, alreadyUploaded])
@@ -223,9 +229,9 @@ const ReportSteps = (): React.ReactElement => {
                 </div>
 
                 <div className="flex flex-col gap-y-14">
-                    <ReportStep isUploading={uploadingNow[1]} disabled={false} onVerify={verifyStep1} setOnVerify={setVerifyStep1} titleChar={"1"} subTitle={"Upload Input-Sheet"} texts={["Upload Input-SheetUpload the latest Input-Sheet", "to generate the input-sheet.csv"]} buttons={btnList(1)} nonButtons={nonBtnList(1)} ></ReportStep>
-                    <ReportStep isUploading={uploadingNow[2]} disabled={verifyStep1 ? false : true} onVerify={verifyStep2} setOnVerify={setVerifyStep2} titleChar={"2"} subTitle={"Generate Output-Sheet"} texts={["Upload the input-sheet.csv", "to download output-sheet.csv"]} buttons={btnList(2)} nonButtons={nonBtnList(2)}></ReportStep>
-                    <ReportStep isUploading={uploadingNow[3]} disabled={verifyStep2 ? false : true} onVerify={verifyStep3} setOnVerify={setVerifyStep3} titleChar={"3"} subTitle={"Generate Report & Invoice"} texts={["Upload the output-sheet.csv", "to generate Report & Invoice"]} buttons={btnList(3)} nonButtons={nonBtnList(3)}></ReportStep>
+                    <ReportStep allActionDone={allActionDone[1]} isUploading={uploadingNow[1]} disabled={false} onVerify={verifyStep1} setOnVerify={setVerifyStep1} titleChar={"1"} subTitle={"Upload Input-Sheet"} texts={["Upload Input-SheetUpload the latest Input-Sheet", "to generate the input-sheet.csv"]} buttons={btnList(1)} nonButtons={nonBtnList(1)} ></ReportStep>
+                    <ReportStep allActionDone={allActionDone[2]} isUploading={uploadingNow[2]} disabled={verifyStep1 ? false : true} onVerify={verifyStep2} setOnVerify={setVerifyStep2} titleChar={"2"} subTitle={"Generate Output-Sheet"} texts={["Upload the input-sheet.csv", "to download output-sheet.csv"]} buttons={btnList(2)} nonButtons={nonBtnList(2)}></ReportStep>
+                    <ReportStep allActionDone={allActionDone[3]} isUploading={uploadingNow[3]} disabled={verifyStep2 ? false : true} onVerify={verifyStep3} setOnVerify={setVerifyStep3} titleChar={"3"} subTitle={"Generate Report & Invoice"} texts={["Upload the output-sheet.csv", "to generate Report & Invoice"]} buttons={btnList(3)} nonButtons={nonBtnList(3)}></ReportStep>
                 </div>
             </div>
         </div>
