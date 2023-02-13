@@ -535,7 +535,7 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
     }
 
     return (
-        <div className={`edit-container ${openOutletEdit ? "translate-x-0 " : "translate-x-full"}`}>
+        <React.Fragment>
             <div className="flex justify-end">
                 <button onClick={(e) => { setOpenOutletEdit(!openOutletEdit) }} className={`w-8 h-8`} type='button'>
                     <FontAwesomeIcon style={{ fontSize: '2em', cursor: 'pointer' }} icon={faCircleXmark} />
@@ -568,7 +568,7 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
 
             </div>
 
-        </div>
+        </React.Fragment>
     )
 }
 

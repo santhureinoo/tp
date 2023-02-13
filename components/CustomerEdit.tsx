@@ -14,13 +14,12 @@ const cloneDeep = rfdc();
 
 
 interface Props {
-    openCustomerEdit: boolean;
-    setOpenCustomerEdit(setCE: boolean): void;
     customer?: customer;
     afterOperation?: () => void;
+    setOpen : (val: boolean) => void;
 }
 
-const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, customer }: Props) => {
+const CustomerEdit = ({ afterOperation, customer, setOpen }: Props) => {
 
     const router = useRouter();
     const [contactList, setContactList] = React.useState<outlet_person_in_charge[]>([]);
@@ -224,7 +223,7 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
                     }
                 }
             };
-            updateMutationQuery(MUTATE_VARIABLES).then((val) => { afterOperation && afterOperation(); setOpenCustomerEdit(false); })
+            updateMutationQuery(MUTATE_VARIABLES).then((val) => { afterOperation && afterOperation(); setOpen(false); })
         } else {
             const MUTATE_VARIABLES = {
                 variables: {
@@ -263,7 +262,7 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
                     customer_id: -1,
                     group_id: 2
                 });
-                afterOperation && afterOperation(); setOpenCustomerEdit(false);
+                afterOperation && afterOperation(); setOpen(false);
             });
         }
 
@@ -288,10 +287,17 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
         }
     }, [customer]);
 
+    // React.useEffect(() => {
+    //     alert(openCustomerEdit);
+    //     if(openCustomerEdit) {
+    //         setIsOpen(!isOpen);
+    //     }
+    // }, [openCustomerEdit]);
+
     return (
-        <div className={` edit-container ${openCustomerEdit ? "translate-x-0 " : "translate-x-full"}`}>
+        <React.Fragment>
             <div className="flex justify-end">
-                <button onClick={(e) => { setOpenCustomerEdit(!openCustomerEdit) }} className={`w-8 h-8`} type='button'>
+                <button onClick={(e) => { setOpen(false); }} className={`w-8 h-8`} type='button'>
                     <FontAwesomeIcon style={{ fontSize: '2em', cursor: 'pointer' }} icon={faCircleXmark} />
                 </button>
             </div>
@@ -337,8 +343,7 @@ const CustomerEdit = ({ afterOperation, openCustomerEdit, setOpenCustomerEdit, c
                     <button type='button' onClick={onClick} className="bg-blue-500 text-white rounded-lg w-full text-sm h-11 text-center">Save</button>
                 </div>
             </div>
-
-        </div>
+        </React.Fragment>
     )
 }
 

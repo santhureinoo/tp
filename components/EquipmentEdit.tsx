@@ -525,7 +525,7 @@ const OutletEdit = ({ openEquipmentEdit, setOpenEquipmentEdit, eqpt, afterOperat
     }
 
     return (
-        <div className={`edit-container ${openEquipmentEdit ? "translate-x-0 " : "translate-x-full"}`}>
+        <React.Fragment>
             <div className="flex justify-end">
                 <button onClick={(e) => { setOpenEquipmentEdit(!openEquipmentEdit) }} className={`w-8 h-8`} type='button'>
                     <FontAwesomeIcon style={{ fontSize: '2em', cursor: 'pointer' }} icon={faCircleXmark} />
@@ -600,7 +600,7 @@ const OutletEdit = ({ openEquipmentEdit, setOpenEquipmentEdit, eqpt, afterOperat
                 </div>
             </div>
 
-        </div>
+        </React.Fragment>
     )
 }
 

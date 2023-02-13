@@ -2,9 +2,10 @@ import React from 'react';
 import TinyEditDeleteMenu from "./TinyEditDeleteMenu";
 import { v4 as uuidv4 } from 'uuid';
 import { TableProps } from "../common/types";
-import { TRelayEdge } from '@apollo/client/utilities/policies/pagination';
+import { Drawer } from "flowbite";
+import type { DrawerOptions, DrawerInterface } from "flowbite";
 import ReactPaginate from 'react-paginate';
-
+import 'flowbite';
 interface Props {
     handleEdit?: (selectedData: any) => any;
     handleDelete?: (selectedData: any) => any;
@@ -18,13 +19,16 @@ interface Props {
     hideDetailMenu?: boolean;
     totalNumberOfPages?: number;
     currentSelectedPage?: number;
+    detailContent?: JSX.Element;
+    openDetailContent?: boolean;
+    setOpenDetailContent?: (val: boolean) => void;
     setCurrentSelectedPage?: (pageNum: number) => void;
 }
 
-const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataColIndex = [], currentSelectedPage = 1, setCurrentSelectedPage, totalNumberOfPages = 40, handleAddNew, leftSideFlexDirection = "Horizontal", handleEdit, handleDelete, hideDetailMenu = false, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
+const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], setOpenDetailContent, openDetailContent, detailContent, hiddenDataColIndex = [], currentSelectedPage = 1, setCurrentSelectedPage, totalNumberOfPages = 40, handleAddNew, leftSideFlexDirection = "Horizontal", handleEdit, handleDelete, hideDetailMenu = false, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
     const [openTinyMenuIndex, setOpenTinyMenuIndex] = React.useState(-1);
-
-
+    const drawerElem = React.useRef<HTMLDivElement | null>(null);
+    const [drawerInterface, setDrawerInterface] = React.useState<DrawerInterface>();
     // const pages = React.useMemo(() => {
     //     const pageArr = [];
 
@@ -68,29 +72,78 @@ const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataCo
     //     }
     //     return pageArr;
     // }, [totalNumberOfPages, currentSelectedPage])
-    
+
+
+    /**
+     * Hack : https://github.com/themesberg/flowbite-react/issues/340
+     * Flowbite doesn't still support drawer as react component, we need to trigger the button manually.
+     *   */
+    React.useEffect(() => {
+        if (drawerInterface && openDetailContent !== undefined) {
+            if (openDetailContent) {
+                drawerInterface.show();
+            } else {
+                drawerInterface.hide();
+            }
+        }
+    }, [openDetailContent])
+
+    React.useEffect(() => {
+        // options with default values
+        const options: DrawerOptions = {
+            placement: 'right',
+            backdrop: true,
+            bodyScrolling: false,
+            edge: false,
+            edgeOffset: '',
+            backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-30',
+            onHide: () => {
+                setOpenDetailContent && setOpenDetailContent(false);
+            },
+            // onShow: () => {
+            //     console.log('drawer is shown');
+            // },
+            // onToggle: () => {
+            //     console.log('drawer has been toggled');
+            // }
+        };
+
+        /*
+        * $targetEl: required
+        * options: optional
+        */
+        setDrawerInterface(new Drawer(drawerElem.current, options));
+    }, [])
+
     return (
         <React.Fragment>
             <div className="drop-shadow-lg w-full h-100 rounded-lg p-4 bg-white w-auto">
                 {leftSideFlexDirection === 'Horizontal' ? <div className={`grid grid-cols-2 justify-between items-start py-2 grow-0`}>
                     <div className={`flex flex-row gap-x-2`}>
-                        {leftSideElements.map(elem => {
-                            return <React.Fragment key={uuidv4()}>
+                        {leftSideElements.map((elem,index) => {
+                            return <React.Fragment key={index}>
                                 {elem}
                             </React.Fragment>
                         })}
                     </div>
                     <div className="flex flex-row justify-end gap-x-2">
                         <div className='flex justify-between gap-x-4'>
-                            {rightSideElements.map(elem => {
-                                return <React.Fragment key={uuidv4()}>
+                            {rightSideElements.map((elem, index) => {
+                                return <React.Fragment key={index}>
                                     {elem}
                                 </React.Fragment>
                             })}
                         </div>
-                        {buttonText && <button type="button" onClick={(e) => { handleAddNew && handleAddNew() }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        {/* {buttonText && <button type="button" onClick={(e) => { handleAddNew && handleAddNew() }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             {buttonText}
-                        </button>}
+                        </button>} */}
+                        {detailContent && <div className="text-center">
+                            <button onClick={() => {
+                                setOpenDetailContent && setOpenDetailContent(!openDetailContent);
+                            }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" aria-controls="drawer-right-example">
+                                {buttonText || "Show Detail"}
+                            </button>
+                        </div>}
                     </div>
                 </div> : <div className='flex flex-col gap-y-4 px-2'>
                     {leftSideElements}
@@ -153,6 +206,9 @@ const Table = ({ headers, data, onlyShowButton, hiddenDataCol = [], hiddenDataCo
                     nextClassName={"bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium"}
                     previousClassName={"bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium"}
                 />
+            </div>
+            <div ref={drawerElem} id="drawer-right-example" className="edit-container fixed top-0 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform translate-x-full bg-white w-80 dark:bg-gray-800" tabIndex={-1} aria-labelledby="drawer-right-label">
+                {detailContent}
             </div>
         </React.Fragment >
 

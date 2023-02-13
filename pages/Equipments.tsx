@@ -261,7 +261,7 @@ const EquipmentTable: any = () => {
     }
   }, [equipments]);
 
-   // React.useEffect(() => {
+  // React.useEffect(() => {
   //   if (getTotalExFaResult.data && getTotalAcResult.data && getTotalExFaResult.data.aggregateOutlet_device_ex_fa_input && getTotalAcResult.data.aggregateOutlet_device_ac_input) {
   //     setTotalpage(calculatePagination(getTotalExFaResult.data.aggregateOutlet_device_ex_fa_input._count._all, getTotalAcResult.data.aggregateOutlet_device_ac_input._count._all));
   //   } else {
@@ -276,6 +276,32 @@ const EquipmentTable: any = () => {
         hiddenDataCol={['od_device_input_id']}
         hiddenDataColIndex={[6]}
         data={filteredEquipmentsInArray}
+        openDetailContent={openEquipmentEdit}
+        setOpenDetailContent={setOpenEquipmentEdit}
+        detailContent={<EquipmentEdit eqpt={selectedEqpt} afterOperation={() => {
+          eqptsResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
+            if (res.data && res.data.outlets) {
+              const outletsWithEqpts = res.data.outlets as outlet[];
+              let eqptList: any[] = [];
+
+              outletsWithEqpts.map(oe => {
+                let ac_list = oe.outlet_device_ac_input as any[];
+                if (ac_list.length > 0) {
+                  ac_list = ac_list.map(ac => {
+                    const cloned_ac = cloneDeep(ac);
+                    cloned_ac.device_type = 'ac';
+                    return cloned_ac;
+                  })
+                }
+
+                eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
+              })
+              setEquipments(eqptList);
+            }
+
+          })
+        }}
+          selectedOutletID={selectedOutletID} selectedCustomerID={selectedCustomerID} setEqpt={setSelectedEqpt} openEquipmentEdit={openEquipmentEdit} setOpenEquipmentEdit={setOpenEquipmentEdit} />}
         leftSideElements={[
           <Searchfield data={equipmentsInArray} setFilteredData={setFilteredEquipmentsInArray} key={"eqpt_search"} IconFront={false} WithButton={false} ButtonText={'Search'} />
         ]}
@@ -285,7 +311,7 @@ const EquipmentTable: any = () => {
           <TableOptionField key={uuidv4()} label={'Outlet'} onChange={(selectedValue: string) => { setSelectedOutletID(selectedValue) }}
             selectedValue={selectedOutletID} data={outletDropdown} />,
         ]}
-        // totalNumberOfPages={totalPage} setCurrentSelectedPage={setCurrentPageIndex} currentSelectedPage={currentPageIndex}
+        totalNumberOfPages={totalPage} setCurrentSelectedPage={setCurrentPageIndex} currentSelectedPage={currentPageIndex}
         handleAddNew={() => {
           setSelectedEqpt(undefined);
           setOpenEquipmentEdit(true);
@@ -354,36 +380,11 @@ const EquipmentTable: any = () => {
                   // getTotalAcResult.refetch();
                   // getTotalExFaResult.refetch();
                 }
-
               })
             })
           }
         }} buttonText={"+ Add New Equipment"} />
-      <EquipmentEdit eqpt={selectedEqpt} afterOperation={() => {
-        eqptsResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
-          if (res.data && res.data.outlets) {
-            const outletsWithEqpts = res.data.outlets as outlet[];
-            let eqptList: any[] = [];
 
-            outletsWithEqpts.map(oe => {
-              let ac_list = oe.outlet_device_ac_input as any[];
-              if (ac_list.length > 0) {
-                ac_list = ac_list.map(ac => {
-                  const cloned_ac = cloneDeep(ac);
-                  cloned_ac.device_type = 'ac';
-                  return cloned_ac;
-                })
-              }
-
-              eqptList = [...oe.outlet_device_ex_fa_input || [], ...ac_list || []];
-            })
-            setEquipments(eqptList);
-            // getTotalAcResult.refetch();
-            // getTotalExFaResult.refetch();
-          }
-
-        })
-      }} selectedOutletID={selectedOutletID} selectedCustomerID={selectedCustomerID} setEqpt={setSelectedEqpt} openEquipmentEdit={openEquipmentEdit} setOpenEquipmentEdit={setOpenEquipmentEdit} />
     </React.Fragment>
   )
 }

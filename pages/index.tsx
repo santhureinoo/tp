@@ -118,19 +118,24 @@ const CustomerTable: any = () => {
 
   return (
     <React.Fragment>
-      <Table headers={['ID', 'Name', 'PIC Name', 'PIC Phone', 'Outlets', 'Equipment']} data={resultInArray} handleAddNew={() => { setSelectedCustomer(undefined); setOpenCustomerEdit(true) }} handleEdit={(selectedData) => { setOpenCustomerEdit(true); setSelectedCustomer(customers.find(customer => customer.customer_id === selectedData[0])) }} handleDelete={(selectedData) => {
-        deleteMutationQuery({
-          variables: {
-            "where": {
-              "customer_id": selectedData[0]
-            },
-          }
-        }).then((value) => {
-          refetch();
-          getTotalResult.refetch();
-        })
-      }} rightSideElements={[]} leftSideElements={[]} buttonText={'+ Add New Customer'} totalNumberOfPages={totalPage} setCurrentSelectedPage={setCurrentPageIndex} currentSelectedPage={currentPageIndex} />
-      <CustomerEdit afterOperation={() => { refetch(); getTotalResult.refetch(); }} customer={selectedCustomer} openCustomerEdit={openCustomerEdit} setOpenCustomerEdit={setOpenCustomerEdit} />
+      <Table
+        openDetailContent={openCustomerEdit}
+        setOpenDetailContent={setOpenCustomerEdit}
+        detailContent={<CustomerEdit afterOperation={() => { refetch(); getTotalResult.refetch(); }}
+          customer={selectedCustomer} setOpen={setOpenCustomerEdit} />}
+        headers={['ID', 'Name', 'PIC Name', 'PIC Phone', 'Outlets', 'Equipment']} data={resultInArray} handleAddNew={() => { setSelectedCustomer(undefined); setOpenCustomerEdit(true) }} handleEdit={(selectedData) => { setOpenCustomerEdit(true); setSelectedCustomer(customers.find(customer => customer.customer_id === selectedData[0])) }} handleDelete={(selectedData) => {
+          deleteMutationQuery({
+            variables: {
+              "where": {
+                "customer_id": selectedData[0]
+              },
+            }
+          }).then((value) => {
+            refetch();
+            getTotalResult.refetch();
+          })
+        }} rightSideElements={[]} leftSideElements={[]} buttonText={'+ Add New Customer'} totalNumberOfPages={totalPage} setCurrentSelectedPage={setCurrentPageIndex} currentSelectedPage={currentPageIndex} />
+
     </React.Fragment>
 
   )

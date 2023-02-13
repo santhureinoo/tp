@@ -40,10 +40,10 @@ const CustomizedInput = ({ inputType, label, onChange, onBlur, textColor = 'text
                     onChange && onChange(event.currentTarget.value);
                 }} onBlur={(event) => {
                     onBlur && onBlur(event.currentTarget.value);
-                }} className={`outline-none px-6 py-3 border-2 focus:border focus:border-black rounded-lg h-11 w-full ${!validateInput() ? '' : 'border-red-200'}`} />
+                }} className={`outline-none px-6 py-3 border focus:border focus:ring-0 focus:border-black rounded-lg h-11 w-full ${!validateInput() ? '' : 'border-red-200'}`} />
                 break;
             case 'textWithPostfix':
-                elem = <div className="flex flex-row w-auto border-2 rounded-lg items-center focus-within:border focus-within:border-black">
+                elem = <div className="flex flex-row w-auto border rounded-lg items-center focus-within:border focus-within:border-black">
                     <input type="text" className="outline-none overflow-hidden  px-6 py-3  h-11 w-9/12" />
                     <span className="m-2 text-sm text-center text-gray-300 w-3/12 ">{postFix}</span>
                 </div>

@@ -21,7 +21,6 @@ const Searchfield = ({ IconFront = false, WithButton = false, ButtonText = '', I
                     entry.toString().includes(value))
             });
             setFilteredData(filtered);
-
         } else {
             setFilteredData(data);
         }
@@ -30,7 +29,7 @@ const Searchfield = ({ IconFront = false, WithButton = false, ButtonText = '', I
     const search = (value: string) => {
         setText(value);
         if (!WithButton) {
-          filterProcess(value);
+            filterProcess(value);
         }
     }
 
@@ -46,7 +45,7 @@ const Searchfield = ({ IconFront = false, WithButton = false, ButtonText = '', I
                         onChange={(event) => {
                             search(event.target.value);
                         }}
-                        className=" font-normal text-grey-darkest font-bold w-full px-2 outline-none text-gray-600"
+                        className=" font-normal text-grey-darkest font-bold w-full border-0 focus:border-0 focus:ring-0 focus:outline-none px-2 outline-none text-gray-600"
                         type="text" value={text} placeholder="Search" />
 
                     {!IconFront && <Image src="/asserts/main/search.svg" alt="searchSvg" unoptimized={true} width="25" height="25" />}
