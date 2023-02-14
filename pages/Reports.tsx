@@ -712,11 +712,11 @@ const ReportTable: any = () => {
                 let totalSavingTariff = "$0";
                 group.reports.forEach(report => {
                   let isFound = -1;
-                  if (arr.length > 0) {
-                    isFound = arr.findIndex(item => {
-                      return item[2] === report.month && item[3] === report.year;
-                    });
-                  }
+                  // if (arr.length > 0) {
+                  //   isFound = arr.findIndex(item => {
+                  //     return item[2] === report.month && item[3] === report.year;
+                  //   });
+                  // }
 
                   if (isFound < 0) {
                     innerArr.push(group.group_id);
