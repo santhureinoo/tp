@@ -49,7 +49,6 @@ const ReportTable: any = () => {
   //Savings
   const [selectedCustomerType, setSelectedCustomerType] = React.useState<'Group' | 'Outlet'>('Group');
   const [selectedCustomerId, setSelectedCustomerId] = React.useState("");
-  const [customers, setCustomers] = React.useState<customer[]>([]);
   const [selectedSavingsOutletID, setSelectedSavingsOutletID] = React.useState("");
   const [selectedSavingsMonth, setSelectedSavingsMonth] = React.useState("All");
   const [selectedSavingsYear, setSelectedSavingsYear] = React.useState("All");
@@ -780,56 +779,59 @@ const ReportTable: any = () => {
         });
         setTotalSavingPage(0);
       } else {
-        getReportsByOutletIdResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then((res: any) => {
-          const arr = [];
-          if (res && res.data && res.data.findManyReports) {
-            const reports = res.data.findManyReports as reports[];
-            for (let i = 0; i < reports.length; i++) {
-              const cur = reports[i];
-              if (cur.group && cur.group.customers && cur.group.customers.length > 0 && cur.group.customers[0].outlet) {
-                arr.push([
-                  cur.report_id, cur.group.customers[0]?.outlet[0]?.outlet_id, cur.group.customers[0]?.outlet[0]?.name, cur.month, cur.year, '1', '$ 0.20',
-                  <div key={'frag ' + i} className='flex flex-row gap-x-4'>
-                    <div className='flex flex-col'>
-                      <span className='text-custom-xs'>
-                        (kWH)
-                      </span>
-                      <span>
-                        {cur.outlet_measured_savings_kWh}
-                      </span>
+        customerResult.refetch().then(res => {
+          getReportsByOutletIdResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then((res: any) => {
+            const arr = [];
+            if (res && res.data && res.data.findManyReports) {
+              const reports = res.data.findManyReports as reports[];
+              for (let i = 0; i < reports.length; i++) {
+                const cur = reports[i];
+                if (cur.group && cur.group.customers && cur.group.customers.length > 0 && cur.group.customers[0].outlet) {
+                  arr.push([
+                    cur.report_id, cur.group.customers[0]?.outlet[0]?.outlet_id, cur.group.customers[0]?.outlet[0]?.name, cur.month, cur.year, '1', '$ 0.20',
+                    <div key={'frag ' + i} className='flex flex-row gap-x-4'>
+                      <div className='flex flex-col'>
+                        <span className='text-custom-xs'>
+                          (kWH)
+                        </span>
+                        <span>
+                          {cur.outlet_measured_savings_kWh}
+                        </span>
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className='text-custom-xs'>
+                          ($)
+                        </span>
+                        <span>
+                          ${cur.outlet_measured_savings_expenses}
+                        </span>
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className='text-custom-xs'>
+                          (%)
+                        </span>
+                        <span>
+                          {cur.outlet_measured_savings_percent}%
+                        </span>
+                      </div>
                     </div>
-                    <div className='flex flex-col'>
-                      <span className='text-custom-xs'>
-                        ($)
-                      </span>
-                      <span>
-                        ${cur.outlet_measured_savings_expenses}
-                      </span>
-                    </div>
-                    <div className='flex flex-col'>
-                      <span className='text-custom-xs'>
-                        (%)
-                      </span>
-                      <span>
-                        {cur.outlet_measured_savings_percent}%
-                      </span>
-                    </div>
-                  </div>
-                ]);
-              }
+                  ]);
+                }
 
+              }
+              setSavingReportData(arr);
+            } else {
+              setSavingReportData([]);
             }
-            setSavingReportData(arr);
-          } else {
-            setSavingReportData([]);
-          }
-        });
+          });
+        })
+
       }
     }
   }, [selectedCustomerType, selectedSavingsMonth, selectedSavingsYear, selectedSavingsOutletID, selectedSavingPageIndex, selectedSubTitle])
 
   React.useEffect(() => {
-    if (selectedCustomerType === "Outlet") {
+    if (selectedCustomerType === "Outlet" && selectedSavingsOutletID !== '') {
       reportTotalResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
         if (res.data && res.data.aggregateReports._count._all) {
           const total = res.data.aggregateReports._count._all;
