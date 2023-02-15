@@ -33,7 +33,7 @@ export default async function handler(
   }
 
   await page.goto(url, {
-    waitUntil: ["load", 'networkidle2', 'domcontentloaded'],
+    waitUntil: ["load", 'networkidle2','networkidle0','domcontentloaded'],
   });
 
   await page.emulateMediaType('print');

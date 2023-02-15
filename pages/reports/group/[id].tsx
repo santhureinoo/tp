@@ -84,18 +84,22 @@ const GroupReport: NextPage = () => {
     const getGroupQuery = gql`
     query FindManyReports($where: ReportsWhereInput, $resultsWhere2: ResultsWhereInput) {
         findManyReports(where: $where) {
-          customer {
-            outlet {
-              name
-              results(where: $resultsWhere2) {
-                outlet_measured_savings_percent
-                outlet_measured_savings_kWh
-                outlet_measured_savings_expenses
-                outlet_eqpt_energy_usage_with_TP_month_expenses
-                outlet_eqpt_energy_usage_with_TP_month_kW
-                outlet_eqpt_energy_usage_without_TP_month_expenses
-                outlet_eqpt_energy_usage_without_TP_month_kW
-                savings_tariff_expenses
+          group {
+            group_name
+            customers {
+              outlet {
+                name
+                outlet_id
+                results(where: $resultsWhere2) {
+                  outlet_measured_savings_percent
+                  outlet_measured_savings_kWh
+                  outlet_measured_savings_expenses
+                  outlet_eqpt_energy_usage_with_TP_month_expenses
+                  outlet_eqpt_energy_usage_with_TP_month_kW
+                  outlet_eqpt_energy_usage_without_TP_month_expenses
+                  outlet_eqpt_energy_usage_without_TP_month_kW
+                  savings_tariff_expenses
+                }
               }
             }
           }
@@ -118,13 +122,17 @@ const GroupReport: NextPage = () => {
                 }
 
             },
-            "resultsWhere2": {
-                ...(month && year && month !== 'All' && year !== 'All') && {
+            // 'GroupsWhereInput' : {
+            //     "group_id": {
+            //         "equals": id && typeof id === 'string' ? Number(id) : 0
+            //     },
+            // },
+            ...(month !== 'All' && year !== 'All') && {
+                "ResultsWhereInput": {
                     "outlet_date": {
-                        "equals": `${month} ${year}`
+                        "contains": month + "/" + year
                     }
                 }
-
             }
         },
         'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy
@@ -148,10 +156,12 @@ const GroupReport: NextPage = () => {
             };
 
             const reports: reports[] = getGroupResult.data.findManyReports;
-            reports.forEach(rep => {
-                if (rep.customer) {
-                    if (rep.customer.outlet) {
-                        rep.customer.outlet.forEach((outlet: outlet) => {
+            const rep = reports[reports.length - 1];
+            if (rep.group && rep.group.customers) {
+                attributes.groupName = rep.group.group_name;
+                rep.group.customers.forEach(cus => {
+                    if (cus.outlet) {
+                        cus.outlet.forEach((outlet: outlet) => {
                             axios.get(
                                 '/api/download',
                                 {
@@ -179,8 +189,9 @@ const GroupReport: NextPage = () => {
                             })
                         })
                     }
-                }
-            })
+                })
+
+            }
 
             setReportAttributes(attributes);
         }
@@ -192,10 +203,10 @@ const GroupReport: NextPage = () => {
                 {"Portfolio Savings & Substainability"}
             </h1>
             <span>
-                {"Burger King Holdings"}
+                {reportAttributes.groupName}
             </span>
             <span>
-                {"August 2022"}
+                {month + ' ' + year}
             </span>
             {/* <table>
                 <tr>
@@ -260,40 +271,40 @@ const GroupReport: NextPage = () => {
                 <tbody>
                     <tr>
                         <td>
-                            {reportAttributes.outletCount}
+                            {reportAttributes.outletCount.toFixed(0)}
                         </td>
                         <td>
-                            {reportAttributes.eqptWTP}
+                            {reportAttributes.eqptWTP.toFixed(2)}
                         </td>
                         <td>
                             <div className='flex flex-row justify-between'>
-                                <span>$</span> <span>{reportAttributes.eqptWTPExpense}</span>
+                                <span>$</span> <span>{reportAttributes.eqptWTPExpense.toFixed(2)}</span>
                             </div>
 
                         </td>
                         <td>
-                            {reportAttributes.eqptWoTP}
+                            {reportAttributes.eqptWoTP.toFixed(2)}
                         </td>
                         <td>
                             <div className='flex flex-row justify-between'>
-                                <span>$</span> <span>{reportAttributes.eqptWoTPExpense}</span>
+                                <span>$</span> <span>{reportAttributes.eqptWoTPExpense.toFixed(2)}</span>
                             </div>
 
                         </td>
                         <td>
-                            {reportAttributes.measuredEnergySavingsKWH}
+                            {reportAttributes.measuredEnergySavingsKWH.toFixed(2)}
                         </td>
                         <td>
                             <div className='flex flex-row justify-between'>
-                                <span>$</span> <span>{reportAttributes.measuredEnergySavingsExpense}</span>
+                                <span>$</span> <span>{reportAttributes.measuredEnergySavingsExpense.toFixed(2)}</span>
                             </div>
                         </td>
                         <td>
-                            {reportAttributes.measuredEnergySavingsPercent}%
+                            {Math.round(reportAttributes.measuredEnergySavingsPercent)}%
                         </td>
                         <td>
                             <div className='flex flex-row justify-between'>
-                                <span>$</span><span>{reportAttributes.savingTariff}</span>
+                                <span>$</span><span>{reportAttributes.savingTariff.toFixed(2)}</span>
                             </div>
 
                         </td>

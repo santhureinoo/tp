@@ -137,12 +137,12 @@ const ReportTable: any = () => {
         },
         ...(selectedInvoiceMonth !== 'All') && {
           "month": {
-            "equals": selectedSavingsMonth
+            "equals": selectedInvoiceMonth
           }
         },
         ...(selectedInvoiceYear !== 'All') && {
           "year": {
-            "equals": selectedSavingsYear
+            "equals": selectedInvoiceYear
           }
         },
       },
@@ -251,6 +251,7 @@ const ReportTable: any = () => {
       group {
         customers(where: $customersWhere2) {
           outlet(where: $outletWhere2) {
+            outlet_id
             name
           }
           name
@@ -647,11 +648,23 @@ const ReportTable: any = () => {
 
   const generateTable = React.useMemo(() => {
     const generateRows = (): any[][] => {
-      return reports.map((rep, index) => {
-        return [
-          rep.updated_at, rep.year, rep.month, rep.input_type, rep.report_id, <span key={`status-${index}`} className='text-custom-active-link'>{rep.status}</span>, rep.total_updated_outlets, rep.total_error_found, <span key={`rp-status-${index}`} className='text-custom-active-link'>{rep.report_status}</span>, <span key={`invoice-status-${index}`} className='text-custom-active-link'>{rep.invoice_status}</span>
-        ];
+      const uniqueArr: any[][] = [];
+      reports.forEach((rep, index) => {
+        const foundUni = uniqueArr.find((uni: any[]) => uni[4] === rep.report_id);
+        if (foundUni) {
+          foundUni[6] += rep.total_updated_outlets;
+          foundUni[7] += rep.total_error_found;
+        } else {
+          uniqueArr.push(
+            [
+              rep.updated_at, rep.year, rep.month, rep.input_type, rep.report_id, <span key={`status-${index}`} className='text-custom-active-link'>{rep.status}</span>, rep.total_updated_outlets, rep.total_error_found, <span key={`rp-status-${index}`} className='text-custom-active-link'>{rep.report_status}</span>, <span key={`invoice-status-${index}`} className='text-custom-active-link'>{rep.invoice_status}</span>
+            ]
+          )
+        }
+
       });
+
+      return uniqueArr;
     }
     return <React.Fragment>
       <Table
@@ -775,7 +788,7 @@ const ReportTable: any = () => {
               const cur = reports[i];
               if (cur.group && cur.group.customers && cur.group.customers.length > 0 && cur.group.customers[0].outlet) {
                 arr.push([
-                  cur.report_id, cur.group.customers[0]?.outlet[0]?.name, cur.month, cur.year, '1', '$ 0.20',
+                  cur.report_id, cur.group.customers[0]?.outlet[0]?.outlet_id, cur.group.customers[0]?.outlet[0]?.name, cur.month, cur.year, '1', '$ 0.20',
                   <div key={'frag ' + i} className='flex flex-row gap-x-4'>
                     <div className='flex flex-col'>
                       <span className='text-custom-xs'>
@@ -863,6 +876,7 @@ const ReportTable: any = () => {
         headers={headers()}
         onlyShowButton={true}
         data={savingReportData}
+        hiddenDataColIndex={selectedCustomerType === 'Outlet' ? [1] : []}
         totalNumberOfPages={totalSavingPage}
         openDetailContent={openReportEdit}
         setOpenDetailContent={setOpenReportEdit}
@@ -874,10 +888,11 @@ const ReportTable: any = () => {
         leftSideFlexDirection={"Vertical"}
         rightSideElements={[]}
         handleEdit={(selectedData) => {
+          setSelectedOutletID(selectedCustomerType === 'Outlet' ? selectedData[1] : selectedData[0])
           setSelectedReportID({
             reportId: parseInt(selectedData[0]),
-            selectedMonth: selectedData[2],
-            selectedYear: selectedData[3]
+            selectedMonth: selectedCustomerType === 'Outlet' ? selectedData[3] : selectedData[2],
+            selectedYear: selectedCustomerType === 'Outlet' ? selectedData[4] : selectedData[3]
           }); setOpenReportEdit(true)
         }} handleDelete={() => setOpenReportEdit(true)} />
     </React.Fragment>
@@ -977,23 +992,6 @@ const ReportTable: any = () => {
     </React.Fragment>
   }, [selectedInvoiceMonth, selectedInvoiceYear, , openReportEdit, setOpenReportEdit, selectedInvoicePte, selectedInvoice, setSelectedInvoicePte, allPte, invoices]);
 
-
-  const reportEditComp = React.useMemo(() => {
-    return <React.Fragment>
-      <Table
-        headers={['Report ID', 'Outlet Name', 'Month', 'Year', 'Equipment', 'Last Avaiable Tariff ($/kWh)', 'Measured Energy']}
-        hiddenDataColIndex={[7]}
-        onlyShowButton={true}
-        data={dummyDatForInvoices()}
-        leftSideElements={[]}
-        rightSideElements={[
-          <TableOptionField key={uuidv4()} label={'Outlet'} onChange={(selectedValue: string) => { setSelectedOutletID(selectedValue) }}
-            selectedValue={selectedOutletID} data={outletDropdown} />,
-        ]}
-        handleEdit={(selectedData) => { setSelectedResult(results[0]); setOpenReportEdit(true) }} handleDelete={() => setOpenReportEdit(true)} />
-    </React.Fragment>
-  }, [selectedCustomerType]);
-
   return (
     <React.Fragment >
       <div className='flex flex-row'>
@@ -1009,7 +1007,7 @@ const ReportTable: any = () => {
               generateTable
               : selectedSubTitle === "Savings" ?
                 savingTable(<ReportEdit selectedReportID={selectedReportID.reportId} selectedCustomerID={selectedCustomerId ? parseInt(selectedCustomerId) : 0} selectedOutletID={selectedOutletID ? parseInt(selectedOutletID) : 0} result={selectedResult} openReportEdit={openReportEdit} customerType={selectedCustomerType} setOpenReportEdit={setOpenReportEdit} month={selectedReportID.selectedMonth} year={selectedReportID.selectedYear} />) :
-                selectedSubTitle === "Invoice" ? invoiceTable(<InvoiceEdit openReportEdit={openReportEdit} setOpenReportEdit={setOpenReportEdit} invoice={selectedInvoice} />) : <React.Fragment><ReportSteps></ReportSteps></React.Fragment>
+                selectedSubTitle === "Invoice" ? invoiceTable(<InvoiceEdit openReportEdit={openReportEdit} setOpenReportEdit={setOpenReportEdit} invoice={selectedInvoice} month={selectedInvoice?.month || 'All'} year={selectedInvoice?.year || 'All'} />) : <React.Fragment><ReportSteps></ReportSteps></React.Fragment>
             }
           </div>
         </div>

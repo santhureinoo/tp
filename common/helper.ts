@@ -60,7 +60,7 @@ export function disableTemplate(path: string) {
 
 export function numberWithCommas(x?: number) {
   if (x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return Number(x).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   else {
     0;
@@ -81,9 +81,16 @@ export function formatCurrency(currency?: number) {
 }
 
 export function convertDate(dateStr: string | null) {
-  var timestamp = Date.parse(dateStr || "");
-  var dateObject = new Date(timestamp);
-  return dateObject.toLocaleDateString('en-us', { year: "numeric", month: "short", day: "numeric" });
+  if (dateStr) {
+    var parts = dateStr.split('/').map(par => Number(par));
+    // Please pay attention to the month (parts[1]); JavaScript counts months from 0:
+    // January - 0, February - 1, etc.
+    var dateObject = new Date(parts[2], parts[1] - 1, parts[0]);
+    // var timestamp = Date.parse(dateStr || "");
+    // var dateObject = new Date(timestamp);
+    return dateObject.toLocaleDateString('en-us', { year: "numeric", month: "short", day: "numeric" });
+  }
+  return null;
 }
 
 // calculate the median
@@ -100,3 +107,18 @@ export function calculatePagination(...total: string[]) {
 
 
 export const month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+export const monthNumToStr = {
+  '01': 'Jan',
+  '02': 'Feb',
+  '03': 'Mar',
+  '04': 'Apr',
+  '05': 'May',
+  '06': 'Jun',
+  '07': 'Jul',
+  '08': 'Aug',
+  '09': 'Sep',
+  '10': 'Oct',
+  '11': 'Nov',
+  '12': 'Dec',
+}

@@ -144,7 +144,7 @@ const GroupReport: NextPage = () => {
             ...(month && year && month !== 'All' && year !== 'All') && {
                 "resultsWhere2": {
                     "outlet_date": {
-                        "equals": `${month} ${year}`
+                        "contains": month + "/" + year
                     }
                 }
             }
@@ -185,7 +185,7 @@ const GroupReport: NextPage = () => {
                 },
                 ...(month && year && month !== 'All' && year !== 'All') && {
                     "outlet_month_year": {
-                        "equals": `${month} ${year}`
+                        "equals": `${month}/${year}`
                     }
                 },
 
@@ -219,7 +219,7 @@ const GroupReport: NextPage = () => {
                 },
                 ...(month && year && month !== 'All' && year !== 'All') && {
                     "outlet_month_year": {
-                        "equals": `${month} ${year}`
+                        "equals": `${month}/${year}`
                     }
                 }
             }
@@ -249,7 +249,7 @@ const GroupReport: NextPage = () => {
 
                             </td>
                             <td>
-                                {Number(result.outlet_eqpt_energy_usage_with_TP_month_kW).toLocaleString()}
+                                {Number(result.outlet_eqpt_energy_usage_with_TP_month_kW).toFixed(2)}
                             </td>
                             <td>
                                 <div className='flex flex-row justify-between'>
@@ -257,7 +257,7 @@ const GroupReport: NextPage = () => {
                                 </div>
                             </td>
                             <td>
-                                {Number(result.outlet_eqpt_energy_usage_without_TP_month_kW).toLocaleString()}
+                                {Number(result.outlet_eqpt_energy_usage_without_TP_month_kW).toFixed(2)}
                             </td>
                             <td>
                                 <div className='flex flex-row justify-between'>
@@ -265,16 +265,16 @@ const GroupReport: NextPage = () => {
                                 </div>
                             </td>
                             <td>
-                                {Number(result.outlet_measured_savings_kWh)}
+                                {Number(result.outlet_measured_savings_kWh).toFixed(2)}
                             </td>
                             <td>
                                 {numberWithCommas(Number(result.outlet_measured_savings_expenses))}
                             </td>
                             <td>
-                                {Number(result.outlet_measured_savings_percent)}%
+                                {Number(result.outlet_measured_savings_percent).toFixed(0)}%
                             </td>
                             <td>
-                                {Number(result.co2_savings_kg).toLocaleString()}
+                                {Number(result.co2_savings_kg).toFixed(2)}
                             </td>
                             <td>
                                 {numberWithCommas(Number(result.savings_tariff_expenses))}
@@ -285,7 +285,7 @@ const GroupReport: NextPage = () => {
                                 ACMV Equipment
                             </td>
                             <td>
-                                {Number(result.acmv_eqpt_energy_baseline_avg_hourly_kW)}
+                                {Number(result.acmv_eqpt_energy_baseline_avg_hourly_kW).toFixed(2)}
                             </td>
                             <td rowSpan={2} colSpan={5}>
 
@@ -293,8 +293,8 @@ const GroupReport: NextPage = () => {
                             <td rowSpan={2} colSpan={5}>
                                 <div className='flex flex-row justify-between align-center'>
                                     <div className='flex flex-col items-end'>
-                                        <span>{Number(result.acmv_25percent_benchmark_comparison_kWh).toLocaleString()}</span>
-                                        <span>{Number(result.acmv_10percent_benchmark_comparison_kWh).toLocaleString()}</span>
+                                        <span>{Number(result.acmv_25percent_benchmark_comparison_kWh).toFixed(2)}</span>
+                                        <span>{Number(result.acmv_10percent_benchmark_comparison_kWh).toFixed(2)}</span>
                                     </div>
                                     <div className='flex flex-col items-start'>
                                         <div className='flex gap-x-4'>
@@ -322,19 +322,19 @@ const GroupReport: NextPage = () => {
                                 Kitchen Exhaust
                             </td>
                             <td>
-                                {Number(result.ke_eqpt_energy_baseline_avg_hourly_kW).toLocaleString()}
+                                {Number(result.ke_eqpt_energy_baseline_avg_hourly_kW).toFixed(2)}
                             </td>
                             <td rowSpan={2}>
 
                             </td>
                             <td rowSpan={2}>
-                                {result.ke_eqpt_energy_usage_without_TP_month_kW}
+                                {Number(result.ke_eqpt_energy_usage_without_TP_month_kW).toFixed(2)}
                             </td>
                             <td rowSpan={2}>
 
                             </td>
                             <td rowSpan={2}>
-                                {result.ke_eqpt_energy_usage_with_TP_month_kW}
+                                {Number(result.ke_eqpt_energy_usage_with_TP_month_kW).toFixed(2)}
                             </td>
                             <td rowSpan={2}>
 
@@ -342,8 +342,8 @@ const GroupReport: NextPage = () => {
                             <td rowSpan={4} colSpan={5}>
                                 <div className='flex flex-row justify-between align-center'>
                                     <div className='flex flex-col items-end'>
-                                        <span>{Number(result.ke_and_ac_25percent_benchmark_comparison_kWh).toLocaleString()}</span>
-                                        <span>{Number(result.ke_and_ac_10percent_benchmark_comparison_kWh).toLocaleString()}</span>
+                                        <span>{Number(result.ke_and_ac_25percent_benchmark_comparison_kWh).toFixed(2)}</span>
+                                        <span>{Number(result.ke_and_ac_10percent_benchmark_comparison_kWh).toFixed(2)}</span>
                                     </div>
                                     <div className='flex flex-col items-start'>
                                         <div className='flex gap-x-4'>
@@ -370,19 +370,19 @@ const GroupReport: NextPage = () => {
                                 Aircons
                             </td>
                             <td>
-                                {Number(result.ac_eqpt_energy_baseline_avg_hourly_kW).toLocaleString()}
+                                {Number(result.ac_eqpt_energy_baseline_avg_hourly_kW).toFixed(2)}
                             </td>
                             <td rowSpan={2}>
 
                             </td>
                             <td rowSpan={2}>
-                                {Number(result.ac_eqpt_energy_usage_without_TP_month_kW).toLocaleString()}
+                                {Number(result.ac_eqpt_energy_usage_without_TP_month_kW).toFixed(2)}
                             </td>
                             <td rowSpan={2}>
 
                             </td>
                             <td rowSpan={2}>
-                                {Number(result.ac_eqpt_energy_usage_with_TP_month_kW).toLocaleString()}
+                                {Number(result.ac_eqpt_energy_usage_with_TP_month_kW).toFixed(2)}
                             </td>
                             <td rowSpan={2}>
 
@@ -464,16 +464,16 @@ const GroupReport: NextPage = () => {
                     var fontsize = 14;
                     var fontface = 'verdana';
                     var lineHeight = fontsize * 1.286;
-                    var text = '100';
+                    // var text = '100';
 
                     ctx.font = fontsize + 'px ' + fontface;
-                    var textWidth = ctx.measureText(text).width;
+                    // var textWidth = ctx.measureText(text).width;
 
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'top';
 
-                    ctx.fillText(text, x.getPixelForValue(0), y.getPixelForValue(0));
-                    ctx.strokeRect(x.getPixelForValue(0), y.getPixelForValue(0), textWidth, lineHeight);
+                    // ctx.fillText(text, x.getPixelForValue(0), y.getPixelForValue(0));
+                    // ctx.strokeRect(x.getPixelForValue(0), y.getPixelForValue(0), textWidth, lineHeight);
                     // const img = new Image();
                     // img.src = "https://www.chartjs.org/img/chartjs-logo.svg"
                     // ctx.drawImage(img, 10, 10, 30, 30);

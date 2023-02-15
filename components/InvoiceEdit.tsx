@@ -9,7 +9,7 @@ import { gql, useLazyQuery, WatchQueryFetchPolicy } from "@apollo/client";
 import DropdownMenu from "./DropdownMenu";
 import { useRouter } from 'next/router';
 import axios from "axios";
-import { downloadFile } from "../common/helper";
+import { downloadFile, monthNumToStr } from "../common/helper";
 
 
 interface Props {
@@ -17,9 +17,11 @@ interface Props {
     afterOperation?: () => void;
     invoice?: invoice;
     setOpenReportEdit(openReportEdit: boolean): void;
+    month: string;
+    year: string;
 }
 
-const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperation }: Props) => {
+const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperation, month, year }: Props) => {
 
     const [outlets, setOutlets] = React.useState<outlet[]>([]);
     const [openInvoiceBtn, setOpenInvoiceBtn] = React.useState(false);
@@ -38,6 +40,7 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
             outlet_eqpt_energy_usage_without_TP_month_expenses
             outlet_eqpt_energy_usage_without_TP_month_kW
             co2_savings_kg
+            savings_tariff_expenses
             outlet_date
           }
           name
@@ -73,9 +76,7 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                 "variables": {
                     "where": {
                         "outlet_date": {
-                            // "endsWith": `${invoice.month}/${invoice.year}`
-                            "endsWith": '2022',
-                            "startsWith": '01'
+                            "contains": month + "/" + year
                         }
                     },
                     "outletsWhere2": {
@@ -86,8 +87,7 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                     "resultsWhere2": {
                         "outlet_date": {
                             // "endsWith": `${invoice.month}/${invoice.year}`
-                            "endsWith": '2022',
-                            "startsWith": '01'
+                            "contains": month + "/" + year
                         }
                     }
                 }
@@ -100,7 +100,23 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
 
     }, [invoice, openReportEdit]);
 
+    const savingCo2 = React.useMemo(() => {
+        console.log(outlets);
+        let co2 = 0;
+        let saving = 0;
+        if (outlets && outlets.length > 0) {
+            outlets.forEach(out => {
+                out.results?.forEach(res => {
+                    co2 += Number(res.co2_savings_kg);
+                    saving += Number(res.savings_tariff_expenses);
+                })
+            })
 
+        } return {
+            'co2': co2,
+            'saving': saving,
+        }
+    }, [outlets])
 
     return (
         <React.Fragment>
@@ -149,7 +165,7 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                             </div>
 
                             {/* <button type="button" onClick={(e) => { }} className={`text-white ${billingData && billingData.STA === 'Generated' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'} font-medium rounded-lg text-sm px-5 py-5 items-center`}>
-                                Download Report
+                                Download Invoice
                             </button> */}
                         </div>
 
@@ -188,16 +204,16 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                                 <span><b>W/O TablePointer</b></span>
                             </div>
 
-                            <span><b>Sept. 2022</b></span>
+                            <span><b>{month + '.' + year}</b></span>
                         </div>
                         <div className="grid grid-cols-1 gap-x-2 gap-y-8">
                             <div>
                                 <h4>kWh</h4>
-                                <span className="text-slate-300">{invoice?.eqpt_energy_usage_without_TP_month_kW}</span>
+                                <span className="text-slate-300">{Number(invoice?.eqpt_energy_usage_without_TP_month_kW).toFixed(2)}</span>
                             </div>
                             <div>
                                 <h4>$</h4>
-                                <span className="text-slate-300">{invoice?.eqpt_energy_usage_without_TP_month_expenses}</span>
+                                <span className="text-slate-300">{Number(invoice?.eqpt_energy_usage_without_TP_month_expenses).toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
@@ -208,16 +224,16 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                                 <span><b>With TablePointer</b></span>
                             </div>
 
-                            <span><b>Sept. 2022</b></span>
+                            <span><b>{month + '.' + year}</b></span>
                         </div>
                         <div className="grid grid-cols-1 gap-x-2 gap-y-8">
                             <div>
                                 <h4>kWh</h4>
-                                <span className="text-slate-300">{invoice?.eqpt_energy_usage_with_TP_month_kW}</span>
+                                <span className="text-slate-300">{Number(invoice?.eqpt_energy_usage_with_TP_month_kW).toFixed(2)}</span>
                             </div>
                             <div>
                                 <h4>$</h4>
-                                <span className="text-slate-300">{invoice?.eqpt_energy_usage_with_TP_month_expenses}</span>
+                                <span className="text-slate-300">{Number(invoice?.eqpt_energy_usage_with_TP_month_expenses).toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
@@ -225,28 +241,28 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                 <div className="edit-sub-container">
                     <div className="flex bg-slate-200 p-4 items-center justify-between">
                         <h2><b>Measured Energy Savings</b></h2>
-                        <span><b>Sept. 2022</b></span>
+                        <span><b>{month + '.' + year}</b></span>
                     </div>
                     <div className="grid grid-cols-3 gap-x-2 gap-y-8">
                         <div>
                             <h4>kWh</h4>
-                            <span className="text-slate-300">{invoice?.outlet_measured_savings_kWh}</span>
+                            <span className="text-slate-300">{Number(invoice?.outlet_measured_savings_kWh).toFixed(2)}</span>
                         </div>
                         <div>
                             <h4>$</h4>
-                            <span className="text-slate-300">{invoice?.outlet_measured_savings_expenses}</span>
+                            <span className="text-slate-300">{Number(invoice?.outlet_measured_savings_expenses).toFixed(2)}</span>
                         </div>
                         <div>
                             <h4>%</h4>
-                            <span className="text-slate-300">{invoice?.outlet_measured_savings_percent}</span>
+                            <span className="text-slate-300">{Math.round(Number(invoice?.outlet_measured_savings_percent))}</span>
                         </div>
                         <div>
                             <h4>CO2</h4>
-                            <span className="text-slate-300">{invoice?.co2_savings_kg}</span>
+                            <span className="text-slate-300">{Number(savingCo2.co2).toFixed(2)}</span>
                         </div>
                         <div>
                             <h4>Savings @</h4>
-                            <span className="text-slate-300">{invoice?.savings_tariff_expenses}</span>
+                            <span className="text-slate-300">{Number(savingCo2.saving).toFixed(2)}</span>
                         </div>
 
                     </div>
@@ -254,7 +270,7 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                 <div className="edit-sub-container">
                     <div className="flex bg-slate-200 p-4 items-center justify-between">
                         <h2><b>Outlet Savings</b></h2>
-                        <span><b>Sept. 2022</b></span>
+                        <span><b>{month + '.' + year}</b></span>
                     </div>
                     <div className="grid grid-cols-1 items-center">
                         <div className="w-full flex flex-col overflow-auto max-h-summaryBillingHeight">

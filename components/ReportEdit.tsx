@@ -50,19 +50,26 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                 "group_id": {
                     "equals": selectedReportID
                 },
+            },
+            ...(month !== 'All' && year !== 'All') && {
+                "resultWhere": {
+                    "outlet_date": {
+                        "contains": month + "/" + year
+                    }
+                }
             }
         },
     };
 
     const getGroupByIDQUery = gql`
-    query FindFirstGroup($where: ReportsWhereInput, $findFirstGroupWhere2: GroupWhereInput) {
+    query FindFirstGroup($where: ReportsWhereInput, $findFirstGroupWhere2: GroupWhereInput, $resultWhere: ResultsWhereInput) {
         findFirstGroup(where: $findFirstGroupWhere2) {
           group_name
           group_id
           customers {
             name
             outlet {
-                results {
+                results(where: $resultWhere) {
                     outlet_eqpt_energy_usage_with_TP_month_expenses
                     outlet_eqpt_energy_usage_with_TP_month_kW
                     outlet_eqpt_energy_usage_without_TP_month_expenses
@@ -115,26 +122,36 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                 "outlet_id": {
                     "equals": selectedOutletID || 0
                 }
+            },
+            ...(month !== 'All' && year !== 'All') && {
+                "resultWhere": {
+                    "outlet_date": {
+                        "contains": month + "/" + year
+                    }
+                }
             }
+
         },
     }
 
     const getGroupQuery = gql`
     query FindManyReports($where: ReportsWhereInput, $resultsWhere2: ResultsWhereInput) {
         findManyReports(where: $where) {
-          customer {
-            outlet {
-              name
-              outlet_id
-              results(where: $resultsWhere2) {
-                outlet_measured_savings_percent
-                outlet_measured_savings_kWh
-                outlet_measured_savings_expenses
-                outlet_eqpt_energy_usage_with_TP_month_expenses
-                outlet_eqpt_energy_usage_with_TP_month_kW
-                outlet_eqpt_energy_usage_without_TP_month_expenses
-                outlet_eqpt_energy_usage_without_TP_month_kW
-                savings_tariff_expenses
+          group {
+            customers {
+              outlet {
+                name
+                outlet_id
+                results(where: $resultsWhere2) {
+                  outlet_measured_savings_percent
+                  outlet_measured_savings_kWh
+                  outlet_measured_savings_expenses
+                  outlet_eqpt_energy_usage_with_TP_month_expenses
+                  outlet_eqpt_energy_usage_with_TP_month_kW
+                  outlet_eqpt_energy_usage_without_TP_month_expenses
+                  outlet_eqpt_energy_usage_without_TP_month_kW
+                  savings_tariff_expenses
+                }
               }
             }
           }
@@ -142,7 +159,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
       }`;
 
     const getReportByIdQuery = gql`
-    query FindFirstReports($where: ReportsWhereInput, $customersWhere2: CustomerWhereInput, $outletWhere2: OutletWhereInput) {
+    query FindFirstReports($where: ReportsWhereInput, $customersWhere2: CustomerWhereInput,$resultWhere: ResultsWhereInput, $outletWhere2: OutletWhereInput) {
         findFirstReports(where: $where) {
             group {
                 customers(where: $customersWhere2) {
@@ -151,7 +168,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                         outlet_id
                         name
                         outlet_address
-                        results {
+                        results(where: $resultWhere) {
                             outlet_eqpt_energy_usage_with_TP_month_expenses
                             outlet_eqpt_energy_usage_with_TP_month_kW
                             outlet_eqpt_energy_usage_without_TP_month_expenses
@@ -484,7 +501,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                 "resultsWhere2": {
                                     ...(month && year && month !== 'All' && year !== 'All') && {
                                         "outlet_date": {
-                                            "equals": `${month} ${year}`
+                                            "equals": `${month}/${year}`
                                         }
                                     }
 
@@ -492,35 +509,36 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                             },
                             'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy
                         }).then(response => {
+                            if (!response.data) {
+                                return;
+                            }
                             const reports: reports[] = response.data.findManyReports;
-                            console.log
-                            reports.forEach(rep => {
-                                if (rep.group && rep.group.customers) {
-                                    rep.group.customers.forEach(cus => {
-                                        if (cus.outlet) {
-                                            cus.outlet.forEach(outlet => {
-                                                axios.get(
-                                                    '/api/download',
-                                                    {
-                                                        responseType: 'arraybuffer',
-                                                        params: {
-                                                            type: 'group_annex',
-                                                            id: outlet.outlet_id,
-                                                            month: month,
-                                                            year: year,
-                                                        }
-                                                    } // !!!
-                                                ).then((response) => {
-                                                    downloadFile(response.data, 'Group(Annex) Report');
-                                                })
+                            const rep = reports[reports.length - 1];
+                            if (rep.group && rep.group.customers) {
+                                rep.group.customers.forEach(cus => {
+                                    if (cus.outlet) {
+                                        cus.outlet.forEach(outlet => {
+                                            axios.get(
+                                                '/api/download',
+                                                {
+                                                    responseType: 'arraybuffer',
+                                                    params: {
+                                                        type: 'group_annex',
+                                                        id: outlet.outlet_id,
+                                                        month: month,
+                                                        year: year,
+                                                    }
+                                                } // !!!
+                                            ).then((response) => {
+                                                downloadFile(response.data, 'Group(Annex) Report');
                                             })
-                                        }
+                                        })
+                                    }
 
-                                    })
+                                })
 
 
-                                }
-                            })
+                            }
                         })
 
                         axios.get(
@@ -551,9 +569,10 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                             {
                                 responseType: 'arraybuffer',
                                 params: {
-                                    type: 'outlet', id: currentReport?.outlet?.outlet_id,
+                                    type: 'outlet',
                                     month: month,
                                     year: year,
+                                    id: selectedOutletID,
                                 }
                             } // !!!
                         ).then((response) => {
@@ -697,108 +716,149 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                     <h2><b>{customerType === 'Outlet' ? 'Pte Ltd' : 'Group'}</b> Information</h2>
                 </div>
                 {customerType === 'Outlet' ?
-                    <div className="grid grid-cols-3 gap-x-2 gap-y-8">
-                        <div>
-                            <h4>Pte Ltd Name</h4>
-                            <span className="text-slate-400">{currentReport?.group?.customers && currentReport?.group?.customers.length > 0 ? currentReport?.group?.customers[0].name : ''} </span>
-                        </div>
-                        <div>
-                            <h4>Outlet Name</h4>
-                            <span className="text-slate-400">{currentReport?.group?.customers && currentReport?.group?.customers.length > 0 && currentReport?.group?.customers[0].outlet && currentReport?.group?.customers[0].outlet.length > 0 ? currentReport?.group?.customers[0].outlet[0].name : ''}</span>
-                        </div>
-                        <div>
-                            <h4>Outlet Address</h4>
-                            <span className="text-slate-400">{currentReport?.group?.customers && currentReport?.group?.customers.length > 0 && currentReport?.group?.customers[0].outlet && currentReport?.group?.customers[0].outlet.length > 0 ? currentReport?.group?.customers[0].outlet[0].outlet_address : ''} </ span >
+                    <React.Fragment>
+                        <div className="grid grid-cols-3 gap-x-2 gap-y-8">
+                            <div>
+                                <h4>Pte Ltd Name</h4>
+                                <span className="text-slate-400">{currentReport?.group?.customers && currentReport?.group?.customers.length > 0 ? currentReport?.group?.customers[0].name : ''} </span>
+                            </div>
+                            <div>
+                                <h4>Outlet Name</h4>
+                                <span className="text-slate-400">{currentReport?.group?.customers && currentReport?.group?.customers.length > 0 && currentReport?.group?.customers[0].outlet && currentReport?.group?.customers[0].outlet.length > 0 ? currentReport?.group?.customers[0].outlet[0].name : ''}</span>
+                            </div>
+                            <div>
+                                <h4>Outlet Address</h4>
+                                <span className="text-slate-400">{currentReport?.group?.customers && currentReport?.group?.customers.length > 0 && currentReport?.group?.customers[0].outlet && currentReport?.group?.customers[0].outlet.length > 0 ? currentReport?.group?.customers[0].outlet[0].outlet_address : ''} </ span >
+                            </div>
+
+                            <div>
+                                <h4>Last Available Tariff</h4>
+                                <span className="text-slate-400">{currentReport?.last_avail_tariff}</span>
+                            </div>
                         </div>
 
-                        <div>
-                            <h4>Last Available Tariff</h4>
-                            <span className="text-slate-400">{currentReport?.last_avail_tariff}</span>
+                        <div className="grid grid-cols-2 gap-x-2">
+                            <div className="edit-sub-container">
+                                <div className="flex bg-slate-200 p-4 items-center justify-between">
+                                    <div>
+                                        <h2><b>Energy Usage</b></h2>
+                                        <span><b>W/O TablePointer</b></span>
+                                    </div>
+
+                                    <span><b>{currentReport?.month}. {currentReport?.year}</b></span>
+                                </div>
+                                <div className="grid grid-cols-1 gap-x-2 gap-y-8">
+                                    {customerType === 'Outlet' ? <><div>
+                                        <h4>kWh</h4>
+                                        <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.euwotp_kwh)}</span>
+                                    </div>
+                                        <div>
+                                            <h4>$</h4>
+                                            <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.euwotp_exp)}</span>
+                                        </div></> :
+                                        <><div>
+                                            <h4>kWh</h4>
+                                            <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwotp_kwh)}</span>
+                                        </div>
+                                            <div>
+                                                <h4>$</h4>
+                                                <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwotp_exp)}</span>
+                                            </div></>}
+                                </div>
+                            </div>
+                            <div className="edit-sub-container">
+                                <div className="flex bg-slate-200 p-4 items-center justify-between">
+                                    <div>
+                                        <h2><b>Energy Usage</b></h2>
+                                        <span><b>With TablePointer</b></span>
+                                    </div>
+
+                                    <span><b>{currentReport?.month}. {currentReport?.year}</b></span>
+                                </div>
+                                {customerType === 'Outlet' && <div className="grid grid-cols-1 gap-x-2 gap-y-8">
+                                    <div>
+                                        <h4>kWh</h4>
+                                        <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.euwtp_kwh)}</span>
+                                    </div>
+                                    <div>
+                                        <h4>$</h4>
+                                        <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.euwtp_exp)}</span>
+                                    </div>
+                                </div>}
+
+                            </div>
                         </div>
-                    </div>
+                    </React.Fragment>
                     :
-                    <div className="grid grid-cols-3 gap-x-2 gap-y-8">
-                        <div>
-                            <h4>Group Name</h4>
-                            <span className="text-slate-400">{currentGroup?.group_name} </span>
+                    <React.Fragment>
+                        <div className="grid grid-cols-3 gap-x-2 gap-y-8">
+                            <div>
+                                <h4>Group Name</h4>
+                                <span className="text-slate-400">{currentGroup?.group_name} </span>
+                            </div>
+                            <div>
+                                <h4>Live Outlets</h4>
+                                <span className="text-slate-400">{outletTotalForGroup}</span>
+                            </div>
+                            <div>
+                                <h4>Group Address</h4>
+                                <span className="text-slate-400">Sahid Building <br /> Sudirman Boulevard No.12 Floor 15 / <br /> Unit 09</ span >
+                            </div>
+
+                            <div>
+                                <h4>Savings @Tariff</h4>
+                                <span className="text-slate-400">{savingTarifForGroup()}</span>
+                            </div>
                         </div>
-                        <div>
-                            <h4>Live Outlets</h4>
-                            <span className="text-slate-400">{outletTotalForGroup}</span>
-                        </div>
-                        <div>
-                            <h4>Group Address</h4>
-                            <span className="text-slate-400">Sahid Building <br /> Sudirman Boulevard No.12 Floor 15 / <br /> Unit 09</ span >
+                        <div className="grid grid-cols-2 gap-x-2">
+                            <div className="edit-sub-container">
+                                <div className="flex bg-slate-200 p-4 items-center justify-between">
+                                    <div>
+                                        <h2><b>Energy Usage (GROUP)</b></h2>
+                                        <span><b>W/O TablePointer</b></span>
+                                    </div>
+
+                                    <span><b>{month}. {year}</b></span>
+                                </div>
+                                <div className="grid grid-cols-1 gap-x-2 gap-y-8">
+                                    <div>
+                                        <h4>kWh</h4>
+                                        <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwotp_kwh)}</span>
+                                    </div>
+                                    <div>
+                                        <h4>$</h4>
+                                        <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwotp_exp)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="edit-sub-container">
+                                <div className="flex bg-slate-200 p-4 items-center justify-between">
+                                    <div>
+                                        <h2><b>Energy Usage</b></h2>
+                                        <span><b>With TablePointer</b></span>
+                                    </div>
+
+                                    <span><b>{month}. {year}</b></span>
+                                </div>
+                                <div className="grid grid-cols-1 gap-x-2 gap-y-8">
+                                    <div>
+                                        <h4>kWh</h4>
+                                        <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwtp_kwh)}</span>
+                                    </div>
+                                    <div>
+                                        <h4>$</h4>
+                                        <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwtp_exp)}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div>
-                            <h4>Savings @Tariff</h4>
-                            <span className="text-slate-400">{savingTarifForGroup()}</span>
-                        </div>
-                    </div>
+                    </React.Fragment>
+
                 }
 
             </div>
-            <div className="grid grid-cols-2 gap-x-2">
-                <div className="edit-sub-container">
-                    <div className="flex bg-slate-200 p-4 items-center justify-between">
-                        <div>
-                            <h2><b>Energy Usage</b></h2>
-                            <span><b>W/O TablePointer</b></span>
-                        </div>
 
-                        <span><b>{currentReport?.month}. {currentReport?.year}</b></span>
-                    </div>
-                    <div className="grid grid-cols-1 gap-x-2 gap-y-8">
-                        {customerType === 'Outlet' ? <><div>
-                            <h4>kWh</h4>
-                            <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.euwotp_kwh)}</span>
-                        </div>
-                            <div>
-                                <h4>$</h4>
-                                <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.euwotp_exp)}</span>
-                            </div></> :
-                            <><div>
-                                <h4>kWh</h4>
-                                <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwotp_kwh)}</span>
-                            </div>
-                                <div>
-                                    <h4>$</h4>
-                                    <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwotp_exp)}</span>
-                                </div></>}
-                    </div>
-                </div>
-                <div className="edit-sub-container">
-                    <div className="flex bg-slate-200 p-4 items-center justify-between">
-                        <div>
-                            <h2><b>Energy Usage</b></h2>
-                            <span><b>With TablePointer</b></span>
-                        </div>
-
-                        <span><b>{currentReport?.month}. {currentReport?.year}</b></span>
-                    </div>
-                    {customerType === 'Outlet' && <div className="grid grid-cols-1 gap-x-2 gap-y-8">
-                        <div>
-                            <h4>kWh</h4>
-                            <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.euwtp_kwh)}</span>
-                        </div>
-                        <div>
-                            <h4>$</h4>
-                            <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.euwtp_exp)}</span>
-                        </div>
-                    </div>}
-                    {customerType === 'Group' && <div className="grid grid-cols-1 gap-x-2 gap-y-8">
-                        <div>
-                            <h4>kWh</h4>
-                            <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwtp_kwh)}</span>
-                        </div>
-                        <div>
-                            <h4>$</h4>
-                            <span className="text-slate-400">{numberWithCommas(groupMeasuredEnergySavings?.euwtp_exp)}</span>
-                        </div>
-                    </div>}
-                </div>
-            </div>
             <div className="edit-sub-container">
                 <div className="flex bg-slate-200 p-4 items-center justify-between">
                     <h2><b>Measured Energy Savings</b></h2>
