@@ -235,7 +235,12 @@ const ReportSteps = (): React.ReactElement => {
                 </div>
             </div>
         </div>
-        <ReportStepEdit onConfirm={() => { downloadFromS3(3); }} openReportStepEdit={openReportStepEdit} setOpenReportStepEdit={setOpenReportStepEdit} fromExtension={"Report & Invoice"} toExtension={"Output-Sheet.csv"} datePeriod={date} affectedRows={50} uploadedFileAttribute={selectedFileAttribute} />
+        <ReportStepEdit onConfirm={() => {
+            axios.get(
+                `http://13.214.191.184:4001/create_group_passwords`,
+            );
+            downloadFromS3(3);
+        }} openReportStepEdit={openReportStepEdit} setOpenReportStepEdit={setOpenReportStepEdit} fromExtension={"Report & Invoice"} toExtension={"Output-Sheet.csv"} datePeriod={date} affectedRows={50} uploadedFileAttribute={selectedFileAttribute} />
     </React.Fragment>;
 }
 
