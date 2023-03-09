@@ -215,6 +215,20 @@ export interface global_input {
 
 }
 
+
+export namespace lastest_report_dateFields {
+    export type date_id = number;
+    export type lastest_report_month_year = string;
+
+}
+
+export interface lastest_report_date {
+    [key: string]: any;
+    outlet_id: lastest_report_dateFields.date_id;
+    lastest_report_month_year: lastest_report_dateFields.lastest_report_month_year;
+}
+
+
 export namespace groupFields {
     export type group_id = number;
     export type group_name = string;

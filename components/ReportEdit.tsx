@@ -10,7 +10,9 @@ import DropdownMenu from "./DropdownMenu";
 import { useRouter } from 'next/router';
 import { useDropdown } from '../hooks/UseDropdown';
 import axios from "axios";
-import { downloadFile, numberWithCommas } from "../common/helper";
+import { convertMonthName, downloadFile, numberWithCommas } from "../common/helper";
+import moment from "moment";
+import { Oval } from "react-loader-spinner";
 
 interface Props {
     openReportEdit: boolean;
@@ -29,6 +31,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
     const [dropdownRef, openDownloadReport, setOpenDownloadReport] = useDropdown(false, () => { });
     const [currentReport, setCurrentReport] = React.useState<reports>();
     const [currentGroup, setCurrentGroup] = React.useState<group>();
+    const [loading, setLoading] = React.useState(false);
     const router = useRouter();
 
     const getGroupBYIDVariable = {
@@ -54,7 +57,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
             ...(month !== 'All' && year !== 'All') && {
                 "resultWhere": {
                     "outlet_date": {
-                        "contains": month + "/" + year
+                        "contains": year
                     }
                 }
             }
@@ -77,6 +80,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                     outlet_measured_savings_percent
                     outlet_measured_savings_kWh
                     outlet_measured_savings_expenses
+                    outlet_date
                 }
             }
         }
@@ -126,7 +130,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
             ...(month !== 'All' && year !== 'All') && {
                 "resultWhere": {
                     "outlet_date": {
-                        "contains": month + "/" + year
+                        "contains": month + '/' + year
                     }
                 }
             }
@@ -151,6 +155,9 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                   outlet_eqpt_energy_usage_without_TP_month_expenses
                   outlet_eqpt_energy_usage_without_TP_month_kW
                   savings_tariff_expenses
+                  co2_savings_kg
+                  tp_sales_expenses
+                  outlet_date
                 }
               }
             }
@@ -462,6 +469,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                 {
                     "text": "Group",
                     "onClick": () => {
+                        setLoading(true);
                         axios.get(
                             '/api/download',
                             {
@@ -474,6 +482,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                 }
                             } // !!!
                         ).then((response) => {
+                            setLoading(false);
                             downloadFile(response.data, 'Group Report');
                         })
                     },
@@ -482,6 +491,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                 {
                     "text": "Group + Annex",
                     "onClick": () => {
+                        setLoading(true);
                         getGroupResult[0]({
                             'variables': {
                                 "where": {
@@ -510,6 +520,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                             'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy
                         }).then(response => {
                             if (!response.data) {
+                                setLoading(false);
                                 return;
                             }
                             const reports: reports[] = response.data.findManyReports;
@@ -530,14 +541,17 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                                     }
                                                 } // !!!
                                             ).then((response) => {
+                                                setLoading(false);
                                                 downloadFile(response.data, 'Group(Annex) Report');
                                             })
                                         })
+                                    } else {
+                                        setLoading(false);
                                     }
 
                                 })
-
-
+                            } else {
+                                setLoading(false);
                             }
                         })
 
@@ -553,6 +567,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                 }
                             } // !!!
                         ).then((response) => {
+                            setLoading(false);
                             downloadFile(response.data, 'Group Report');
                         })
                     },
@@ -564,6 +579,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                 {
                     "text": "Outlet",
                     "onClick": () => {
+                        setLoading(true);
                         axios.get(
                             '/api/download',
                             {
@@ -576,6 +592,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                 }
                             } // !!!
                         ).then((response) => {
+                            setLoading(false);
                             downloadFile(response.data, 'Outlet Report');
                         })
 
@@ -596,19 +613,26 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                 euwotp_kwh: 0,
                 euwotp_exp: 0,
                 euwtp_kwh: 0,
-                euwtp_exp: 0
+                euwtp_exp: 0,
+                energy_saving_py: 0,
+                co2_saving_py: 0,
             }
             if (currentGroup.customers) {
                 currentGroup.customers.forEach(customer => {
                     customer.outlet && customer.outlet.forEach(outlet => {
                         outlet.results && outlet.results.forEach(res => {
-                            result.exp += res.outlet_measured_savings_expenses ? parseInt(res.outlet_measured_savings_expenses) : 0;
-                            result.kwh += res.outlet_measured_savings_kWh ? parseInt(res.outlet_measured_savings_kWh) : 0;
-                            result.percent += res.outlet_measured_savings_percent ? parseInt(res.outlet_measured_savings_percent) : 0;
-                            result.euwotp_kwh += res.outlet_eqpt_energy_usage_without_TP_month_kW ? parseInt(res.outlet_eqpt_energy_usage_without_TP_month_kW) : 0;
-                            result.euwotp_exp += res.outlet_eqpt_energy_usage_without_TP_month_expenses ? parseInt(res.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0;
-                            result.euwtp_kwh += res.outlet_eqpt_energy_usage_with_TP_month_kW ? parseInt(res.outlet_eqpt_energy_usage_with_TP_month_kW) : 0;
-                            result.euwtp_exp += res.outlet_eqpt_energy_usage_with_TP_month_expenses ? parseInt(res.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0;
+                            const outletDate = moment(res.outlet_date, 'DD/MM/YYYY');
+                            if (outletDate.month() + 1 === parseInt(month)) {
+                                result.exp += res.outlet_measured_savings_expenses ? parseInt(res.outlet_measured_savings_expenses) : 0;
+                                result.kwh += res.outlet_measured_savings_kWh ? parseInt(res.outlet_measured_savings_kWh) : 0;
+                                result.percent += res.outlet_measured_savings_percent ? parseInt(res.outlet_measured_savings_percent) : 0;
+                                result.euwotp_kwh += res.outlet_eqpt_energy_usage_without_TP_month_kW ? parseInt(res.outlet_eqpt_energy_usage_without_TP_month_kW) : 0;
+                                result.euwotp_exp += res.outlet_eqpt_energy_usage_without_TP_month_expenses ? parseInt(res.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0;
+                                result.euwtp_kwh += res.outlet_eqpt_energy_usage_with_TP_month_kW ? parseInt(res.outlet_eqpt_energy_usage_with_TP_month_kW) : 0;
+                                result.euwtp_exp += res.outlet_eqpt_energy_usage_with_TP_month_expenses ? parseInt(res.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0;
+                            }
+                            result.energy_saving_py += res.tp_sales_expenses ? parseInt(res.tp_sales_expenses) : 0;
+                            result.co2_saving_py += res.co2_savings_kg ? parseInt(res.co2_savings_kg) : 0;
                         })
                     })
                 })
@@ -698,8 +722,19 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                             View Dashboard
                         </button>
                         <div className="">
-                            <button type="button" onClick={(e) => { setOpenDownloadReport(!openDownloadReport) }} className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}>
-                                Download Report
+                            <button type="button" onClick={(e) => { !loading && setOpenDownloadReport(!openDownloadReport) }} className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}>
+                                {loading ? <Oval
+                                    height={20}
+                                    width={20}
+                                    color="white"
+                                    wrapperStyle={{}}
+                                    wrapperClass="w-full py-2 flex justify-center"
+                                    visible={true}
+                                    ariaLabel='oval-loading'
+                                    secondaryColor="white"
+                                    strokeWidth={2}
+                                    strokeWidthSecondary={2}
+                                /> : 'Download Report'}
                                 <div className={`${openDownloadReport ? 'absolute' : 'hidden'} z-20 top-16 left-0 w-full`}>
                                     <DropdownMenu options={downloadReportItems} />
                                 </div>
@@ -745,7 +780,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                         <span><b>W/O TablePointer</b></span>
                                     </div>
 
-                                    <span><b>{currentReport?.month}. {currentReport?.year}</b></span>
+                                    <span><b>{convertMonthName(currentReport?.month)}. {currentReport?.year}</b></span>
                                 </div>
                                 <div className="grid grid-cols-1 gap-x-2 gap-y-8">
                                     {customerType === 'Outlet' ? <><div>
@@ -773,7 +808,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                         <span><b>With TablePointer</b></span>
                                     </div>
 
-                                    <span><b>{currentReport?.month}. {currentReport?.year}</b></span>
+                                    <span><b>{convertMonthName(currentReport?.month)}. {currentReport?.year}</b></span>
                                 </div>
                                 {customerType === 'Outlet' && <div className="grid grid-cols-1 gap-x-2 gap-y-8">
                                     <div>
@@ -814,11 +849,11 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                             <div className="edit-sub-container">
                                 <div className="flex bg-slate-200 p-4 items-center justify-between">
                                     <div>
-                                        <h2><b>Energy Usage (GROUP)</b></h2>
+                                        <h2><b>Energy Usage</b></h2>
                                         <span><b>W/O TablePointer</b></span>
                                     </div>
 
-                                    <span><b>{month}. {year}</b></span>
+                                    <span><b>{convertMonthName(month)}. {year}</b></span>
                                 </div>
                                 <div className="grid grid-cols-1 gap-x-2 gap-y-8">
                                     <div>
@@ -838,7 +873,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                         <span><b>With TablePointer</b></span>
                                     </div>
 
-                                    <span><b>{month}. {year}</b></span>
+                                    <span><b>{convertMonthName(month)}. {year}</b></span>
                                 </div>
                                 <div className="grid grid-cols-1 gap-x-2 gap-y-8">
                                     <div>
@@ -861,8 +896,8 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
 
             <div className="edit-sub-container">
                 <div className="flex bg-slate-200 p-4 items-center justify-between">
-                    <h2><b>Measured Energy Savings</b></h2>
-                    <span><b>{currentReport?.month || currentGroup?.reports?.pop()?.month}. {currentReport?.year || currentGroup?.reports?.pop()?.year}</b></span>
+                    <h2><b>Measured Energy Saving</b></h2>
+                    <span><b>{convertMonthName(currentReport?.month || month)}. {currentReport?.year || year}</b></span>
                 </div>
                 {customerType === 'Outlet' ?
                     <div className="grid grid-cols-3 gap-x-2 gap-y-8">
@@ -910,7 +945,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                     <div className="edit-sub-container">
                         <div className="flex bg-slate-200 p-4 items-center justify-between">
                             <h2><b>Equipment Performance</b></h2>
-                            <span><b>{currentReport?.month}. {currentReport?.year}</b></span>
+                            <span><b>{convertMonthName(currentReport?.month)}. {currentReport?.year}</b></span>
                         </div>
                         <div className="grid grid-cols-1 items-center">
                             <div className="w-full overflow-auto max-h-summaryBillingHeight">

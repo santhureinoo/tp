@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export function truncateFileName(str: string, max: number) {
   const splitStr = str.split('.');
   return str.length > max ? str.substring(0, max - 1) + '…' : str;
@@ -29,6 +31,11 @@ export function downloadFile(data: any, name: string) {
   document.body.removeChild(link);
   URL.revokeObjectURL(href);
 
+}
+
+export function convertMonthName(monthIndex?: string) {
+  const indexNum = parseInt(monthIndex || '1') - 1;
+  return moment().month(indexNum).format('MMM')
 }
 
 export function disableTemplate(path: string) {

@@ -68,6 +68,9 @@ const ReportTable: any = () => {
   const [totalGeneratePage, setTotalGeneratePage] = React.useState(1);
   const [selectedGeneratePageIndex, setSelectedGeneratePageIndex] = React.useState(1);
 
+  //Loading
+  const [tableLoading, setTableLoading] = React.useState(false);
+
 
   const getReportsQuery = gql`
   query FindManyReports($where: ReportsWhereInput) {
@@ -345,7 +348,7 @@ const ReportTable: any = () => {
 
 
   const getGroupsQuery = gql`
-  query _count($where: ReportsWhereInput) {
+  query getGroups($where: ReportsWhereInput) {
     groups {
       group_id
       group_name
@@ -671,6 +674,7 @@ const ReportTable: any = () => {
         onlyShowButton={true}
         data={generateRows()}
         leftSideElements={[]}
+        loading={tableLoading}
         hideDetailMenu={true}
         totalNumberOfPages={totalGeneratePage}
         setCurrentSelectedPage={setSelectedGeneratePageIndex}
@@ -686,12 +690,13 @@ const ReportTable: any = () => {
         ]}
         handleEdit={(selectedData) => { setSelectedResult(results.find(res => res.outlet_date === selectedData[7])); setOpenReportEdit(true) }} handleDelete={() => setOpenReportEdit(true)} />
     </React.Fragment>
-  }, [reports, selectedGenerateMonth, selectedGenerateYear]);
+  }, [reports, selectedGenerateMonth, tableLoading, selectedGenerateYear]);
 
   React.useEffect(() => {
     const arr: any[] = [];
     if (selectedSubTitle === 'Savings') {
       if (selectedCustomerType === 'Group') {
+        setTableLoading(true);
         getGroupsResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then((res: any) => {
           const arr: any[] = [];
           if (res && res.data && res.data.groups) {
@@ -773,12 +778,15 @@ const ReportTable: any = () => {
               }
             })
             setSavingReportData(arr);
+            setTableLoading(false);
           } else {
             setSavingReportData([]);
+            setTableLoading(false);
           }
         });
         setTotalSavingPage(0);
       } else {
+        setTableLoading(true);
         customerResult.refetch().then(res => {
           getReportsByOutletIdResult[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then((res: any) => {
             const arr = [];
@@ -820,8 +828,11 @@ const ReportTable: any = () => {
 
               }
               setSavingReportData(arr);
+              setTableLoading(false);
+
             } else {
               setSavingReportData([]);
+              setTableLoading(false);
             }
           });
         })
@@ -876,6 +887,7 @@ const ReportTable: any = () => {
     return <React.Fragment>
       <Table
         headers={headers()}
+        loading={tableLoading}
         onlyShowButton={true}
         data={savingReportData}
         hiddenDataColIndex={selectedCustomerType === 'Outlet' ? [1] : []}
@@ -898,45 +910,7 @@ const ReportTable: any = () => {
           }); setOpenReportEdit(true)
         }} handleDelete={() => setOpenReportEdit(true)} />
     </React.Fragment>
-  }, [selectedCustomerType, selectedCustomerId, openReportEdit, setOpenReportEdit, selectedSavingPageIndex, totalSavingPage, savingReportData, selectedSavingsOutletID, selectedSavingsMonth, selectedSavingsYear, savingOutletDropdown]);
-
-  const dummyDatForInvoices = (): any[][] => {
-
-    const arr = [];
-
-    for (let i = 1; i < 10; i++) {
-      arr.push([
-        `EQ-240${i}`, 'KFC Indonesia', 'Jan', '2022', '15', '$ 0.3486',
-        <div key={'frag ' + i} className='flex flex-row gap-x-4'>
-          <div className='flex flex-col'>
-            <span className='text-custom-xs'>
-              (kWH)
-            </span>
-            <span>
-              97111
-            </span>
-          </div>
-          <div className='flex flex-col'>
-            <span className='text-custom-xs'>
-              ($)
-            </span>
-            <span>
-              $0.20
-            </span>
-          </div>
-          <div className='flex flex-col'>
-            <span className='text-custom-xs'>
-              (%)
-            </span>
-            <span>
-              30%
-            </span>
-          </div>
-        </div>, '$ 4,203'
-      ]);
-    }
-    return arr;
-  }
+  }, [selectedCustomerType, tableLoading, selectedCustomerId, openReportEdit, setOpenReportEdit, selectedSavingPageIndex, totalSavingPage, savingReportData, selectedSavingsOutletID, selectedSavingsMonth, selectedSavingsYear, savingOutletDropdown]);
 
   const invoiceTable = React.useCallback((detailElem: any) => {
     const invoiceRows = (): any[][] => {
@@ -978,6 +952,7 @@ const ReportTable: any = () => {
         hiddenDataColIndex={[7]}
         onlyShowButton={true}
         data={invoiceRows()}
+        loading={tableLoading}
         openDetailContent={openReportEdit}
         setOpenDetailContent={setOpenReportEdit}
         detailContent={detailElem}
@@ -992,7 +967,7 @@ const ReportTable: any = () => {
         ]}
         handleEdit={(selectedData) => { setSelectedInvoice(invoices.find(inv => inv.invoice_id === selectedData[0])); setOpenReportEdit(true) }} handleDelete={() => setOpenReportEdit(true)} />
     </React.Fragment>
-  }, [selectedInvoiceMonth, selectedInvoiceYear, , openReportEdit, setOpenReportEdit, selectedInvoicePte, selectedInvoice, setSelectedInvoicePte, allPte, invoices]);
+  }, [selectedInvoiceMonth, selectedInvoiceYear, tableLoading, openReportEdit, setOpenReportEdit, selectedInvoicePte, selectedInvoice, setSelectedInvoicePte, allPte, invoices]);
 
   return (
     <React.Fragment >
