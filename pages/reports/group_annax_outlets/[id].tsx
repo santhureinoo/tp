@@ -244,12 +244,12 @@ const GroupReport: NextPage = () => {
                             </td>
                             <td>
                                 <div className='flex flex-row justify-between'>
-                                    <span>$</span><span>{numberWithCommas(Number(result.outlet_eqpt_energy_usage_with_TP_month_expenses))}</span>
+                                    <span>$</span><span>{numberWithCommas(Number(result.savings_tariff_expenses))}</span>
                                 </div>
 
                             </td>
                             <td>
-                                {Number(result.outlet_eqpt_energy_usage_with_TP_month_kW).toFixed(2)}
+                                {Number(result.outlet_eqpt_energy_usage_without_TP_month_kW).toFixed(2)}
                             </td>
                             <td>
                                 <div className='flex flex-row justify-between'>
@@ -257,11 +257,11 @@ const GroupReport: NextPage = () => {
                                 </div>
                             </td>
                             <td>
-                                {Number(result.outlet_eqpt_energy_usage_without_TP_month_kW).toFixed(2)}
+                                {Number(result.outlet_eqpt_energy_usage_with_TP_month_kW).toFixed(2)}
                             </td>
                             <td>
                                 <div className='flex flex-row justify-between'>
-                                    <span>$</span><span>{numberWithCommas(Number(result.savings_tariff_expenses))}</span>
+                                    <span>$</span><span>{numberWithCommas(Number(result.outlet_eqpt_energy_usage_with_TP_month_expenses))}</span>
                                 </div>
                             </td>
                             <td>
@@ -658,7 +658,7 @@ const GroupReport: NextPage = () => {
                 {"Month of reference:"}
             </span>
             <span>
-                {month + " " + year}
+                {month + "/" + year}
             </span>
         </div>
         <div className='w-auto'>
@@ -725,7 +725,7 @@ const GroupReport: NextPage = () => {
                             kg
                         </td>
                         <td >
-                            <span>$</span><span>0.3228</span>
+                            <span>$</span>
                         </td>
                     </tr>
                 </thead>

@@ -33,7 +33,8 @@ import React from 'react';
 import { group, outlet, reports, results } from '../../../types/datatype';
 import { report } from 'process';
 import axios from 'axios';
-import { downloadFile } from '../../../common/helper';
+import { downloadFile, numberWithCommas } from '../../../common/helper';
+import moment from 'moment';
 
 
 ChartJS.register(
@@ -78,6 +79,8 @@ const GroupReport: NextPage = () => {
         measuredEnergySavingsPercent: 0,
         savingTariff: 0,
         groupName: "",
+        energy_saving_py: 0,
+        co2_saving_py: 0,
     });
     const { id, month, year } = router.query;
 
@@ -87,6 +90,7 @@ const GroupReport: NextPage = () => {
           group {
             group_name
             customers {
+                name
               outlet {
                 name
                 outlet_id
@@ -99,6 +103,9 @@ const GroupReport: NextPage = () => {
                   outlet_eqpt_energy_usage_without_TP_month_expenses
                   outlet_eqpt_energy_usage_without_TP_month_kW
                   savings_tariff_expenses
+                  tp_sales_expenses
+                    co2_savings_kg
+                    outlet_date
                 }
               }
             }
@@ -130,7 +137,7 @@ const GroupReport: NextPage = () => {
             ...(month !== 'All' && year !== 'All') && {
                 "ResultsWhereInput": {
                     "outlet_date": {
-                        "contains": month + "/" + year
+                        "contains": year
                     }
                 }
             }
@@ -153,6 +160,8 @@ const GroupReport: NextPage = () => {
                 measuredEnergySavingsPercent: 0,
                 savingTariff: 0,
                 groupName: "",
+                energy_saving_py: 0,
+                co2_saving_py: 0,
             };
 
             const reports: reports[] = getGroupResult.data.findManyReports;
@@ -161,31 +170,39 @@ const GroupReport: NextPage = () => {
                 attributes.groupName = rep.group.group_name;
                 rep.group.customers.forEach(cus => {
                     if (cus.outlet) {
+                        console.log(cus.outlet);
                         cus.outlet.forEach((outlet: outlet) => {
-                            axios.get(
-                                '/api/download',
-                                {
-                                    responseType: 'blob',
-                                    params: {
-                                        type: 'group_annex',
-                                        id: outlet.outlet_id,
-                                        month: month,
-                                        year: year,
-                                    }
-                                } // !!!
-                            ).then((response) => {
-                                downloadFile(response.data, 'Group (Annax) Report');
-                            });
+                            // axios.get(
+                            //     '/api/download',
+                            //     {
+                            //         responseType: 'blob',
+                            //         params: {
+                            //             type: 'group_annex',
+                            //             id: outlet.outlet_id,
+                            //             month: month,
+                            //             year: year,
+                            //         }
+                            //     } // !!!
+                            // ).then((response) => {
+                            //     downloadFile(response.data, 'Group (Annax) Report');
+                            // });
                             attributes.outletCount += 1;
                             outlet.results && outlet.results.forEach((result: results) => {
-                                attributes.eqptWTP += Number(result.outlet_eqpt_energy_usage_with_TP_month_kW);
-                                attributes.eqptWTPExpense += Number(result.outlet_eqpt_energy_usage_with_TP_month_expenses);
-                                attributes.eqptWoTP += Number(result.outlet_eqpt_energy_usage_without_TP_month_kW);
-                                attributes.eqptWoTPExpense += Number(result.outlet_eqpt_energy_usage_without_TP_month_expenses);
-                                attributes.savingTariff += Number(result.savings_tariff_expenses);
-                                attributes.measuredEnergySavingsExpense += Number(result.outlet_measured_savings_expenses);
-                                attributes.measuredEnergySavingsKWH += Number(result.outlet_measured_savings_kWh);
-                                attributes.measuredEnergySavingsPercent += Number(result.outlet_measured_savings_percent);
+                                const outletDate = moment(result.outlet_date, 'DD/MM/YYYY');
+                                if (outletDate.month() + 1 === Number(month?.toString() || '')) {
+                                    attributes.eqptWTP += Number(result.outlet_eqpt_energy_usage_with_TP_month_kW);
+                                    attributes.eqptWTPExpense += Number(result.outlet_eqpt_energy_usage_with_TP_month_expenses);
+                                    attributes.eqptWoTP += Number(result.outlet_eqpt_energy_usage_without_TP_month_kW);
+                                    attributes.eqptWoTPExpense += Number(result.outlet_eqpt_energy_usage_without_TP_month_expenses);
+                                    attributes.savingTariff += Number(result.savings_tariff_expenses);
+                                    attributes.measuredEnergySavingsExpense += Number(result.outlet_measured_savings_expenses);
+                                    attributes.measuredEnergySavingsKWH += Number(result.outlet_measured_savings_kWh);
+                                    attributes.measuredEnergySavingsPercent += Number(result.outlet_measured_savings_percent);
+                                }
+
+                                attributes.energy_saving_py += result.tp_sales_expenses ? Number(result.tp_sales_expenses) : 0;
+                                attributes.co2_saving_py += result.co2_savings_kg ? Number(result.co2_savings_kg) : 0;
+
                             })
                         })
                     }
@@ -205,8 +222,8 @@ const GroupReport: NextPage = () => {
             <span>
                 {reportAttributes.groupName}
             </span>
-            <span>
-                {month + ' ' + year}
+            <span className='px-2'>
+                {month + '/' + year}
             </span>
             {/* <table>
                 <tr>
@@ -264,7 +281,7 @@ const GroupReport: NextPage = () => {
                         </td>
                         <td>
                             <span>$</span>
-                            <span>0.3228</span>
+                            {/* <span>0.3228</span> */}
                         </td>
                     </tr>
                 </thead>
@@ -321,19 +338,19 @@ const GroupReport: NextPage = () => {
             </p>
             <div className='flex flex-row gap-x-4 text-report-non-table-text justify-center'>
                 <div className='flex flex-col'>
-                    <span>$100,900</span>
+                    <span>$ {numberWithCommas(reportAttributes?.energy_saving_py, 0)}</span>
                     <span>energy savings per year</span>
                 </div>
                 <div className='flex flex-col'>
-                    <span>$100,900</span>
+                    <span>$ {numberWithCommas(reportAttributes?.co2_saving_py, 0)}</span>
                     <span>kg CO<sup>2</sup> saved per year</span>
                 </div>
                 <div className='flex flex-col'>
-                    <span>3,730</span>
+                    <span>{numberWithCommas((reportAttributes?.energy_saving_py || 0) * 0.00084, 0)}</span>
                     <span>tree per years and wait 10 years</span>
                 </div>
                 <div className='flex flex-col'>
-                    <span>201,800</span>
+                    <span>{numberWithCommas((reportAttributes?.energy_saving_py || 0) * 2, 0)}</span>
                     <span>meals to be sold per year</span>
                 </div>
             </div>

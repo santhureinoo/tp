@@ -41,7 +41,7 @@ export default async function handler(
     path: 'report.pdf',
     format: 'A4',
     printBackground: true,
-    scale: 1,
+    scale: 0.7,
   })
 
   res.setHeader('Content-Type', 'application/pdf');

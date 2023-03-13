@@ -65,9 +65,9 @@ export function disableTemplate(path: string) {
   }
 }
 
-export function numberWithCommas(x?: number) {
+export function numberWithCommas(x?: number, fixedNum = 2) {
   if (x) {
-    return Number(x).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return Number(x).toFixed(fixedNum).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   else {
     0;

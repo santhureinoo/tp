@@ -81,6 +81,8 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                     outlet_measured_savings_kWh
                     outlet_measured_savings_expenses
                     outlet_date
+                    tp_sales_expenses
+                    co2_savings_kg
                 }
             }
         }
@@ -142,6 +144,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
     query FindManyReports($where: ReportsWhereInput, $resultsWhere2: ResultsWhereInput) {
         findManyReports(where: $where) {
           group {
+            group_name
             customers {
               outlet {
                 name
@@ -289,34 +292,33 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                     }
                 };
                 result.forEach(res => {
-                    console.log(res);
                     exObj.qty += 1;
                     acObj.qty += 1;
                     faObj.qty += 1;
 
-                    // exObj.tenBM.energyBase += parseInt(res.ke_eqpt_energy_baseline_avg_hourly_kW || '0');
-                    // acObj.tenBM.energyBase += parseInt(res.acmv_eqpt_energy_baseline_avg_hourly_kW || '0');
-                    // faObj.tenBM.energyBase += parseInt(res.ac_eqpt_energy_baseline_avg_hourly_kW || '0');
+                    // exObj.tenBM.energyBase += Number(res.ke_eqpt_energy_baseline_avg_hourly_kW || '0');
+                    // acObj.tenBM.energyBase += Number(res.acmv_eqpt_energy_baseline_avg_hourly_kW || '0');
+                    // faObj.tenBM.energyBase += Number(res.ac_eqpt_energy_baseline_avg_hourly_kW || '0');
 
-                    exObj.tenBM.mesKWH += parseInt(res.ke_and_ac_10percent_benchmark_comparison_kWh || '0');
-                    acObj.tenBM.mesKWH += parseInt(res.acmv_10percent_benchmark_comparison_kWh || '0');
-                    faObj.tenBM.mesKWH += parseInt(res.ke_and_ac_10percent_benchmark_comparison_kWh || '0');
+                    exObj.tenBM.mesKWH += Number(res.ke_and_ac_10percent_benchmark_comparison_kWh || '0');
+                    acObj.tenBM.mesKWH += Number(res.acmv_10percent_benchmark_comparison_kWh || '0');
+                    faObj.tenBM.mesKWH += Number(res.ke_and_ac_10percent_benchmark_comparison_kWh || '0');
 
-                    exObj.tenBM.mesEXP += parseInt(res.ke_and_ac_10percent_benchmark_comparison_expenses || '0');
-                    acObj.tenBM.mesEXP += parseInt(res.acmv_10percent_benchmark_comparison_expenses || '0');
-                    faObj.tenBM.mesEXP += parseInt(res.ke_and_ac_10percent_benchmark_comparison_expenses || '0');
+                    exObj.tenBM.mesEXP += Number(res.ke_and_ac_10percent_benchmark_comparison_expenses || '0');
+                    acObj.tenBM.mesEXP += Number(res.acmv_10percent_benchmark_comparison_expenses || '0');
+                    faObj.tenBM.mesEXP += Number(res.ke_and_ac_10percent_benchmark_comparison_expenses || '0');
 
-                    exObj.tfBM.energyBase += parseInt(res.ke_eqpt_energy_baseline_avg_hourly_kW || '0');
-                    acObj.tfBM.energyBase += parseInt(res.ke_eqpt_energy_baseline_avg_hourly_kW || '0');
-                    faObj.tfBM.energyBase += parseInt(res.ke_eqpt_energy_baseline_avg_hourly_kW || '0');
+                    exObj.tfBM.energyBase += Number(res.ke_eqpt_energy_baseline_avg_hourly_kW || '0');
+                    acObj.tfBM.energyBase += Number(res.ke_eqpt_energy_baseline_avg_hourly_kW || '0');
+                    faObj.tfBM.energyBase += Number(res.ke_eqpt_energy_baseline_avg_hourly_kW || '0');
 
-                    exObj.tfBM.mesKWH += parseInt(res.ke_and_ac_25percent_benchmark_comparison_kWh || '0');
-                    acObj.tfBM.mesKWH += parseInt(res.acmv_25percent_benchmark_comparison_kWh || '0');
-                    faObj.tfBM.mesKWH += parseInt(res.ke_and_ac_25percent_benchmark_comparison_kWh || '0');
+                    exObj.tfBM.mesKWH += Number(res.ke_and_ac_25percent_benchmark_comparison_kWh || '0');
+                    acObj.tfBM.mesKWH += Number(res.acmv_25percent_benchmark_comparison_kWh || '0');
+                    faObj.tfBM.mesKWH += Number(res.ke_and_ac_25percent_benchmark_comparison_kWh || '0');
 
-                    exObj.tfBM.mesEXP += parseInt(res.ke_and_ac_25percent_benchmark_comparison_expenses || '0');
-                    acObj.tfBM.mesEXP += parseInt(res.acmv_25percent_benchmark_comparison_expenses || '0');
-                    faObj.tfBM.mesEXP += parseInt(res.ke_and_ac_25percent_benchmark_comparison_expenses || '0');
+                    exObj.tfBM.mesEXP += Number(res.ke_and_ac_25percent_benchmark_comparison_expenses || '0');
+                    acObj.tfBM.mesEXP += Number(res.acmv_25percent_benchmark_comparison_expenses || '0');
+                    faObj.tfBM.mesEXP += Number(res.ke_and_ac_25percent_benchmark_comparison_expenses || '0');
                 })
 
                 ex_data = [
@@ -396,7 +398,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                 //         </div>
                 //     </div>;
                 // });
-                // ac_data.push(currentReport.group.customers[0].outlet[0].outlet_device_ac_input.reduce((accum: any, obj: any) => { return accum + parseInt(obj.ac_baseline_kW || "0") }, 0) + "kw");
+                // ac_data.push(currentReport.group.customers[0].outlet[0].outlet_device_ac_input.reduce((accum: any, obj: any) => { return accum + Number(obj.ac_baseline_kW || "0") }, 0) + "kw");
                 // ac_data.push(elemString);
                 // ac_data.push(elemString.length > 0 && "30%");
             }
@@ -420,7 +422,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
             //         </div >;
             //     })
             //     ex_data.push(exArr.length.toString());
-            //     ex_data.push(exArr.reduce((accum: any, obj: any) => { return accum + parseInt(obj.display_baseline_kW || "0") }, 0) + "kw");
+            //     ex_data.push(exArr.reduce((accum: any, obj: any) => { return accum + Number(obj.display_baseline_kW || "0") }, 0) + "kw");
             //     ex_data.push(elemString);
             //     ex_data.push(elemString.length > 0 && "30%");
             // } else {
@@ -444,7 +446,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
             //         </div>;
             //     })
             //     fa_data.push(faArr.length.toString());
-            //     fa_data.push(faArr.reduce((accum: any, obj: any) => { return accum + parseInt(obj.display_baseline_kW || "0") }, 0) + "kw");
+            //     fa_data.push(faArr.reduce((accum: any, obj: any) => { return accum + Number(obj.display_baseline_kW || "0") }, 0) + "kw");
             //     fa_data.push(elemString);
             //     fa_data.push(elemString.length > 0 && "30%");
             // } else {
@@ -620,20 +622,23 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
             if (currentGroup.customers) {
                 currentGroup.customers.forEach(customer => {
                     customer.outlet && customer.outlet.forEach(outlet => {
+                        console.log(outlet, 'outlet');
                         outlet.results && outlet.results.forEach(res => {
                             const outletDate = moment(res.outlet_date, 'DD/MM/YYYY');
-                            if (outletDate.month() + 1 === parseInt(month)) {
-                                result.exp += res.outlet_measured_savings_expenses ? parseInt(res.outlet_measured_savings_expenses) : 0;
-                                result.kwh += res.outlet_measured_savings_kWh ? parseInt(res.outlet_measured_savings_kWh) : 0;
-                                result.percent += res.outlet_measured_savings_percent ? parseInt(res.outlet_measured_savings_percent) : 0;
-                                result.euwotp_kwh += res.outlet_eqpt_energy_usage_without_TP_month_kW ? parseInt(res.outlet_eqpt_energy_usage_without_TP_month_kW) : 0;
-                                result.euwotp_exp += res.outlet_eqpt_energy_usage_without_TP_month_expenses ? parseInt(res.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0;
-                                result.euwtp_kwh += res.outlet_eqpt_energy_usage_with_TP_month_kW ? parseInt(res.outlet_eqpt_energy_usage_with_TP_month_kW) : 0;
-                                result.euwtp_exp += res.outlet_eqpt_energy_usage_with_TP_month_expenses ? parseInt(res.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0;
+                            if (outletDate.month() + 1 === Number(month)) {
+                                result.exp += res.outlet_measured_savings_expenses ? Number(res.outlet_measured_savings_expenses) : 0;
+                                result.kwh += res.outlet_measured_savings_kWh ? Number(res.outlet_measured_savings_kWh) : 0;
+                                result.percent += res.outlet_measured_savings_percent ? Number(res.outlet_measured_savings_percent) : 0;
+                                result.euwotp_kwh += res.outlet_eqpt_energy_usage_without_TP_month_kW ? Number(res.outlet_eqpt_energy_usage_without_TP_month_kW) : 0;
+                                result.euwotp_exp += res.outlet_eqpt_energy_usage_without_TP_month_expenses ? Number(res.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0;
+                                result.euwtp_kwh += res.outlet_eqpt_energy_usage_with_TP_month_kW ? Number(res.outlet_eqpt_energy_usage_with_TP_month_kW) : 0;
+                                result.euwtp_exp += res.outlet_eqpt_energy_usage_with_TP_month_expenses ? Number(res.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0;
                             }
-                            result.energy_saving_py += res.tp_sales_expenses ? parseInt(res.tp_sales_expenses) : 0;
-                            result.co2_saving_py += res.co2_savings_kg ? parseInt(res.co2_savings_kg) : 0;
+
+                            result.energy_saving_py += res.tp_sales_expenses ? Number(res.tp_sales_expenses) : 0;
+                            result.co2_saving_py += res.co2_savings_kg ? Number(res.co2_savings_kg) : 0;
                         })
+                        console.log(result.euwtp_exp);
                     })
                 })
             }
@@ -662,15 +667,15 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                     customer.outlet.forEach(out => {
                         if (out.results) {
                             out.results.forEach(res => {
-                                result.kwh = res.outlet_measured_savings_kWh ? parseInt(res.outlet_measured_savings_kWh) : 0;
-                                result.exp = res.outlet_measured_savings_expenses ? parseInt(res.outlet_measured_savings_expenses) : 0;
-                                result.percent += res.outlet_measured_savings_percent ? parseInt(res.outlet_measured_savings_percent) : 0;
-                                result.euwotp_kwh += res.outlet_eqpt_energy_usage_without_TP_month_kW ? parseInt(res.outlet_eqpt_energy_usage_without_TP_month_kW) : 0;
-                                result.euwotp_exp += res.outlet_eqpt_energy_usage_without_TP_month_expenses ? parseInt(res.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0;
-                                result.euwtp_kwh += res.outlet_eqpt_energy_usage_with_TP_month_kW ? parseInt(res.outlet_eqpt_energy_usage_with_TP_month_kW) : 0;
-                                result.euwtp_exp += res.outlet_eqpt_energy_usage_with_TP_month_expenses ? parseInt(res.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0;
-                                result.ste += res.savings_tariff_expenses ? parseInt(res.savings_tariff_expenses) : 0;
-                                result.co2 += res.co2_savings_kg ? parseInt(res.co2_savings_kg) : 0;
+                                result.kwh = res.outlet_measured_savings_kWh ? Number(res.outlet_measured_savings_kWh) : 0;
+                                result.exp = res.outlet_measured_savings_expenses ? Number(res.outlet_measured_savings_expenses) : 0;
+                                result.percent += res.outlet_measured_savings_percent ? Number(res.outlet_measured_savings_percent) : 0;
+                                result.euwotp_kwh += res.outlet_eqpt_energy_usage_without_TP_month_kW ? Number(res.outlet_eqpt_energy_usage_without_TP_month_kW) : 0;
+                                result.euwotp_exp += res.outlet_eqpt_energy_usage_without_TP_month_expenses ? Number(res.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0;
+                                result.euwtp_kwh += res.outlet_eqpt_energy_usage_with_TP_month_kW ? Number(res.outlet_eqpt_energy_usage_with_TP_month_kW) : 0;
+                                result.euwtp_exp += res.outlet_eqpt_energy_usage_with_TP_month_expenses ? Number(res.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0;
+                                result.ste += res.savings_tariff_expenses ? Number(res.savings_tariff_expenses) : 0;
+                                result.co2 += res.co2_savings_kg ? Number(res.co2_savings_kg) : 0;
                             })
                         }
                     })
@@ -715,12 +720,12 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                 <div className="flex text-lg justify-between">
                     <div>
                         <h1 ><b>Report ID</b></h1>
-                        <h5>EQ-2405</h5>
+                        <h5>{currentReport?.report_id || currentGroup?.group_id}</h5>
                     </div>
                     <div ref={dropdownRef} className="flex gap-x-2">
-                        <button type="button" onClick={(e) => { }} className={`text-white bg-blue-500 hover:bg-blue-600 font-medium rounded-lg text-sm w-48 px-2 py-2.5 text-center items-center`}>
+                        {/* <button type="button" onClick={(e) => { }} className={`text-white bg-blue-500 hover:bg-blue-600 font-medium rounded-lg text-sm w-48 px-2 py-2.5 text-center items-center`}>
                             View Dashboard
-                        </button>
+                        </button> */}
                         <div className="">
                             <button type="button" onClick={(e) => { !loading && setOpenDownloadReport(!openDownloadReport) }} className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}>
                                 {loading ? <Oval
@@ -962,19 +967,19 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                             <div className="grid grid-cols-3 gap-x-2 gap-y-8">
                                 <div>
                                     <h4>Energy Savings per year</h4>
-                                    <span className="text-slate-400">$ 100,900</span>
+                                    <span className="text-slate-400">$ {numberWithCommas(groupMeasuredEnergySavings?.energy_saving_py, 0)}</span>
                                 </div>
                                 <div>
-                                    <h4>Energy Savings per year</h4>
-                                    <span className="text-slate-400">225,700</span>
+                                    <h4>CO<span className="text-xs">2</span> Saved per year</h4>
+                                    <span className="text-slate-400"> {numberWithCommas(groupMeasuredEnergySavings?.co2_saving_py, 0)}</span>
                                 </div>
                                 <div>
                                     <h4>Planted Trees per year</h4>
-                                    <span className="text-slate-400">3,730</span>
+                                    <span className="text-slate-400">{numberWithCommas((groupMeasuredEnergySavings?.energy_saving_py || 0) * 0.00084, 0)}</span>
                                 </div>
                                 <div>
                                     <h4>Meals sold per year</h4>
-                                    <span className="text-slate-400">201,800</span>
+                                    <span className="text-slate-400">{numberWithCommas((groupMeasuredEnergySavings?.energy_saving_py || 0) * 2, 0)}</span>
                                 </div>
                             </div>
                         </div>
