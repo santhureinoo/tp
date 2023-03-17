@@ -794,11 +794,11 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                 </Table.Cell>,
 
                 without: <Table.Cell>
-                    <input type="number" onChange={e => { changeFirstIntermediaryElement('all_eqpt_without_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_without_TP_kWh ? parseInt(item.all_eqpt_without_TP_kWh) : '0'} />
+                    <input type="number" onChange={e => { changeFirstIntermediaryElement('all_eqpt_without_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_without_TP_kWh ? parseInt(item.all_eqpt_without_TP_kWh).toString() : '0'} />
                 </Table.Cell>,
 
                 with: <Table.Cell>
-                    <input type="number" onChange={e => { changeFirstIntermediaryElement('all_eqpt_with_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_with_TP_kWh ? parseInt(item.all_eqpt_with_TP_kWh) : '0'} />
+                    <input type="number" onChange={e => { changeFirstIntermediaryElement('all_eqpt_with_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_with_TP_kWh ? parseInt(item.all_eqpt_with_TP_kWh).toString() : '0'} />
                 </Table.Cell>,
 
                 totalSavings: <Table.Cell>
@@ -824,11 +824,11 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                 </Table.Cell>,
 
                 without: <Table.Cell>
-                    <input type="number" onChange={e => { changeSecondIntermediaryElement('acmv_without_TP_kWh', index, e.currentTarget.value) }} value={item.acmv_without_TP_kWh ? parseInt(item.acmv_without_TP_kWh) : '0'} />
+                    <input type="number" onChange={e => { changeSecondIntermediaryElement('acmv_without_TP_kWh', index, e.currentTarget.value) }} value={item.acmv_without_TP_kWh ? parseInt(item.acmv_without_TP_kWh).toString() : '0'} />
                 </Table.Cell>,
 
                 baseline: <Table.Cell>
-                    <input type="number" onChange={e => { changeSecondIntermediaryElement('acmv_baseline_kW', index, e.currentTarget.value) }} value={item.acmv_baseline_kW ? parseInt(item.acmv_baseline_kW) : '0'} />
+                    <input type="number" onChange={e => { changeSecondIntermediaryElement('acmv_baseline_kW', index, e.currentTarget.value) }} value={item.acmv_baseline_kW ? parseInt(item.acmv_baseline_kW).toString() : '0'} />
                 </Table.Cell>,
 
             }
