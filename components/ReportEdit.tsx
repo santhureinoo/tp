@@ -3,7 +3,7 @@ import PillButton from "./PillButton";
 import SummaryTable from "./SummaryTable";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
-import { group, outlet, reports, results } from "../types/datatype";
+import { first_intermediary_table, group, outlet, reports, results, secondary_intermediary_table } from "../types/datatype";
 import React from "react";
 import { gql, useLazyQuery, WatchQueryFetchPolicy } from "@apollo/client";
 import DropdownMenu from "./DropdownMenu";
@@ -13,6 +13,9 @@ import axios from "axios";
 import { convertMonthName, downloadFile, numberWithCommas } from "../common/helper";
 import moment from "moment";
 import { Oval } from "react-loader-spinner";
+import { Button, Modal, Table } from "flowbite-react";
+import CustomizedDropDown from "./CustomizedDropDown";
+import { cloneDeep } from "@apollo/client/utilities";
 
 interface Props {
     openReportEdit: boolean;
@@ -32,7 +35,68 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
     const [currentReport, setCurrentReport] = React.useState<reports>();
     const [currentGroup, setCurrentGroup] = React.useState<group>();
     const [loading, setLoading] = React.useState(false);
+    const [openEditPopup, setOpenEditPopup] = React.useState(false);
+    const [selectedSubTitle, setSelectedSubTitle] = React.useState(0);
+    const [firstIntermediaryList, setFirstIntermediaryList] = React.useState<first_intermediary_table[]>([]);
+    const [secondIntermediaryList, setSecondIntermediaryList] = React.useState<secondary_intermediary_table[]>([]);
+    const [firstOriginIntermediaryList, setFirstOriginIntermediaryList] = React.useState<first_intermediary_table[]>([]);
+    const [secondOriginIntermediaryList, setSecondOriginIntermediaryList] = React.useState<secondary_intermediary_table[]>([]);
+
+    const modalItems = ["Savings Performance", "Eqpt. Energy Baseline"];
     const router = useRouter();
+
+    const getFirstIntermediaryVariable = {
+        "variables": {
+            ...(month !== 'All' && year !== 'All') && {
+                "where": {
+                    "outlet_month_year": {
+                        "equals": month + '/' + year
+                    },
+                    "outlet_id": {
+                        "equals": selectedOutletID
+                    }
+                }
+            }
+
+        }
+    }
+
+    const getFirstIntermediaryQuery = gql`
+    query First_intermediary_tables($where: First_intermediary_tableWhereInput) {
+        first_intermediary_tables(where: $where) {
+          outlet_month_year
+          day_of_month
+          all_eqpt_without_TP_kWh
+          all_eqpt_with_TP_kWh
+          total_savings_kWh
+        }
+      }`
+
+
+    const getSecondIntermediaryVariable = {
+        "variables": {
+            ...(month !== 'All' && year !== 'All') && {
+                "where": {
+                    "outlet_month_year": {
+                        "equals": month + '/' + year
+                    },
+                    "outlet_id": {
+                        "equals": selectedOutletID
+                    }
+                }
+            }
+
+        }
+    }
+
+    const getSecondIntermediaryQuery = gql`
+    query Secondary_intermediary_tables($where: Secondary_intermediary_tableWhereInput) {
+        secondary_intermediary_tables(where: $where) {
+          acmv_without_TP_kWh
+          acmv_baseline_kW
+          time
+        }
+      }`
 
     const getGroupBYIDVariable = {
         "variables": {
@@ -225,6 +289,8 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
     const getReportByID = useLazyQuery(getReportByIdQuery, getReportByIDVariable);
     const getGroupByID = useLazyQuery(getGroupByIDQUery, getGroupBYIDVariable);
     const getGroupResult = useLazyQuery(getGroupQuery);
+    const getFirstIntermediary = useLazyQuery(getFirstIntermediaryQuery, getFirstIntermediaryVariable);
+    const getSecondIntermediary = useLazyQuery(getSecondIntermediaryQuery, getSecondIntermediaryVariable);
 
     React.useEffect(() => {
         if (openReportEdit) {
@@ -245,6 +311,27 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
         }
 
     }, [customerType, openReportEdit]);
+
+    React.useEffect(() => {
+        if (openEditPopup) {
+            if (selectedSubTitle === 0) {
+                getFirstIntermediary[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(result => {
+                    if (result && result.data.first_intermediary_tables) {
+                        setFirstIntermediaryList(result.data.first_intermediary_tables);
+                        setFirstOriginIntermediaryList(result.data.first_intermediary_tables);
+                    }
+                })
+            } else {
+                getSecondIntermediary[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(result => {
+                    if (result && result.data.secondary_intermediary_tables) {
+                        setSecondIntermediaryList(result.data.secondary_intermediary_tables);
+                        setSecondOriginIntermediaryList(result.data.secondary_intermediary_tables);
+                    }
+                })
+            }
+        }
+
+    }, [openEditPopup, selectedSubTitle]);
 
     const getSummaryTable = React.useMemo(() => {
         let ex_data: any[] = ["Kitchen Exhaust"];
@@ -687,6 +774,66 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
         }
     }, [currentReport]);
 
+    const changeFirstIntermediaryElement = (attribute: string, index: number, value: any) => {
+
+        const clonedFirstIntermediaryList = cloneDeep(firstIntermediaryList);
+        clonedFirstIntermediaryList[index][attribute] = value;
+        setFirstIntermediaryList(clonedFirstIntermediaryList);
+    }
+
+    const getFirstIntermediaryElement = React.useMemo(() => {
+        return firstIntermediaryList.map((item, index) => {
+            const thisDay = moment(item.day_of_month + '/' + item.outlet_month_year, "DD/MM/YYYY");
+            return {
+                date: <Table.Cell>
+                    {thisDay.format('D MMM')}
+                </Table.Cell>,
+
+                day: <Table.Cell>
+                    {thisDay.format('dddd')}
+                </Table.Cell>,
+
+                without: <Table.Cell>
+                    <input type="number" onChange={e => { changeFirstIntermediaryElement('all_eqpt_without_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_without_TP_kWh ? parseInt(item.all_eqpt_without_TP_kWh) : '0'} />
+                </Table.Cell>,
+
+                with: <Table.Cell>
+                    <input type="number" onChange={e => { changeFirstIntermediaryElement('all_eqpt_with_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_with_TP_kWh ? parseInt(item.all_eqpt_with_TP_kWh) : '0'} />
+                </Table.Cell>,
+
+                totalSavings: <Table.Cell>
+                    {parseInt(item.total_savings_kWh || '0')}
+                </Table.Cell>,
+
+            }
+        })
+    }, [firstIntermediaryList]);
+
+    const changeSecondIntermediaryElement = (attribute: string, index: number, value: string) => {
+        const clonedSecondIntermediaryList = cloneDeep(secondIntermediaryList);
+        clonedSecondIntermediaryList[index][attribute] = value.replace(/^0+/, '');
+        setSecondIntermediaryList(clonedSecondIntermediaryList);
+    }
+
+
+    const getSecondaryIntermediaryElement = React.useMemo(() => {
+        return secondIntermediaryList.map((item, index) => {
+            return {
+                time: <Table.Cell>
+                    {item.time}
+                </Table.Cell>,
+
+                without: <Table.Cell>
+                    <input type="number" onChange={e => { changeSecondIntermediaryElement('acmv_without_TP_kWh', index, e.currentTarget.value) }} value={item.acmv_without_TP_kWh ? parseInt(item.acmv_without_TP_kWh) : '0'} />
+                </Table.Cell>,
+
+                baseline: <Table.Cell>
+                    <input type="number" onChange={e => { changeSecondIntermediaryElement('acmv_baseline_kW', index, e.currentTarget.value) }} value={item.acmv_baseline_kW ? parseInt(item.acmv_baseline_kW) : '0'} />
+                </Table.Cell>,
+
+            }
+        })
+    }, [secondIntermediaryList]);
 
     const outletTotalForGroup = React.useMemo(() => {
         if (currentGroup && currentGroup.reports) {
@@ -726,7 +873,144 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                         {/* <button type="button" onClick={(e) => { }} className={`text-white bg-blue-500 hover:bg-blue-600 font-medium rounded-lg text-sm w-48 px-2 py-2.5 text-center items-center`}>
                             View Dashboard
                         </button> */}
-                        <div className="">
+                        <div className="flex gap-x-2">
+
+
+                            {/** Edit Button for modal popup */}
+                            <button type="button" onClick={(e) => { setOpenEditPopup(!openEditPopup) }} className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}>
+                                Edit
+                            </button>
+                            <Modal
+                                size="7xl"
+                                dismissible={true}
+                                show={openEditPopup}
+                                onClose={() => setOpenEditPopup(!openEditPopup)}
+                            >
+                                <Modal.Header>
+                                    <div className='flex flex-row'>
+                                        <h3 className="text-gray-700 text-3xl font-bold">Edit: </h3>
+                                        <CustomizedDropDown hideBorder={true} customCSS='text-3xl' inputType={'dropdown'} hidePrefixIcons={true} data={modalItems} selected={modalItems[selectedSubTitle]} setSelected={(selected: string) => { setSelectedSubTitle(modalItems.indexOf(selected)) }} />
+                                    </div>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <div className="space-y-6">
+                                        <Table className="firstColumnSticky">
+                                            {/* <Table.Head>
+                                                <Table.HeadCell>
+                                                    Product name
+                                                </Table.HeadCell>
+                                                <Table.HeadCell>
+                                                    Color
+                                                </Table.HeadCell>
+                                                <Table.HeadCell>
+                                                    Category
+                                                </Table.HeadCell>
+                                                <Table.HeadCell>
+                                                    Price
+                                                </Table.HeadCell>
+                                                <Table.HeadCell>
+                                                    <span className="sr-only">
+                                                        Edit
+                                                    </span>
+                                                </Table.HeadCell>
+                                            </Table.Head> */}
+                                            {selectedSubTitle === 0 ? <Table.Body className="divide-y text-xs">
+                                                <Table.Row className="bg-white text-[#989AAC] dark:border-gray-700 dark:bg-gray-800">
+                                                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                                        <span className='block w-[144px]'>Date</span>
+                                                    </Table.Cell>
+                                                    {getFirstIntermediaryElement.map(elem => {
+                                                        return elem.date;
+                                                    })}
+                                                </Table.Row>
+                                                <Table.Row className="bg-white text-[#000000] text-custom-sm dark:border-gray-700 dark:bg-gray-800">
+                                                    <Table.Cell>
+                                                        <span className='block w-[144px]'>Day</span>
+                                                    </Table.Cell>
+                                                    {getFirstIntermediaryElement.map(elem => {
+                                                        return elem.day;
+                                                    })}
+                                                </Table.Row>
+                                                <Table.Row className="bg-white text-[#000000] dark:border-gray-700 dark:bg-gray-800">
+                                                    <Table.Cell>
+                                                        <span className='block w-[144px]'> All Eqpt. w/o TP (kWh)</span>
+                                                    </Table.Cell>
+                                                    {getFirstIntermediaryElement.map(elem => {
+                                                        return elem.without;
+                                                    })}
+                                                </Table.Row>
+                                                <Table.Row className="bg-white text-[#000000] dark:border-gray-700 dark:bg-gray-800">
+                                                    <Table.Cell>
+                                                        <span className='block w-[144px]'> All Eqpt. with TP (kWh)</span>
+                                                    </Table.Cell>
+                                                    {getFirstIntermediaryElement.map(elem => {
+                                                        return elem.with;
+                                                    })}
+                                                </Table.Row>
+                                                <Table.Row className="bg-[#FAFAFA] dark:border-gray-700 dark:bg-gray-800">
+                                                    <Table.Cell>
+                                                        <span className='block w-[144px]'> Total Savings</span>
+                                                    </Table.Cell>
+                                                    {getFirstIntermediaryElement.map(elem => {
+                                                        return elem.totalSavings;
+                                                    })}
+                                                </Table.Row>
+                                            </Table.Body> : <Table.Body className="divide-y">
+                                                <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                                                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                                        <span className='block w-[144px]'> Time</span>
+                                                    </Table.Cell>
+                                                    {getSecondaryIntermediaryElement.map(elem => {
+                                                        return elem.time;
+                                                    })}
+                                                </Table.Row>
+                                                <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                                                    <Table.Cell>
+                                                        <span className='block w-[144px]'> ACMV w/o TP (kWh)</span>
+                                                    </Table.Cell>
+                                                    {getSecondaryIntermediaryElement.map(elem => {
+                                                        return elem.without;
+                                                    })}
+                                                </Table.Row>
+                                                <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                                                    <Table.Cell>
+                                                        <span className='block w-[144px]'> ACMV Baseline (kW)</span>
+                                                    </Table.Cell>
+                                                    {getSecondaryIntermediaryElement.map(elem => {
+                                                        return elem.baseline;
+                                                    })}
+                                                </Table.Row>
+                                            </Table.Body>}
+
+
+                                        </Table>
+                                    </div>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <div className="flex w-full justify-end gap-x-2">
+                                        <Button onClick={e => {
+                                            selectedSubTitle === 0 ? setFirstIntermediaryList(firstOriginIntermediaryList) : setSecondIntermediaryList(secondOriginIntermediaryList);
+                                            // setOpenEditPopup(false);
+                                        }} color="gray">
+                                            Reset
+                                        </Button>
+                                        <Button onClick={e => setOpenEditPopup(false)}>
+                                            Save
+                                        </Button>
+                                        {/* <button
+                                            className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}
+
+                                        >
+                                            Reset
+                                        </button>
+                                        <button className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`} onClick={e => setOpenEditPopup(false)}>
+                                            Save
+                                        </button> */}
+                                    </div>
+                                </Modal.Footer>
+                            </Modal>
+
+
                             <button type="button" onClick={(e) => { !loading && setOpenDownloadReport(!openDownloadReport) }} className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}>
                                 {loading ? <Oval
                                     height={20}

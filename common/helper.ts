@@ -70,7 +70,7 @@ export function numberWithCommas(x?: number, fixedNum = 2) {
     return Number(x).toFixed(fixedNum).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   else {
-    0;
+    return 0;
   }
 
 }

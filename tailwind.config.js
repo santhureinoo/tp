@@ -1,5 +1,6 @@
 module.exports = {
   content: [
+    "./node_modules/flowbite-react/**/*.js",
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
     "./common/**/*.{js,ts,jsx,tsx}",
@@ -11,6 +12,7 @@ module.exports = {
     },
     extend: {
       fontSize: {
+        'custom-sm' : ['10px', '10px'],
         'custom-xs' : ['8px', '12px']
       },
       maxHeight: {
