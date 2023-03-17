@@ -104,14 +104,20 @@
     }
 
     .firstColumnSticky input{
-        border : none;
+        border : none !important;
         font-size: 12px;
+        padding-left: 0px;
+        box-shadow: none !important;
+        outline-width : 0 !important;
     }
 
-    .firstColumnSticky input:focus{
-        border : none;
-        outline:none;
-        font-size: 12px;
+    .firstColumnSticky input[type='number'] {
+        -moz-appearance:textfield;
+    }
+    
+    .firstColumnSticky input::-webkit-outer-spin-button,
+    .firstColumnSticky input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
     }
 
     .firstColumnSticky td:first-child {
