@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 import { first_intermediary_table, group, outlet, reports, results, secondary_intermediary_table } from "../types/datatype";
 import React from "react";
-import { gql, useLazyQuery, WatchQueryFetchPolicy } from "@apollo/client";
+import { gql, useLazyQuery, useMutation, WatchQueryFetchPolicy } from "@apollo/client";
 import DropdownMenu from "./DropdownMenu";
 import { useRouter } from 'next/router';
 import { useDropdown } from '../hooks/UseDropdown';
@@ -35,6 +35,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
     const [currentReport, setCurrentReport] = React.useState<reports>();
     const [currentGroup, setCurrentGroup] = React.useState<group>();
     const [loading, setLoading] = React.useState(false);
+    const [updateIntermediaryLoading, setUpdateIntermediaryLoading] = React.useState(false);
     const [openEditPopup, setOpenEditPopup] = React.useState(false);
     const [selectedSubTitle, setSelectedSubTitle] = React.useState(0);
     const [firstIntermediaryList, setFirstIntermediaryList] = React.useState<first_intermediary_table[]>([]);
@@ -69,6 +70,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
           all_eqpt_without_TP_kWh
           all_eqpt_with_TP_kWh
           total_savings_kWh
+          outlet_id
         }
       }`
 
@@ -95,6 +97,9 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
           acmv_without_TP_kWh
           acmv_baseline_kW
           time
+          day_of_month
+          outlet_month_year
+          outlet_id
         }
       }`
 
@@ -286,11 +291,32 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
           month
         }
       }`;
+
+    const updateOneFirstIntermediaryQuery = gql`
+      mutation UpdateOneFirst_intermediary_table($data: First_intermediary_tableUpdateInput!, $where: First_intermediary_tableWhereUniqueInput!) {
+        updateOneFirst_intermediary_table(data: $data, where: $where) {
+          outlet_id
+          outlet_month_year
+          day_of_month
+        }
+      }`
+
+    const updateOneSecondIntermediaryQuery = gql`
+    mutation UpdateOneSecondary_intermediary_table($data: Secondary_intermediary_tableUpdateInput!, $where: Secondary_intermediary_tableWhereUniqueInput!) {
+        updateOneSecondary_intermediary_table(data: $data, where: $where) {
+          outlet_month_year
+          day_of_month
+          outlet_id
+        }
+      }`
+
     const getReportByID = useLazyQuery(getReportByIdQuery, getReportByIDVariable);
     const getGroupByID = useLazyQuery(getGroupByIDQUery, getGroupBYIDVariable);
     const getGroupResult = useLazyQuery(getGroupQuery);
     const getFirstIntermediary = useLazyQuery(getFirstIntermediaryQuery, getFirstIntermediaryVariable);
     const getSecondIntermediary = useLazyQuery(getSecondIntermediaryQuery, getSecondIntermediaryVariable);
+    const updateOneFirstIntermediary = useMutation(updateOneFirstIntermediaryQuery);
+    const updateOneSecondIntermediary = useMutation(updateOneSecondIntermediaryQuery);
 
     React.useEffect(() => {
         if (openReportEdit) {
@@ -314,24 +340,41 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
 
     React.useEffect(() => {
         if (openEditPopup) {
-            if (selectedSubTitle === 0) {
-                getFirstIntermediary[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(result => {
-                    if (result && result.data.first_intermediary_tables) {
-                        setFirstIntermediaryList(result.data.first_intermediary_tables);
-                        setFirstOriginIntermediaryList(result.data.first_intermediary_tables);
-                    }
-                })
-            } else {
-                getSecondIntermediary[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(result => {
-                    if (result && result.data.secondary_intermediary_tables) {
-                        setSecondIntermediaryList(result.data.secondary_intermediary_tables);
-                        setSecondOriginIntermediaryList(result.data.secondary_intermediary_tables);
-                    }
-                })
-            }
+            // if (selectedSubTitle === 0) {
+            getFirstIntermediary[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(result => {
+                if (result && result.data.first_intermediary_tables) {
+                    setFirstIntermediaryList(result.data.first_intermediary_tables.map((item: first_intermediary_table) => {
+                        item.all_eqpt_with_TP_kWh = Math.round(Number(item.all_eqpt_with_TP_kWh)).toString();
+                        item.all_eqpt_without_TP_kWh = Math.round(Number(item.all_eqpt_without_TP_kWh)).toString();
+                        return item;
+                    }));
+
+                    setFirstOriginIntermediaryList(result.data.first_intermediary_tables.map((item: first_intermediary_table) => {
+                        item.all_eqpt_with_TP_kWh = Math.round(Number(item.all_eqpt_with_TP_kWh)).toString();
+                        item.all_eqpt_without_TP_kWh = Math.round(Number(item.all_eqpt_without_TP_kWh)).toString();
+                        return item;
+                    }));
+                }
+            })
+            // } else {
+            getSecondIntermediary[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(result => {
+                if (result && result.data.secondary_intermediary_tables) {
+                    setSecondIntermediaryList(result.data.secondary_intermediary_tables.map((item: secondary_intermediary_table) => {
+                        item.acmv_without_TP_kWh = Math.round(Number(item.acmv_without_TP_kWh)).toString();
+                        item.acmv_baseline_kW = Math.round(Number(item.acmv_baseline_kW)).toString();
+                        return item
+                    }));
+                    setSecondOriginIntermediaryList(result.data.secondary_intermediary_tables.map((item: secondary_intermediary_table) => {
+                        item.acmv_without_TP_kWh = Math.round(Number(item.acmv_without_TP_kWh)).toString();
+                        item.acmv_baseline_kW = Math.round(Number(item.acmv_baseline_kW)).toString();
+                        return item
+                    }));
+                }
+            })
+            // }
         }
 
-    }, [openEditPopup, selectedSubTitle]);
+    }, [openEditPopup]);
 
     const getSummaryTable = React.useMemo(() => {
         let ex_data: any[] = ["Kitchen Exhaust"];
@@ -552,6 +595,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
         ]
     }, [currentReport]);
 
+
     const downloadReportItems = React.useMemo(() => {
         if (customerType === 'Group') {
             return [
@@ -693,6 +737,86 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
         }
     }, [customerType, selectedReportID, month, year, currentReport]);
 
+    const updateIntermediary = () => {
+        const promiseArr: Promise<any>[] = [];
+        firstIntermediaryList.forEach((item, index) => {
+
+            const originItem = firstOriginIntermediaryList[index];
+            if (originItem.all_eqpt_with_TP_kWh !== item.all_eqpt_with_TP_kWh ||
+                originItem.all_eqpt_without_TP_kWh !== item.all_eqpt_without_TP_kWh) {
+                const updateOneFirstIntermediaryVariable = {
+                    "variables": {
+                        "data": {
+                            ...(originItem.all_eqpt_with_TP_kWh !== item.all_eqpt_with_TP_kWh) && {
+                                "all_eqpt_with_TP_kWh": {
+                                    "set": item.all_eqpt_with_TP_kWh
+                                },
+                            },
+                            ...(originItem.all_eqpt_without_TP_kWh !== item.all_eqpt_without_TP_kWh) && {
+                                "all_eqpt_without_TP_kWh": {
+                                    "set": item.all_eqpt_without_TP_kWh
+                                },
+                            },
+                        },
+                        "where": {
+                            "outlet_month_year_day_of_month_outlet_id": {
+                                "outlet_id": item.outlet_id,
+                                "outlet_month_year": item.outlet_month_year,
+                                "day_of_month": item.day_of_month
+                            }
+                        }
+                    }
+                };
+
+                promiseArr.push(updateOneFirstIntermediary[0](updateOneFirstIntermediaryVariable));
+            }
+
+        })
+
+        secondIntermediaryList.forEach((item, index) => {
+            const originItem = secondOriginIntermediaryList[index];
+            if (originItem.acmv_baseline_kW !== item.acmv_baseline_kW ||
+                originItem.acmv_without_TP_kWh !== item.acmv_without_TP_kWh) {
+                const updateOneSecondIntermediaryVariable = {
+                    "variables": {
+                        "data": {
+                            ...(originItem.acmv_baseline_kW !== item.acmv_baseline_kW) && {
+                                "acmv_baseline_kW": {
+                                    "set": item.acmv_baseline_kW
+                                },
+                            },
+                            ...(originItem.acmv_without_TP_kWh !== item.acmv_without_TP_kWh) && {
+                                "acmv_without_TP_kWh": {
+                                    "set": item.acmv_without_TP_kWh
+                                },
+                            },
+                        },
+                        "where": {
+                            "outlet_id_outlet_month_year_day_of_month": {
+                                "outlet_id": item.outlet_id,
+                                "outlet_month_year": item.outlet_month_year,
+                                "day_of_month": item.day_of_month
+                            }
+                        }
+                    }
+                };
+
+                promiseArr.push(updateOneSecondIntermediary[0](updateOneSecondIntermediaryVariable));
+            }
+        })
+
+        if (promiseArr.length > 0) {
+            setUpdateIntermediaryLoading(true);
+        }
+        Promise.all(promiseArr).then((res) => {
+            // setFirstOriginIntermediaryList(firstIntermediaryList);
+            // setSecondOriginIntermediaryList(secondIntermediaryList);
+            setUpdateIntermediaryLoading(false);
+            setOpenEditPopup(false);
+        })
+
+    }
+
     const groupMeasuredEnergySavings = React.useMemo(() => {
         if (currentGroup && currentGroup.reports) {
             const result = {
@@ -709,7 +833,6 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
             if (currentGroup.customers) {
                 currentGroup.customers.forEach(customer => {
                     customer.outlet && customer.outlet.forEach(outlet => {
-                        console.log(outlet, 'outlet');
                         outlet.results && outlet.results.forEach(res => {
                             const outletDate = moment(res.outlet_date, 'DD/MM/YYYY');
                             if (outletDate.month() + 1 === Number(month)) {
@@ -725,7 +848,6 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                             result.energy_saving_py += res.tp_sales_expenses ? Number(res.tp_sales_expenses) : 0;
                             result.co2_saving_py += res.co2_savings_kg ? Number(res.co2_savings_kg) : 0;
                         })
-                        console.log(result.euwtp_exp);
                     })
                 })
             }
@@ -775,7 +897,6 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
     }, [currentReport]);
 
     const changeFirstIntermediaryElement = (attribute: string, index: number, value: any) => {
-
         const clonedFirstIntermediaryList = cloneDeep(firstIntermediaryList);
         clonedFirstIntermediaryList[index][attribute] = value;
         setFirstIntermediaryList(clonedFirstIntermediaryList);
@@ -794,11 +915,11 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                 </Table.Cell>,
 
                 without: <Table.Cell>
-                    <input type="number" onChange={e => { changeFirstIntermediaryElement('all_eqpt_without_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_without_TP_kWh ? parseInt(item.all_eqpt_without_TP_kWh).toString() : '0'} />
+                    <input type="number" onChange={e => { changeFirstIntermediaryElement('all_eqpt_without_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_without_TP_kWh ? item.all_eqpt_without_TP_kWh.toString() : '0'} />
                 </Table.Cell>,
 
                 with: <Table.Cell>
-                    <input type="number" onChange={e => { changeFirstIntermediaryElement('all_eqpt_with_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_with_TP_kWh ? parseInt(item.all_eqpt_with_TP_kWh).toString() : '0'} />
+                    <input type="number" onChange={e => { changeFirstIntermediaryElement('all_eqpt_with_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_with_TP_kWh ? item.all_eqpt_with_TP_kWh.toString() : '0'} />
                 </Table.Cell>,
 
                 totalSavings: <Table.Cell>
@@ -824,11 +945,11 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                 </Table.Cell>,
 
                 without: <Table.Cell>
-                    <input type="number" onChange={e => { changeSecondIntermediaryElement('acmv_without_TP_kWh', index, e.currentTarget.value) }} value={item.acmv_without_TP_kWh ? parseInt(item.acmv_without_TP_kWh).toString() : '0'} />
+                    <input type="number" onChange={e => { changeSecondIntermediaryElement('acmv_without_TP_kWh', index, e.currentTarget.value) }} value={item.acmv_without_TP_kWh ? item.acmv_without_TP_kWh.toString() : '0'} />
                 </Table.Cell>,
 
                 baseline: <Table.Cell>
-                    <input type="number" onChange={e => { changeSecondIntermediaryElement('acmv_baseline_kW', index, e.currentTarget.value) }} value={item.acmv_baseline_kW ? parseInt(item.acmv_baseline_kW).toString() : '0'} />
+                    <input type="number" onChange={e => { changeSecondIntermediaryElement('acmv_baseline_kW', index, e.currentTarget.value) }} value={item.acmv_baseline_kW ? item.acmv_baseline_kW.toString() : '0'} />
                 </Table.Cell>,
 
             }
@@ -994,8 +1115,21 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                         }} color="gray">
                                             Reset
                                         </Button>
-                                        <Button onClick={e => setOpenEditPopup(false)}>
-                                            Save
+                                        <Button onClick={e => {
+                                            updateIntermediary();
+                                        }}>
+                                            {updateIntermediaryLoading ? <Oval
+                                                height={20}
+                                                width={20}
+                                                color="white"
+                                                wrapperStyle={{}}
+                                                wrapperClass="w-full py-2 flex justify-center"
+                                                visible={true}
+                                                ariaLabel='oval-loading'
+                                                secondaryColor="white"
+                                                strokeWidth={2}
+                                                strokeWidthSecondary={2}
+                                            /> : 'Save'}
                                         </Button>
                                         {/* <button
                                             className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}
