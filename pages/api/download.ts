@@ -20,7 +20,7 @@ export default async function handler(
   await page.setViewport(viewPort);
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36');
 
-  const origin = process.env.NEXT_PUBLIC_SITE_URL;
+  const origin = process.env.NEXT_PUBLIC_SITE_URL + ':3000';
   let url = `${origin}/reports/invoice/${id}`;
 
   if (type === 'group') {

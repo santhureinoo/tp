@@ -36,8 +36,10 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
     const [currentGroup, setCurrentGroup] = React.useState<group>();
     const [loading, setLoading] = React.useState(false);
     const [updateIntermediaryLoading, setUpdateIntermediaryLoading] = React.useState(false);
+    const [updateRecalLoading, setUpdateRecallLoading] = React.useState(false);
     const [openEditPopup, setOpenEditPopup] = React.useState(false);
     const [selectedSubTitle, setSelectedSubTitle] = React.useState(0);
+    const [recalculateDays, setRecalculateDays] = React.useState<string[]>([]);
     const [firstIntermediaryList, setFirstIntermediaryList] = React.useState<first_intermediary_table[]>([]);
     const [secondIntermediaryList, setSecondIntermediaryList] = React.useState<secondary_intermediary_table[]>([]);
     const [firstOriginIntermediaryList, setFirstOriginIntermediaryList] = React.useState<first_intermediary_table[]>([]);
@@ -739,6 +741,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
 
     const updateIntermediary = () => {
         const promiseArr: Promise<any>[] = [];
+        const recalDays: string[] = [];
         firstIntermediaryList.forEach((item, index) => {
 
             const originItem = firstOriginIntermediaryList[index];
@@ -768,6 +771,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                     }
                 };
 
+                recalDays.push(item.day_of_month);
                 promiseArr.push(updateOneFirstIntermediary[0](updateOneFirstIntermediaryVariable));
             }
 
@@ -800,7 +804,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                         }
                     }
                 };
-
+                recalDays.push(item.day_of_month);
                 promiseArr.push(updateOneSecondIntermediary[0](updateOneSecondIntermediaryVariable));
             }
         })
@@ -808,11 +812,13 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
         if (promiseArr.length > 0) {
             setUpdateIntermediaryLoading(true);
         }
+
         Promise.all(promiseArr).then((res) => {
             // setFirstOriginIntermediaryList(firstIntermediaryList);
             // setSecondOriginIntermediaryList(secondIntermediaryList);
             setUpdateIntermediaryLoading(false);
             setOpenEditPopup(false);
+            setRecalculateDays(recalDays);
         })
 
     }
@@ -898,7 +904,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
 
     const changeFirstIntermediaryElement = (attribute: string, index: number, value: any) => {
         const clonedFirstIntermediaryList = cloneDeep(firstIntermediaryList);
-        clonedFirstIntermediaryList[index][attribute] = value;
+        clonedFirstIntermediaryList[index][attribute] = value.replace(/^0+/, '');
         setFirstIntermediaryList(clonedFirstIntermediaryList);
     }
 
@@ -977,6 +983,25 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
         }
     }
 
+    const recalculateResults = () => {
+        setUpdateRecallLoading(true);
+        const promiseArr = recalculateDays.map(day => {
+            return axios.post(
+                `${process.env.NEXT_PUBLIC_SITE_URL}:4001/recalculate_outlet_results`,
+                {
+                    "outlet_id": selectedOutletID,
+                    "outlet_date": day.padStart(2, '0') + `/${month}/${year}`,
+                }
+            )
+        })
+
+        Promise.all(promiseArr).finally(() => {
+            // setFirstOriginIntermediaryList(firstIntermediaryList);
+            // setSecondOriginIntermediaryList(secondIntermediaryList);
+            setUpdateRecallLoading(false);
+        })
+    }
+
     return (<React.Fragment>
         <div className="flex justify-end">
             <button onClick={(e) => { setOpenReportEdit(!openReportEdit) }} className={`w-8 h-8`} type='button'>
@@ -998,9 +1023,24 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
 
 
                             {/** Edit Button for modal popup */}
-                            <button type="button" onClick={(e) => { setOpenEditPopup(!openEditPopup) }} className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}>
+                            {customerType === 'Outlet' && <button type="button" onClick={(e) => { setOpenEditPopup(!openEditPopup) }} className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}>
                                 Edit
-                            </button>
+                            </button>}
+
+                            {customerType === 'Outlet' && <button type="button" onClick={(e) => { recalculateResults() }} className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}>
+                                {updateRecalLoading ? <Oval
+                                    height={20}
+                                    width={20}
+                                    color="white"
+                                    wrapperStyle={{}}
+                                    wrapperClass="w-full py-2 flex justify-center"
+                                    visible={true}
+                                    ariaLabel='oval-loading'
+                                    secondaryColor="white"
+                                    strokeWidth={2}
+                                    strokeWidthSecondary={2}
+                                /> : 'Recalculate results'}
+                            </button>}
                             <Modal
                                 size="7xl"
                                 dismissible={true}

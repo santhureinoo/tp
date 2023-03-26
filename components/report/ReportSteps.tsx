@@ -27,7 +27,7 @@ const ReportSteps = (): React.ReactElement => {
     const getDownloadPresigned = async (name: string, index: number) => {
         const data = index === 1 ? { "filename": name } : { "filename": name, "outlet_id": 3, "outlet_date": "01/10/2022" }
         const response = await axios.post(
-            `http://13.214.191.184:4001/process_step_${index}`,
+            `${process.env.NEXT_PUBLIC_SITE_URL }:4001/process_step_${index}`,
             data
         );
         if (index === 1) {
@@ -237,7 +237,7 @@ const ReportSteps = (): React.ReactElement => {
         </div>
         <ReportStepEdit onConfirm={() => {
             axios.get(
-                `http://13.214.191.184:4001/create_group_passwords`,
+                `${process.env.NEXT_PUBLIC_SITE_URL }:4001/create_group_passwords`,
             );
             downloadFromS3(3);
         }} openReportStepEdit={openReportStepEdit} setOpenReportStepEdit={setOpenReportStepEdit} fromExtension={"Report & Invoice"} toExtension={"Output-Sheet.csv"} datePeriod={date} affectedRows={50} uploadedFileAttribute={selectedFileAttribute} />
