@@ -617,8 +617,9 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                 }
                             } // !!!
                         ).then((response) => {
-                            setLoading(false);
                             downloadFile(response.data, 'Group Report');
+                        }).finally(() => {
+                            setLoading(false);
                         })
                     },
                     "css": "",
@@ -676,8 +677,9 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                                     }
                                                 } // !!!
                                             ).then((response) => {
-                                                setLoading(false);
                                                 downloadFile(response.data, 'Group(Annex) Report');
+                                            }).finally(() => {
+                                                setLoading(false);
                                             })
                                         })
                                     } else {
@@ -702,8 +704,9 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                 }
                             } // !!!
                         ).then((response) => {
-                            setLoading(false);
                             downloadFile(response.data, 'Group Report');
+                        }).finally(() => {
+                            setLoading(false);
                         })
                     },
                     "css": "",
@@ -727,8 +730,9 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                 }
                             } // !!!
                         ).then((response) => {
-                            setLoading(false);
                             downloadFile(response.data, 'Outlet Report');
+                        }).finally(() => {
+                            setLoading(false);
                         })
 
                         // router.push({ pathname: "/api/download", query: { type: 'outlet', id: selectedReportID } });
