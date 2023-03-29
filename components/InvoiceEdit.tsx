@@ -10,6 +10,7 @@ import DropdownMenu from "./DropdownMenu";
 import { useRouter } from 'next/router';
 import axios from "axios";
 import { downloadFile, monthNumToStr } from "../common/helper";
+import { Oval } from "react-loader-spinner";
 
 
 interface Props {
@@ -25,6 +26,7 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
 
     const [outlets, setOutlets] = React.useState<outlet[]>([]);
     const [openInvoiceBtn, setOpenInvoiceBtn] = React.useState(false);
+    const [loading, setLoading] = React.useState(false);
     const router = useRouter();
 
     const getOutletsQuery = gql`
@@ -134,26 +136,41 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                         </div>
                         <div className="flex gap-x-2">
                             <div className="">
-                                <button type="button" onClick={(e) => { setOpenInvoiceBtn(!openInvoiceBtn) }} className={`text-white relative font-medium rounded-lg text-sm px-5 py-5 inline-flex items-center`}>
-                                    Download Invoice
-                                    <div className={`${openInvoiceBtn ? 'absolute' : 'hidden'} z-20 top-12 left-0 w-full`}>
+                                <button type="button" onClick={(e) =>  { !loading && setOpenInvoiceBtn(!openInvoiceBtn)
+                                }} className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-cente`}>
+                                    {loading ? <Oval
+                                        height={20}
+                                        width={20}
+                                        color="white"
+                                        wrapperStyle={{}}
+                                        wrapperClass="w-full py-2 flex justify-center"
+                                        visible={true}
+                                        ariaLabel='oval-loading'
+                                        secondaryColor="white"
+                                        strokeWidth={2}
+                                        strokeWidthSecondary={2}
+                                    /> : 'Download Invoice'}
+                                    <div className={`${openInvoiceBtn ? 'absolute' : 'hidden'} z-20 top-16 left-0 w-full`}>
                                         <DropdownMenu options={[
                                             {
                                                 "text": "Invoice",
                                                 "onClick": () => {
+                                                    setLoading(true)
                                                     axios.get(
                                                         '/api/download',
                                                         {
                                                             responseType: 'arraybuffer',
                                                             params: {
                                                                 type: 'invoice',
-                                                                id: 9,
-                                                                month: "Oct",
-                                                                year: "2021",
+                                                                id: invoice?.invoice_id,
+                                                                month: month,
+                                                                year: year,
                                                             }
                                                         } // !!!
                                                     ).then((response) => {
                                                         downloadFile(response.data, 'Invoice Report');
+                                                    }).finally(()=>{
+                                                        setLoading(false);
                                                     })
                                                 },
                                                 "css": "",

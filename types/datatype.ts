@@ -666,6 +666,7 @@ export interface results {
     sunday: resultsFields.sunday;
     holiday: resultsFields.holiday;
 
+    outlet?: outlet;
 }
 
 export namespace rg_factorsFields {

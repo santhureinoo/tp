@@ -39,13 +39,21 @@ export default async function handler(
   }
 
   await merger.add('./public/pdf/Group_Report_Default.pdf');
-
   await page.goto(url, {
     timeout: 0,
     waitUntil: ["load", 'networkidle2', 'networkidle0', 'domcontentloaded'],
   });
 
+  // if (type === 'invoice') {
+  //   await page.waitForSelector('tr[id="tFoot"]');
+  //   console.log('waiting done');
+  // }
+
+
   await page.emulateMediaType('print');
+  // await page.waitForFunction(() => {
+  //   return document.querySelectorAll('.tfoot-data').length > 0;
+  // });
 
   const pdfBuffer = await page.pdf({
     // path: 'report.pdf',
@@ -54,7 +62,7 @@ export default async function handler(
     width: '25.4cm',
     landscape: true,
     printBackground: true,
-    scale: 1.2,
+    scale: type === 'invoice' ? 0.8 : 1.2,
   })
 
   fs.writeFileSync(tempFileDir, pdfBuffer);

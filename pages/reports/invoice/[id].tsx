@@ -1,66 +1,113 @@
-import { gql, useQuery, WatchQueryFetchPolicy } from "@apollo/client";
+import { gql, useLazyQuery, useQuery, WatchQueryFetchPolicy } from "@apollo/client";
+import moment from "moment";
 import { NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React from "react";
 import { median } from "../../../common/helper";
-import { outlet } from "../../../types/datatype";
+import { invoice, outlet, results } from "../../../types/datatype";
 
 const InvoiceReport: NextPage = () => {
     const router = useRouter();
+    const [invoice, setInvoice] = React.useState<invoice>({} as invoice);
+    const [lstResults, setLstResults] = React.useState<results[]>([]);
     const { id, month, year } = router.query;
+    const momentDate = moment(`01/${month}/${year}`, 'DD/MM/YYYY');
 
-    const getFirstCustomerQuery = gql`
-    query findFirstCustomerQuery($where: CustomerWhereInput) {
-        findFirstCustomer(where: $where) {
+    const getResultsQuery = gql`
+    query FindManyResults($where: ResultsWhereInput, $outletMonthWhere2: Outlet_monthWhereInput) {
+        findManyResults(where: $where) {
+          outlet_measured_savings_kWh
+          outlet_measured_savings_expenses
+          outlet_measured_savings_percent
+          co2_savings_kg
+          tp_sales_expenses
           outlet {
             name
-            outlet_month {
-              last_avail_tariff
-            }
-            results {
-              outlet_measured_savings_expenses
-              outlet_measured_savings_kWh
-              outlet_measured_savings_percent
-              co2_savings_kg
-              tp_sales_expenses
+            outlet_month(where: $outletMonthWhere2) {
+                last_avail_tariff
             }
           }
         }
-      }`;
+      }
+    `;
 
-    const getFirstCustomerVariable = {
+    const getResultsVariable = {
         'variables': {
             "where": {
-                "group_id": {
-                    "equals": id && typeof id === 'string' ? Number(id) : 0
-                },
-            },
-            ...(month && year && month !== 'All' && year !== 'All') && {
-                "outletWhere2": {
-                    "reports": {
-                        "some": {
-                            "year": {
-                                "equals": year
-                            },
-                            "month": {
-                                "equals": month
-                            }
+                "AND": [
+                    {
+                        "outlet_id": {
+                            "in": invoice ? eval(invoice.outlet_ids) : []
+                        },
+                        "outlet_date": {
+                            "contains": month + "/" + year
                         }
                     }
+                ]
+            },
+            "outletMonthWhere2": {
+                "outlet_date": {
+                    "contains": month + "/" + year
                 }
             }
         },
         'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy
     }
 
-    const getCustomerResult = useQuery(getFirstCustomerQuery, getFirstCustomerVariable);
+    const getInvoiceQuery = gql`
+    query FindFirstInvoice($where: InvoiceWhereInput) {
+        findFirstInvoice(where: $where) {
+          month
+          year
+          group_id
+          invoice_id
+          customer_id
+          last_available_tariff
+          outlet_measured_savings_kWh
+          outlet_measured_savings_expenses
+          outlet_measured_savings_percent
+          eqpt_energy_usage_without_TP_month_kW
+          eqpt_energy_usage_without_TP_month_expenses
+          eqpt_energy_usage_with_TP_month_kW
+          eqpt_energy_usage_with_TP_month_expenses
+          outlet_ids
+          outlet_count
+          customer {
+            name
+          }
+          group {
+            group_name
+          }
+        }
+      }`;
+
+    const getInvoiceVariable = {
+        'variables': {
+            "where": {
+                "invoice_id": {
+                    "equals": id && typeof id === 'string' ? Number(id) : 0
+                },
+            },
+        },
+        onCompleted: (data: any) => {
+            if (data && data.findFirstInvoice) {
+                setInvoice(data.findFirstInvoice);
+                getResults[0]().then(res => {
+                    setLstResults(res.data.findManyResults);
+                })
+            }
+
+        },
+        'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy
+    }
+
+    useQuery(getInvoiceQuery, getInvoiceVariable);
+
+    const getResults = useLazyQuery(getResultsQuery, getResultsVariable);
 
     const getTotal = React.useMemo(() => {
-        if (getCustomerResult.data && getCustomerResult.data.findFirstCustomer &&
-            getCustomerResult.data.findFirstCustomer.outlet) {
-
-            const outlets: outlet[] = getCustomerResult.data.findFirstCustomer.outlet;
+        if (lstResults && lstResults.length > 0) {
 
             let totalKwh = 0;
             let totalExpense = 0;
@@ -68,17 +115,15 @@ const InvoiceReport: NextPage = () => {
             let totalCo2 = 0;
             let totalSF = 0;
 
-            outlets.forEach(out => {
-                if (out.results) {
-                    totalKwh += Number(out.results[0].outlet_measured_savings_kWh);
-                    totalExpense += Number(out.results[0].outlet_measured_savings_expenses);
-                    totalPercent.push(Number(out.results[0].outlet_measured_savings_percent));
-                    totalCo2 += Number(out.results[0].co2_savings_kg);
-                    totalSF += Number(out.results[0].tp_sales_expenses);
-                }
+            lstResults.forEach(res => {
+                totalKwh += Number(res.outlet_measured_savings_kWh);
+                totalExpense += Number(res.outlet_measured_savings_expenses);
+                totalPercent.push(Number(res.outlet_measured_savings_percent));
+                totalCo2 += Number(res.co2_savings_kg);
+                totalSF += Number(res.tp_sales_expenses);
             })
 
-            return <tr className="font-bold">
+            return <tr id="tFoot" className="font-bold">
                 <td className="text-right">
                     TOTAL
                 </td>
@@ -109,10 +154,10 @@ const InvoiceReport: NextPage = () => {
                 </td>
             </tr>
         } else {
-            return <tr></tr>
+            return <></>
         }
 
-    }, [getCustomerResult.data])
+    }, [lstResults])
 
     return <React.Fragment>
         <div className="flex flex-row-reverse">
@@ -121,14 +166,20 @@ const InvoiceReport: NextPage = () => {
         <div className="flex flex-col gap-y-4 mt-6">
             <span>Here is our Tablepointer Energy Savings Report for your reference:</span>
             <span>
-                The amount of CO2 emissions that Burger King Singapore Pte ltd reduced...
+                The amount of CO2 emissions that {(invoice && invoice.customer) ? invoice.customer.name : 'customer name not found!'} reduced in {momentDate.format('MMMM YYYY')} is equivalent to planting {'311'} trees and waiting for them to grow over 10 years!
+            </span>
+            <span>
+                You are a leading substainable {`F&B`} company in Southeast Asia!
+            </span>
+            <span>
+                Thank you for your support.
                 <br />
-                The amount of CO2 emissions that Burger King Singapore Pte ltd reduced...
+                Should you have any questions, please feel free to contact us at accounts.sg@tablepointer.com.
             </span>
         </div>
         <div className="flex flex-col gap-y-2 mt-4 text-xs">
-            <span>Burger King Singapore Pte Ltd</span>
-            <span>August 2022</span>
+            <span>{(invoice && invoice.customer) ? invoice.customer.name : 'customer name not found!'}</span>
+            <span>{momentDate.format('MMMM YYYY')}</span>
             <table className="invoice-table w-auto text-xs table-fixed">
                 <thead>
                     <tr>
@@ -146,89 +197,54 @@ const InvoiceReport: NextPage = () => {
                         <th className="w-1/12">kg</th>
                         <th className="w-1/12">$</th>
                     </tr>
+
+
                 </thead>
                 <tbody>
-                    {/* <tr>
-                        <td>
-                            Burger King (Kebun Baru Community Club)
-                        </td>
-                        <td>
-                            <div className="flex flex-row justify-between h-full">
-                                <span>$</span>
-                                <span>0.3486</span>
-                            </div>
+                    {lstResults && lstResults.map((result: results, index: number) => {
+                        return (<React.Fragment key={"frag" + index}>
+                            <tr>
+                                <td>
+                                    {result.outlet?.name}
+                                </td>
+                                <td>
+                                    <div className="flex flex-row justify-between h-full">
+                                        <span>$</span>
+                                        <span>{result.outlet && result.outlet.outlet_month && result.outlet.outlet_month.reduce((prev, current) => Number(current.last_avail_tariff) + Number(prev), 0)}</span>
+                                    </div>
 
-                        </td>
-                        <td>
-                            709
-                        </td>
-                        <td>
-                            <div className="flex flex-row justify-between h-full">
-                                <span>$</span>
-                                <span>247.31</span>
-                            </div>
+                                </td>
+                                <td>
+                                    {result.outlet_measured_savings_kWh}
+                                </td>
+                                <td>
+                                    <div className="flex flex-row justify-between h-full">
+                                        <span>$</span>
+                                        <span>{result.outlet_measured_savings_expenses}</span>
+                                    </div>
 
-                        </td>
-                        <td>
-                            23%
-                        </td>
-                        <td>
-                            503
-                        </td>
-                        <td>
-                            <div className="flex flex-row justify-between h-full">
-                                <span>$</span>
-                                <span>123.66</span>
-                            </div>
+                                </td>
+                                <td>
+                                    {result.outlet_measured_savings_percent}%
+                                </td>
+                                <td>
+                                    {result.co2_savings_kg}
+                                </td>
+                                <td>
+                                    <div className="flex flex-row justify-between h-full">
+                                        <span>$</span>
+                                        <span>{result.tp_sales_expenses}</span>
+                                    </div>
 
-                        </td>
-                    </tr> */}
-                    {getCustomerResult.data &&
-                        getCustomerResult.data.findFirstCustomer &&
-                        getCustomerResult.data.findFirstCustomer.outlet &&
-                        getCustomerResult.data.findFirstCustomer.outlet.map((outl: outlet, index: number) => {
-                            return (<React.Fragment key={"frag" + "index"}>
-                                <tr>
-                                    <td>
-                                        {outl.name}
-                                    </td>
-                                    <td>
-                                        <div className="flex flex-row justify-between h-full">
-                                            <span>$</span>
-                                            <span>{outl.outlet_month && outl.outlet_month[0].last_avail_tariff}</span>
-                                        </div>
+                                </td>
+                            </tr>
+                        </React.Fragment>)
+                    })}
 
-                                    </td>
-                                    <td>
-                                        {outl.results && outl.results[0].outlet_measured_savings_kWh}
-                                    </td>
-                                    <td>
-                                        <div className="flex flex-row justify-between h-full">
-                                            <span>$</span>
-                                            <span>{outl.results && outl.results[0].outlet_measured_savings_expenses}</span>
-                                        </div>
-
-                                    </td>
-                                    <td>
-                                        {outl.results && outl.results[0].outlet_measured_savings_percent}%
-                                    </td>
-                                    <td>
-                                        {outl.results && outl.results[0].co2_savings_kg}
-                                    </td>
-                                    <td>
-                                        <div className="flex flex-row justify-between h-full">
-                                            <span>$</span>
-                                            <span>{outl.results && outl.results[0].tp_sales_expenses}</span>
-                                        </div>
-
-                                    </td>
-                                </tr>
-                            </React.Fragment>)
-                        })}
-
+                    {getTotal}
                 </tbody>
                 <tfoot>
-                    {getTotal}
+
                 </tfoot>
             </table>
         </div>

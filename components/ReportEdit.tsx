@@ -884,7 +884,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
             currentReport.group.customers.forEach(customer => {
                 if (customer.outlet) {
                     customer.outlet.forEach(out => {
-                        if (out.results) {
+                        if (out.results && out.results.length > 0) {
                             out.results.forEach(res => {
                                 result.kwh = res.outlet_measured_savings_kWh ? Number(res.outlet_measured_savings_kWh) : 0;
                                 result.exp = res.outlet_measured_savings_expenses ? Number(res.outlet_measured_savings_expenses) : 0;
