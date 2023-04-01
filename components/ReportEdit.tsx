@@ -21,7 +21,7 @@ interface Props {
     openReportEdit: boolean;
     afterOperation?: () => void;
     customerType: 'Group' | 'Outlet';
-    selectedReportID: number;
+    selectedID: number;
     selectedOutletID?: number;
     selectedCustomerID?: number;
     month: string;
@@ -30,7 +30,7 @@ interface Props {
     setOpenReportEdit(openReportEdit: boolean): void;
 }
 
-const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selectedOutletID, selectedCustomerID, result, month, year, afterOperation, customerType }: Props) => {
+const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOutletID, selectedCustomerID, result, month, year, afterOperation, customerType }: Props) => {
     const [dropdownRef, openDownloadReport, setOpenDownloadReport] = useDropdown(false, () => { });
     const [currentReport, setCurrentReport] = React.useState<reports>();
     const [currentGroup, setCurrentGroup] = React.useState<group>();
@@ -105,35 +105,39 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
         }
       }`
 
-    const getGroupBYIDVariable = {
-        "variables": {
-            "where": {
-                ...(month !== 'All') && {
-                    "month": {
-                        "equals": month
-                    }
+    const getGroupBYIDVariable = React.useMemo(() => {
+        return {
+            "variables": {
+                "where": {
+                    ...(month !== 'All') && {
+                        "month": {
+                            "equals": month
+                        }
+                    },
+                    ...(year !== 'All') && {
+                        "year": {
+                            "equals": year
+                        }
+                    },
+
                 },
-                ...(year !== 'All') && {
-                    "year": {
-                        "equals": year
+                "findFirstGroupWhere2": {
+                    "group_id": {
+                        "equals": selectedID
+                    },
+                },
+                ...(month !== 'All' && year !== 'All') && {
+                    "resultWhere": {
+                        "outlet_date": {
+                            "contains": year
+                        }
                     }
                 },
 
             },
-            "findFirstGroupWhere2": {
-                "group_id": {
-                    "equals": selectedReportID
-                },
-            },
-            ...(month !== 'All' && year !== 'All') && {
-                "resultWhere": {
-                    "outlet_date": {
-                        "contains": year
-                    }
-                }
-            }
-        },
-    };
+            'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy
+        };
+    }, [selectedID, month, year]);
 
     const getGroupByIDQUery = gql`
     query FindFirstGroup($where: ReportsWhereInput, $findFirstGroupWhere2: GroupWhereInput, $resultWhere: ResultsWhereInput) {
@@ -172,7 +176,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
         "variables": {
             "where": {
                 "report_id": {
-                    "equals": selectedReportID
+                    "equals": selectedID
                 },
                 ...(month !== 'All') && {
                     "month": {
@@ -321,24 +325,29 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
     const updateOneSecondIntermediary = useMutation(updateOneSecondIntermediaryQuery);
 
     React.useEffect(() => {
-        if (openReportEdit) {
+        if (openReportEdit && selectedID) {
+            setLoading(true);
             if (customerType === 'Outlet') {
                 getReportByID[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
                     if (res && res.data && res.data.findFirstReports) {
                         setCurrentReport(res.data.findFirstReports);
                     }
+                }).finally(() => {
+                    setLoading(false);
                 })
             } else {
-                getGroupByID[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(res => {
+                getGroupByID[0]().then(res => {
                     if (res && res.data && res.data.findFirstGroup) {
                         setCurrentGroup(res.data.findFirstGroup);
                     }
                 }
-                )
+                ).finally(() => {
+                    setLoading(false);
+                })
             }
         }
 
-    }, [customerType, openReportEdit]);
+    }, [customerType, openReportEdit, selectedID]);
 
     React.useEffect(() => {
         if (openEditPopup) {
@@ -611,13 +620,13 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                 responseType: 'blob',
                                 params: {
                                     type: 'group',
-                                    id: selectedReportID,
+                                    id: selectedID,
                                     month: month,
                                     year: year,
                                 }
                             } // !!!
                         ).then((response) => {
-                            downloadFile(response.data, 'Group Report');
+                            downloadFile(response.data, `TablePointer Summary Report - ${currentGroup?.group_name} - ${month} ${year}`);
                         }).finally(() => {
                             setLoading(false);
                         })
@@ -632,7 +641,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                             'variables': {
                                 "where": {
                                     "group_id": {
-                                        "equals": selectedReportID
+                                        "equals": selectedID
                                     },
                                     ...(month && year && month !== 'All' && year !== 'All') && {
                                         "year": {
@@ -659,54 +668,38 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                 setLoading(false);
                                 return;
                             }
+                            const outletIds: string[] = [];
                             const reports: reports[] = response.data.findManyReports;
                             const rep = reports[reports.length - 1];
                             if (rep.group && rep.group.customers) {
                                 rep.group.customers.forEach(cus => {
                                     if (cus.outlet) {
                                         cus.outlet.forEach(outlet => {
-                                            axios.get(
-                                                '/api/download',
-                                                {
-                                                    responseType: 'arraybuffer',
-                                                    params: {
-                                                        type: 'group_annex',
-                                                        id: outlet.outlet_id,
-                                                        month: month,
-                                                        year: year,
-                                                    }
-                                                } // !!!
-                                            ).then((response) => {
-                                                downloadFile(response.data, 'Group(Annex) Report');
-                                            }).finally(() => {
-                                                setLoading(false);
-                                            })
+                                            outletIds.push(outlet.outlet_id.toString());
                                         })
-                                    } else {
-                                        setLoading(false);
                                     }
 
+                                })
+                                axios.get(
+                                    '/api/download',
+                                    {
+                                        responseType: 'arraybuffer',
+                                        params: {
+                                            type: 'group',
+                                            id: selectedID,
+                                            month: month,
+                                            year: year,
+                                            outletIds: outletIds
+                                        }
+                                    } // !!!
+                                ).then((response) => {
+                                    downloadFile(response.data, `TablePointer Summary Report - ${currentGroup?.group_name} - ${month} ${year}`);
+                                }).finally(() => {
+                                    setLoading(false);
                                 })
                             } else {
                                 setLoading(false);
                             }
-                        })
-
-                        axios.get(
-                            '/api/download',
-                            {
-                                responseType: 'arraybuffer',
-                                params: {
-                                    type: 'group',
-                                    id: selectedReportID,
-                                    month: month,
-                                    year: year,
-                                }
-                            } // !!!
-                        ).then((response) => {
-                            downloadFile(response.data, 'Group Report');
-                        }).finally(() => {
-                            setLoading(false);
                         })
                     },
                     "css": "",
@@ -730,18 +723,23 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                 }
                             } // !!!
                         ).then((response) => {
-                            downloadFile(response.data, 'Outlet Report');
+                            if (currentReport && currentReport.group && currentReport.group.customers
+                                && currentReport.group.customers.length > 0 && currentReport.group.customers[0].outlet
+                                && currentReport.group.customers[0].outlet[0]
+                            ) {
+                                downloadFile(response.data, `TablePointer Outlet Report - ${currentReport.group.customers[0].outlet[0].name} - ${month} ${year}`);
+                            }
                         }).finally(() => {
                             setLoading(false);
                         })
 
-                        // router.push({ pathname: "/api/download", query: { type: 'outlet', id: selectedReportID } });
+                        // router.push({ pathname: "/api/download", query: { type: 'outlet', id: selectedID } });
                     },
                     "css": "",
                 },
             ]
         }
-    }, [customerType, selectedReportID, month, year, currentReport]);
+    }, [customerType, selectedID, month, year, currentReport, currentGroup]);
 
     const updateIntermediary = () => {
         const promiseArr: Promise<any>[] = [];
@@ -1188,7 +1186,6 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                 </Modal.Footer>
                             </Modal>
 
-
                             <button type="button" onClick={(e) => { !loading && setOpenDownloadReport(!openDownloadReport) }} className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}>
                                 {loading ? <Oval
                                     height={20}
@@ -1206,6 +1203,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                                     <DropdownMenu options={downloadReportItems} />
                                 </div>
                             </button>
+
 
                         </div>
                     </div>
@@ -1447,7 +1445,6 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedReportID, selec
                         </div>
                     </div>
             }
-
         </div>
     </React.Fragment >);
 }

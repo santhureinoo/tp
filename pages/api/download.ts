@@ -14,6 +14,7 @@ export default async function handler(
   const id = req.query.id as string;
   const month = req.query.month as string;
   const year = req.query.year as string;
+  const outletIds = req.query['outletIds[]'] as string[];
   const viewPort = { width: 1707, height: 960 };
   const browser = await puppeteer.launch({
     headless: true,
@@ -43,30 +44,50 @@ export default async function handler(
     timeout: 0,
     waitUntil: ["load", 'networkidle2', 'networkidle0', 'domcontentloaded'],
   });
-
-  // if (type === 'invoice') {
-  //   await page.waitForSelector('tr[id="tFoot"]');
-  //   console.log('waiting done');
-  // }
-
-
-  await page.emulateMediaType('print');
-  // await page.waitForFunction(() => {
-  //   return document.querySelectorAll('.tfoot-data').length > 0;
-  // });
+  await page.emulateMediaType('screen');
 
   const pdfBuffer = await page.pdf({
     // path: 'report.pdf',
     // format: 'A3',
-    height: '45.1612cm',
+    height: '34cm',
     width: '25.4cm',
     landscape: true,
     printBackground: true,
+    preferCSSPageSize: false,
     scale: type === 'invoice' ? 0.8 : 1.2,
   })
 
   fs.writeFileSync(tempFileDir, pdfBuffer);
   await merger.add(tempFileDir);
+
+  /**
+   *  Looping across outlets for group+annex selection.
+   */
+  if (outletIds) {
+    for (let i = 0; i < outletIds.length; i++) {
+      const subUrl = `${origin}/reports/group_annax_outlets/${outletIds[i]}?year=${year}&month=${month}`;
+      await page.goto(subUrl, {
+        timeout: 0,
+        waitUntil: ["load", 'networkidle2', 'networkidle0', 'domcontentloaded'],
+      });
+
+      const pdfBuffer = await page.pdf({
+        // path: 'report.pdf',
+        // format: 'A3',
+        // height: '45.1612cm',
+        // width: '25.4cm',
+        height: '34cm',
+        width: '25.4cm',
+        landscape: true,
+        printBackground: true,
+        scale: 1.2,
+      })
+
+      fs.writeFileSync(tempFileDir, pdfBuffer);
+      await merger.add(tempFileDir);
+    }
+  }
+
 
   const mergedPdfBuffer = await merger.saveAsBuffer();
 

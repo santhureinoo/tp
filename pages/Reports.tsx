@@ -983,7 +983,7 @@ const ReportTable: any = () => {
             {selectedSubTitle === "Generate" ?
               generateTable
               : selectedSubTitle === "Savings" ?
-                savingTable(<ReportEdit selectedReportID={selectedReportID.reportId} selectedCustomerID={selectedCustomerId ? parseInt(selectedCustomerId) : 0} selectedOutletID={selectedOutletID ? parseInt(selectedOutletID) : 0} result={selectedResult} openReportEdit={openReportEdit} customerType={selectedCustomerType} setOpenReportEdit={setOpenReportEdit} month={selectedReportID.selectedMonth} year={selectedReportID.selectedYear} />) :
+                savingTable(<ReportEdit selectedID={selectedReportID.reportId} selectedCustomerID={selectedCustomerId ? parseInt(selectedCustomerId) : 0} selectedOutletID={selectedOutletID ? parseInt(selectedOutletID) : 0} result={selectedResult} openReportEdit={openReportEdit} customerType={selectedCustomerType} setOpenReportEdit={setOpenReportEdit} month={selectedReportID.selectedMonth} year={selectedReportID.selectedYear} />) :
                 selectedSubTitle === "Invoice" ? invoiceTable(<InvoiceEdit openReportEdit={openReportEdit} setOpenReportEdit={setOpenReportEdit} invoice={selectedInvoice} month={selectedInvoice?.month || 'All'} year={selectedInvoice?.year || 'All'} />) : <React.Fragment><ReportSteps></ReportSteps></React.Fragment>
             }
           </div>

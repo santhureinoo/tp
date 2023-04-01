@@ -103,7 +103,6 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
     }, [invoice, openReportEdit]);
 
     const savingCo2 = React.useMemo(() => {
-        console.log(outlets);
         let co2 = 0;
         let saving = 0;
         if (outlets && outlets.length > 0) {

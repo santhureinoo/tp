@@ -170,7 +170,6 @@ const GroupReport: NextPage = () => {
                 attributes.groupName = rep.group.group_name;
                 rep.group.customers.forEach(cus => {
                     if (cus.outlet) {
-                        console.log(cus.outlet);
                         cus.outlet.forEach((outlet: outlet) => {
                             // axios.get(
                             //     '/api/download',
@@ -336,20 +335,24 @@ const GroupReport: NextPage = () => {
             <p className='report-text mb-2'>
                 Annually Unlocked :
             </p>
-            <div className='flex flex-row gap-x-4 text-report-non-table-text justify-center'>
+            <div className='flex flex-row gap-x-4 text-report-non-table-text text-center font-bold justify-center'>
                 <div className='flex flex-col'>
+                    <img className="float-right w-28 h-28 object-scale-down" src={'/asserts/reports/icon_summary_energysaved.png'} />
                     <span>$ {numberWithCommas(reportAttributes?.energy_saving_py, 0)}</span>
                     <span>energy savings per year</span>
                 </div>
                 <div className='flex flex-col'>
+                    <img className="float-right w-28 h-28 object-scale-down" src={'/asserts/reports/icon_summary_co2.png'} />
                     <span>$ {numberWithCommas(reportAttributes?.co2_saving_py, 0)}</span>
                     <span>kg CO<sup>2</sup> saved per year</span>
                 </div>
                 <div className='flex flex-col'>
+                    <img className="float-right w-28 h-28 object-scale-down" src={'/asserts/reports/icon_summary_treesplanted.png'} />
                     <span>{numberWithCommas((reportAttributes?.energy_saving_py || 0) * 0.00084, 0)}</span>
                     <span>tree per years and wait 10 years</span>
                 </div>
                 <div className='flex flex-col'>
+                    <img className="float-right w-28 h-28 object-scale-down" src={'/asserts/reports/icon_summary_foodsold.png'} />
                     <span>{numberWithCommas((reportAttributes?.energy_saving_py || 0) * 2, 0)}</span>
                     <span>meals to be sold per year</span>
                 </div>
