@@ -135,7 +135,8 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                         </div>
                         <div className="flex gap-x-2">
                             <div className="">
-                                <button type="button" onClick={(e) =>  { !loading && setOpenInvoiceBtn(!openInvoiceBtn)
+                                <button type="button" onClick={(e) => {
+                                    !loading && setOpenInvoiceBtn(!openInvoiceBtn)
                                 }} className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-cente`}>
                                     {loading ? <Oval
                                         height={20}
@@ -167,8 +168,8 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                                                             }
                                                         } // !!!
                                                     ).then((response) => {
-                                                        downloadFile(response.data, 'Invoice Report');
-                                                    }).finally(()=>{
+                                                        downloadFile(response.data, `TablePointer Invoice - ${invoice?.customer?.name} - ${month} ${year}`);
+                                                    }).finally(() => {
                                                         setLoading(false);
                                                     })
                                                 },
