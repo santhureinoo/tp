@@ -1014,7 +1014,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
             <div className="pb-6 space-y-4">
                 <div className="flex text-lg justify-between">
                     <div>
-                        <h1 ><b>Report ID</b></h1>
+                        <h1 ><b>{customerType === 'Group' ? 'Group ID' : 'Report ID'}</b></h1>
                         <h5>{currentReport?.report_id || currentGroup?.group_id}</h5>
                     </div>
                     <div ref={dropdownRef} className="flex gap-x-2">
