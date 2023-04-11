@@ -160,7 +160,7 @@ const ReportSteps = (): React.ReactElement => {
                     const text = reader.result as string;
                     var rows = text.split('\n');
                     if (rows.length > 0) {
-                        setDate(moment(rows[1].split(',')[1], 'MM/DD/YYYY').format("MMMM YYYY"));
+                        setDate(moment(rows[1].split(',')[1], 'DD/MM/YYYY').format("MMMM YYYY"));
                     }
                 };
                 // start reading the file. When it is done, calls the onload event defined above.
@@ -220,13 +220,13 @@ const ReportSteps = (): React.ReactElement => {
         <div className="drop-shadow-lg h-100 rounded-lg p-4 bg-white">
             <div className='flex flex-col gap-y-4'>
                 <h3 className="text-gray-700 text-3xl"><b>Update |</b> Log</h3>
-                <div className="flex flex-row w-full justify-between">
+                {/* <div className="flex flex-row w-full justify-between">
                     <TableOptionField key={uuidv4()} label={'Select Input Type'} selectedValue={inputType} data={["Partial", "All"]} onChange={(selectedValue: string) => { setInputType(selectedValue) }} />
                     <div className="flex flex-row gap-x-2">
                         <TableOptionField key={uuidv4()} label={'Month'} selectedValue={inputType} data={["Partial", "All"]} onChange={(selectedValue: string) => { setInputType(selectedValue) }} />
                         <TableOptionField key={uuidv4()} label={'Year'} selectedValue={inputType} data={["Partial", "All"]} onChange={(selectedValue: string) => { setInputType(selectedValue) }} />
                     </div>
-                </div>
+                </div> */}
 
                 <div className="flex flex-col gap-y-14">
                     <ReportStep allActionDone={allActionDone[1]} isUploading={uploadingNow[1]} disabled={false} onVerify={verifyStep1} setOnVerify={setVerifyStep1} titleChar={"1"} subTitle={"Upload Input-Sheet"} texts={["Upload Input-SheetUpload the latest Input-Sheet", "to generate the input-sheet.csv"]} buttons={btnList(1)} nonButtons={nonBtnList(1)} ></ReportStep>

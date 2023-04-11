@@ -62,8 +62,8 @@ const ReportTable: any = () => {
   const [selectedSavingPageIndex, setSelectedSavingPageIndex] = React.useState(1);
 
   //Generate 
-  const [selectedGenerateMonth, setSelectedGenerateMonth] = React.useState("All");
-  const [selectedGenerateYear, setSelectedGenerateYear] = React.useState("All");
+  const [selectedGenerateMonth, setSelectedGenerateMonth] = React.useState("01");
+  const [selectedGenerateYear, setSelectedGenerateYear] = React.useState("2023");
   const [reports, setReports] = React.useState<reports[]>([]);
   const [totalGeneratePage, setTotalGeneratePage] = React.useState(1);
   const [selectedGeneratePageIndex, setSelectedGeneratePageIndex] = React.useState(1);
@@ -222,8 +222,8 @@ const ReportTable: any = () => {
         },
 
       },
-      "take": 10,
-      "skip": (selectedSavingPageIndex * 5) - 5,
+      // "take": 10,
+      // "skip": (selectedSavingPageIndex * 5) - 5,
       "customersWhere2": {
         "customer_id": {
           "equals": parseInt(selectedCustomerId),
@@ -891,7 +891,7 @@ const ReportTable: any = () => {
         onlyShowButton={true}
         data={savingReportData}
         hiddenDataColIndex={selectedCustomerType === 'Outlet' ? [1] : []}
-        totalNumberOfPages={totalSavingPage}
+        totalNumberOfPages={0}
         openDetailContent={openReportEdit}
         setOpenDetailContent={setOpenReportEdit}
         detailContent={detailElem}
@@ -963,7 +963,7 @@ const ReportTable: any = () => {
           <TableOptionField key={uuidv4()} label={'Month'} onChange={(selectedValue: string) => { setSelectedInvoiceMonth(selectedValue) }}
             selectedValue={selectedInvoiceMonth} data={month} />,
           <TableOptionField key={uuidv4()} label={'Year'} onChange={(selectedValue: string) => { setSelectedInvoiceYear(selectedValue) }}
-            selectedValue={selectedInvoiceYear} data={["All", "2022", "2020"]} />,
+            selectedValue={selectedInvoiceYear} data={["All", "2023", "2022", "2020"]} />,
         ]}
         handleEdit={(selectedData) => { setSelectedInvoice(invoices.find(inv => inv.invoice_id === selectedData[0])); setOpenReportEdit(true) }} handleDelete={() => setOpenReportEdit(true)} />
     </React.Fragment>

@@ -23,7 +23,7 @@ const Groups: NextPage = () => {
 }
 
 Groups.getInitialProps = async () => {
-  const title = 'Groups';
+  const title = 'Credentials';
   return { title };
 };
 
@@ -79,6 +79,7 @@ const EquipmentTable: any = () => {
         headers={['Group ID', 'Name', 'Password']}
         data={groupList || []}
         loading={groupList ? false : true}
+        hideDetailMenu={true}
         rightSideElements={[]}
         leftSideElements={[]}
         totalNumberOfPages={totalPage} setCurrentSelectedPage={setCurrentPageIndex} currentSelectedPage={currentPageIndex}

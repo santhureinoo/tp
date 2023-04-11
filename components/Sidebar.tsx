@@ -55,8 +55,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: Props) => {
                         {/* <Link href="/Billings">
                         {getLinkContent('Billing', router.pathname == "/Billings", 'billing')}
                     </Link> */}
-                        <Link href="/Groups">
-                        {getLinkContent('Groups', router.pathname == "/Groups", 'customer')}
+                        <Link href="/Credentials">
+                        {getLinkContent('Credentials', router.pathname == "/Credentials", 'customer')}
                     </Link>
                     </nav>
                     <nav className="mt-10 flex flex-col gap-y-2.5 py-3 px-2.5">

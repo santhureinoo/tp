@@ -1300,10 +1300,10 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                                 <h4>Live Outlets</h4>
                                 <span className="text-slate-400">{outletTotalForGroup}</span>
                             </div>
-                            <div>
+                            {/* <div>
                                 <h4>Group Address</h4>
-                                <span className="text-slate-400">Sahid Building <br /> Sudirman Boulevard No.12 Floor 15 / <br /> Unit 09</ span >
-                            </div>
+                                <span className="text-slate-400">{currentGroup}</ span >
+                            </div> */}
 
                             <div>
                                 <h4>Savings @Tariff</h4>
