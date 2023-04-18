@@ -207,9 +207,9 @@ const ReportTable: any = () => {
   const getReportsByOutletIDVariable = {
     "variables": {
       "where": {
-        "outlet_ids": {
-          "contains": selectedSavingsOutletID.toString()
-        },
+          "outlet_ids": {
+            "contains": selectedSavingsOutletID.toString()
+          },
         ...(selectedSavingsMonth !== 'All') && {
           "month": {
             "equals": selectedSavingsMonth
@@ -233,16 +233,23 @@ const ReportTable: any = () => {
         "outlet_id": {
           "equals": parseInt(selectedSavingsOutletID)
         }
-      }
+      },
+      // "outletMonthWhere2": {
+      //   "outlet_date": {
+      //     "equals": `01/${selectedSavingsMonth}/${selectedSavingsYear}`
+      //   }
+      // }
     },
   };
 
   const getReportsByOutletIdQuery = gql`
-  query FindManyReports($where: ReportsWhereInput, $take: Int, $skip: Int, $customersWhere2: CustomerWhereInput, $outletWhere2: OutletWhereInput) {
+  query FindManyReports($where: ReportsWhereInput, $take: Int, $skip: Int, $customersWhere2: CustomerWhereInput, $outletWhere2: OutletWhereInput, $outletMonthWhere2: Outlet_monthWhereInput) {
     findManyReports(where: $where, take: $take, skip: $skip) {
+      id
       report_id
       year
       month
+      outlet_ids
       outlet_measured_savings_expenses
       outlet_measured_savings_kWh
       outlet_measured_savings_percent
@@ -255,6 +262,12 @@ const ReportTable: any = () => {
           outlet(where: $outletWhere2) {
             outlet_id
             name
+            outlet_month(where: $outletMonthWhere2) {
+              outlet_date
+              no_of_ex_installed
+              no_of_fa_installed
+              no_of_ac_installed
+            }
           }
           name
         }
@@ -794,9 +807,16 @@ const ReportTable: any = () => {
               const reports = res.data.findManyReports as reports[];
               for (let i = 0; i < reports.length; i++) {
                 const cur = reports[i];
-                if (cur.group && cur.group.customers && cur.group.customers.length > 0 && cur.group.customers[0].outlet) {
+                if (cur.group && cur.group.customers && cur.group.customers.length > 0 && cur.group.customers[0].outlet
+                  && cur.group.customers[0].outlet.length && cur.group.customers[0].outlet[0].outlet_month) {
+                  const outlet_month = cur.group.customers[0].outlet[0].outlet_month.find(om=>om.outlet_date === `01/${cur.month}/${cur.year}`);
+                  let outlet_total_eqpt = 0;
+                  if(outlet_month) {
+                    outlet_total_eqpt = (outlet_month.no_of_ac_installed || 0) + (outlet_month.no_of_ex_installed || 0) + (outlet_month.no_of_fa_installed || 0);
+                  }
+                  
                   arr.push([
-                    cur.report_id, cur.group.customers[0]?.outlet[0]?.outlet_id, cur.group.customers[0]?.outlet[0]?.name, cur.month, cur.year, '1', '$ 0.20',
+                    cur.id, cur.report_id, cur.group.customers[0]?.outlet[0]?.outlet_id, cur.group.customers[0]?.outlet[0]?.name, cur.month, cur.year, outlet_total_eqpt, `$ ${cur.last_avail_tariff}`,
                     <div key={'frag ' + i} className='flex flex-row gap-x-4'>
                       <div className='flex flex-col'>
                         <span className='text-custom-xs'>
@@ -890,7 +910,7 @@ const ReportTable: any = () => {
         loading={tableLoading}
         onlyShowButton={true}
         data={savingReportData}
-        hiddenDataColIndex={selectedCustomerType === 'Outlet' ? [1] : []}
+        hiddenDataColIndex={selectedCustomerType === 'Outlet' ? [0,2] : []}
         totalNumberOfPages={0}
         openDetailContent={openReportEdit}
         setOpenDetailContent={setOpenReportEdit}
@@ -902,11 +922,11 @@ const ReportTable: any = () => {
         leftSideFlexDirection={"Vertical"}
         rightSideElements={[]}
         handleEdit={(selectedData) => {
-          setSelectedOutletID(selectedCustomerType === 'Outlet' ? selectedData[1] : selectedData[0])
+          setSelectedOutletID(selectedCustomerType === 'Outlet' ? selectedData[2] : selectedData[0])
           setSelectedReportID({
             reportId: parseInt(selectedData[0]),
-            selectedMonth: selectedCustomerType === 'Outlet' ? selectedData[3] : selectedData[2],
-            selectedYear: selectedCustomerType === 'Outlet' ? selectedData[4] : selectedData[3]
+            selectedMonth: selectedCustomerType === 'Outlet' ? selectedData[4] : selectedData[2],
+            selectedYear: selectedCustomerType === 'Outlet' ? selectedData[5] : selectedData[3]
           }); setOpenReportEdit(true)
         }} handleDelete={() => setOpenReportEdit(true)} />
     </React.Fragment>

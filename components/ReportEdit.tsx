@@ -175,24 +175,24 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
     const getReportByIDVariable = {
         "variables": {
             "where": {
-                "report_id": {
+                "id": {
                     "equals": selectedID
                 },
-                ...(month !== 'All') && {
-                    "month": {
-                        "equals": month
-                    }
-                },
-                ...(year !== 'All') && {
-                    "year": {
-                        "equals": year
-                    }
-                },
-                ...(selectedCustomerID) && {
-                    "customer_ids": {
-                        "contains": selectedCustomerID.toString()
-                    }
-                },
+                // ...(month !== 'All') && {
+                //     "month": {
+                //         "equals": month
+                //     }
+                // },
+                // ...(year !== 'All') && {
+                //     "year": {
+                //         "equals": year
+                //     }
+                // },
+                // ...(selectedCustomerID) && {
+                //     "customer_ids": {
+                //         "contains": selectedCustomerID.toString()
+                //     }
+                // },
             },
             "customersWhere2": {
                 "customer_id": {
@@ -246,6 +246,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
     const getReportByIdQuery = gql`
     query FindFirstReports($where: ReportsWhereInput, $customersWhere2: CustomerWhereInput,$resultWhere: ResultsWhereInput, $outletWhere2: OutletWhereInput) {
         findFirstReports(where: $where) {
+            report_id
             group {
                 customers(where: $customersWhere2) {
                     name
@@ -468,12 +469,12 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                     `${exObj.tfBM.energyBase}kw`,
                     <div key={'ex_data_first'} className="flex flex-row justify-around">
                         <div className='flex flex-col'>
-                            <span>{exObj.tfBM.mesKWH}kWh</span>
-                            <span>{exObj.tenBM.mesKWH}kWh</span>
+                            <span>{numberWithCommas(exObj.tfBM.mesKWH)}kWh</span>
+                            <span>{numberWithCommas(exObj.tenBM.mesKWH)}kWh</span>
                         </div>
                         <div className='flex flex-col'>
-                            <span>${exObj.tfBM.mesEXP}</span>
-                            <span>${exObj.tenBM.mesEXP}</span>
+                            <span>${numberWithCommas(exObj.tfBM.mesEXP)}</span>
+                            <span>${numberWithCommas(exObj.tenBM.mesEXP)}</span>
                         </div>
                     </div>,
                     <div key={'ex_data_second'} className='flex flex-col'>
@@ -488,12 +489,12 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                     `${acObj.tfBM.energyBase}kw`,
                     <div key={'ac_data_first'} className="flex flex-row justify-around">
                         <div className='flex flex-col'>
-                            <span>{acObj.tfBM.mesKWH}kWh</span>
-                            <span>{acObj.tenBM.mesKWH}kWh</span>
+                            <span>{numberWithCommas(acObj.tfBM.mesKWH)}kWh</span>
+                            <span>{numberWithCommas(acObj.tenBM.mesKWH)}kWh</span>
                         </div>
                         <div className='flex flex-col'>
-                            <span>${acObj.tfBM.mesEXP}</span>
-                            <span>${acObj.tenBM.mesEXP}</span>
+                            <span>${numberWithCommas(acObj.tfBM.mesEXP)}</span>
+                            <span>${numberWithCommas(acObj.tenBM.mesEXP)}</span>
                         </div>
                     </div>,
                     <div key={'ac_data_second'} className='flex flex-col'>
@@ -508,12 +509,12 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                     `${faObj.tfBM.energyBase}kw`,
                     <div key={'fa_data_first'} className="flex flex-row justify-around">
                         <div className='flex flex-col'>
-                            <span>{faObj.tfBM.mesKWH}kWh</span>
-                            <span>{faObj.tenBM.mesKWH}kWh</span>
+                            <span>{numberWithCommas(faObj.tfBM.mesKWH)}kWh</span>
+                            <span>{numberWithCommas(faObj.tenBM.mesKWH)}kWh</span>
                         </div>
                         <div className='flex flex-col'>
-                            <span>${faObj.tfBM.mesEXP}</span>
-                            <span>${faObj.tenBM.mesEXP}</span>
+                            <span>${numberWithCommas(faObj.tfBM.mesEXP)}</span>
+                            <span>${numberWithCommas(faObj.tenBM.mesEXP)}</span>
                         </div>
                     </div>,
                     <div key={'fa_data_second'} className='flex flex-col'>
@@ -1376,7 +1377,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                         </div>
                         <div>
                             <h4>%</h4>
-                            <span className="text-slate-400">{reportMeasuredEnergySavings?.percent}</span>
+                            <span className="text-slate-400">{numberWithCommas(reportMeasuredEnergySavings?.percent, 0)}</span>
                         </div>
                         <div>
                             <h4>CO2</h4>

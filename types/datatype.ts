@@ -530,6 +530,7 @@ export interface outlet_person_in_charge {
 }
 
 export namespace reportsFields {
+    export type id = number;
     export type report_id = number;
     export type group_id = number;
     export type year = string;
@@ -552,6 +553,7 @@ export namespace reportsFields {
 
 export interface reports {
     [key: string]: any;
+    id: reportsFields.id;
     report_id: reportsFields.report_id;
     group_id: reportsFields.group_id;
     year: reportsFields.year;
