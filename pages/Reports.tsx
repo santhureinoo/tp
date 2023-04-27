@@ -12,7 +12,7 @@ import PillButton from '../components/PillButton';
 import CustomizedDropDown from '../components/CustomizedDropDown';
 import ReportSteps from '../components/report/ReportSteps';
 import InvoiceEdit from '../components/InvoiceEdit';
-import { numberWithCommas } from '../common/helper';
+import { dateValueForQuery, formatCurrency, numberWithCommas } from '../common/helper';
 
 const Reports: NextPage = () => {
   return (
@@ -207,9 +207,9 @@ const ReportTable: any = () => {
   const getReportsByOutletIDVariable = {
     "variables": {
       "where": {
-          "outlet_ids": {
-            "contains": selectedSavingsOutletID.toString()
-          },
+        "outlet_ids": {
+          "contains": selectedSavingsOutletID.toString()
+        },
         ...(selectedSavingsMonth !== 'All') && {
           "month": {
             "equals": selectedSavingsMonth
@@ -296,7 +296,13 @@ const ReportTable: any = () => {
             "equals": selectedSavingsYear
           }
         },
-
+      },
+      ...(dateValueForQuery(selectedSavingsMonth, selectedSavingsYear) !== '') && {
+        "resultsWhere2": {
+          "outlet_date": {
+            "equals": dateValueForQuery(selectedSavingsMonth, selectedSavingsYear)
+          }
+        }
       }
     },
   };
@@ -361,13 +367,17 @@ const ReportTable: any = () => {
 
 
   const getGroupsQuery = gql`
-  query getGroups($where: ReportsWhereInput) {
+  query getGroups($where: ReportsWhereInput, $resultsWhere2: ResultsWhereInput) {
     groups {
       group_id
       group_name
       customers {
         outlet {
           outlet_id
+          results(where: $resultsWhere2) {
+            savings_tariff_expenses
+            outlet_date
+          }
         }
       }
       reports(where: $where) {
@@ -377,6 +387,7 @@ const ReportTable: any = () => {
         outlet_measured_savings_kWh
         outlet_measured_savings_percent
         last_avail_tariff
+        total_updated_outlets
       }
     }
   }`;
@@ -715,54 +726,53 @@ const ReportTable: any = () => {
           if (res && res.data && res.data.groups) {
             const groups = res.data.groups as group[];
             groups.forEach(group => {
-              let outletCount = 0;
               let measuredKwh = 0;
               let measuredExpense = 0;
               let measuredPercent = 0;
 
               if (group.reports) {
-                group.reports.forEach(res => {
-                  measuredKwh = measuredKwh + parseInt(res.outlet_measured_savings_kWh || "0");
-                  measuredExpense = measuredExpense + parseInt(res.outlet_measured_savings_expenses || "0");
-                  measuredPercent = measuredPercent + parseInt(res.outlet_measured_savings_percent || "0");
-                })
-              }
-
-              //Get the total outlet count by the customer.
-              if (group.customers) {
-                group.customers.forEach(customer => {
-                  if (customer.outlet) {
-                    outletCount = outletCount + customer.outlet.length;
-                  }
-
-                })
-              }
-              if (group.reports) {
                 let innerArr: any[] = [];
-                let totalSavingTariff = "$0";
-                group.reports.forEach(report => {
+                group.reports.reduce((previousValue, currentValue) => {
+                  const index = previousValue.findIndex(prev => prev.month === currentValue.month);
+                  if (index >= 0) {
+                    previousValue.splice(index, 1, currentValue);
+                  } else {
+                    previousValue.push(currentValue);
+                  }
+                  return previousValue;
+                }, [] as reports[]).forEach(report => {
                   let isFound = -1;
-                  // if (arr.length > 0) {
-                  //   isFound = arr.findIndex(item => {
-                  //     return item[2] === report.month && item[3] === report.year;
-                  //   });
-                  // }
-
                   if (isFound < 0) {
                     innerArr.push(group.group_id);
                     innerArr.push(group.group_name);
-
                     innerArr.push(report.month, report.year);
-                    totalSavingTariff = "$ 0.40";
-                    innerArr.push(outletCount);
-                    innerArr.push(totalSavingTariff);
+                    let totalSavingTariff = 0;
+                    innerArr.push(report.total_updated_outlets);
+
+                    if (group.customers) {
+                      group.customers.forEach(customer => {
+                        if (customer.outlet) {
+                          customer.outlet.forEach(out => {
+                            if (out.results) {
+                              out.results.forEach(res => {
+                                if (res.outlet_date.split('/')[1] === report.month) {
+                                  totalSavingTariff += Number(res.savings_tariff_expenses || '0');
+                                }
+
+                              });
+                            }
+                          })
+                        }
+                      })
+                    }
+                    innerArr.push('$' + formatCurrency(totalSavingTariff));
                     innerArr.push(<div className='flex flex-row gap-x-4'>
                       <div className='flex flex-col'>
                         <span className='text-custom-xs'>
                           (kWH)
                         </span>
                         <span>
-                          {numberWithCommas(measuredKwh)}
+                          {numberWithCommas(parseInt(report.outlet_measured_savings_kWh || "0"))}
                         </span>
                       </div>
                       <div className='flex flex-col'>
@@ -770,7 +780,7 @@ const ReportTable: any = () => {
                           ($)
                         </span>
                         <span>
-                          $ {numberWithCommas(measuredExpense)}
+                          $ {numberWithCommas(parseInt(report.outlet_measured_savings_expenses || "0"))}
                         </span>
                       </div>
                       <div className='flex flex-col'>
@@ -778,7 +788,7 @@ const ReportTable: any = () => {
                           (%)
                         </span>
                         <span>
-                          {measuredPercent}%
+                          {parseInt(report.outlet_measured_savings_percent || "0")}%
                         </span>
                       </div>
                     </div>);
@@ -809,12 +819,12 @@ const ReportTable: any = () => {
                 const cur = reports[i];
                 if (cur.group && cur.group.customers && cur.group.customers.length > 0 && cur.group.customers[0].outlet
                   && cur.group.customers[0].outlet.length && cur.group.customers[0].outlet[0].outlet_month) {
-                  const outlet_month = cur.group.customers[0].outlet[0].outlet_month.find(om=>om.outlet_date === `01/${cur.month}/${cur.year}`);
+                  const outlet_month = cur.group.customers[0].outlet[0].outlet_month.find(om => om.outlet_date === `01/${cur.month}/${cur.year}`);
                   let outlet_total_eqpt = 0;
-                  if(outlet_month) {
+                  if (outlet_month) {
                     outlet_total_eqpt = (outlet_month.no_of_ac_installed || 0) + (outlet_month.no_of_ex_installed || 0) + (outlet_month.no_of_fa_installed || 0);
                   }
-                  
+
                   arr.push([
                     cur.id, cur.report_id, cur.group.customers[0]?.outlet[0]?.outlet_id, cur.group.customers[0]?.outlet[0]?.name, cur.month, cur.year, outlet_total_eqpt, `$ ${cur.last_avail_tariff}`,
                     <div key={'frag ' + i} className='flex flex-row gap-x-4'>
@@ -910,7 +920,7 @@ const ReportTable: any = () => {
         loading={tableLoading}
         onlyShowButton={true}
         data={savingReportData}
-        hiddenDataColIndex={selectedCustomerType === 'Outlet' ? [0,2] : []}
+        hiddenDataColIndex={selectedCustomerType === 'Outlet' ? [0, 2] : []}
         totalNumberOfPages={0}
         openDetailContent={openReportEdit}
         setOpenDetailContent={setOpenReportEdit}

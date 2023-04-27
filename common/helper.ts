@@ -129,3 +129,23 @@ export const monthNumToStr = {
   '11': 'Nov',
   '12': 'Dec',
 }
+
+
+
+export function dateValueForQuery(month: string, year: string) {
+  let finalStr = "";
+
+  if (month !== 'All') {
+    finalStr = '01/' + month;
+  }
+
+  if (year !== 'All') {
+    finalStr = finalStr + '/' + year;
+  } else {
+    if (finalStr !== "") {
+      finalStr = finalStr + '/';
+    }
+  }
+  return finalStr;
+
+}
