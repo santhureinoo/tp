@@ -16,6 +16,7 @@ import { Oval } from "react-loader-spinner";
 import { Button, Modal, Table } from "flowbite-react";
 import CustomizedDropDown from "./CustomizedDropDown";
 import { cloneDeep } from "@apollo/client/utilities";
+import { faInfo } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
     openReportEdit: boolean;
@@ -35,9 +36,11 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
     const [currentReport, setCurrentReport] = React.useState<reports>();
     const [currentGroup, setCurrentGroup] = React.useState<group>();
     const [loading, setLoading] = React.useState(false);
+    const [disableSave, setDisableSave] = React.useState(true);
     const [updateIntermediaryLoading, setUpdateIntermediaryLoading] = React.useState(false);
     const [updateRecalLoading, setUpdateRecallLoading] = React.useState(false);
     const [openEditPopup, setOpenEditPopup] = React.useState(false);
+    const [openModal, setOpenModal] = React.useState(false);
     const [selectedSubTitle, setSelectedSubTitle] = React.useState(0);
     const [recalculateDays, setRecalculateDays] = React.useState<string[]>([]);
     const [firstIntermediaryList, setFirstIntermediaryList] = React.useState<first_intermediary_table[]>([]);
@@ -71,6 +74,10 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
           day_of_month
           all_eqpt_without_TP_kWh
           all_eqpt_with_TP_kWh
+          ke_without_TP_kWh
+          ke_with_TP_kWh
+          ac_without_TP_kWh
+          ac_with_TP_kWh
           total_savings_kWh
           outlet_id
         }
@@ -748,19 +755,35 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
         firstIntermediaryList.forEach((item, index) => {
 
             const originItem = firstOriginIntermediaryList[index];
-            if (originItem.all_eqpt_with_TP_kWh !== item.all_eqpt_with_TP_kWh ||
-                originItem.all_eqpt_without_TP_kWh !== item.all_eqpt_without_TP_kWh) {
+            if (originItem.ke_with_TP_kWh !== item.ke_with_TP_kWh ||
+                originItem.ke_without_TP_kWh !== item.ke_without_TP_kWh ||
+                originItem.ac_with_TP_kWh !== item.ac_with_TP_kWh ||
+                originItem.ac_without_TP_kWh !== item.ac_without_TP_kWh) {
                 const updateOneFirstIntermediaryVariable = {
                     "variables": {
                         "data": {
-                            ...(originItem.all_eqpt_with_TP_kWh !== item.all_eqpt_with_TP_kWh) && {
-                                "all_eqpt_with_TP_kWh": {
-                                    "set": item.all_eqpt_with_TP_kWh
+
+                            ...(originItem.ke_with_TP_kWh !== item.ke_with_TP_kWh) && {
+                                "ke_with_TP_kWh": {
+                                    "set": item.ke_with_TP_kWh
                                 },
                             },
-                            ...(originItem.all_eqpt_without_TP_kWh !== item.all_eqpt_without_TP_kWh) && {
-                                "all_eqpt_without_TP_kWh": {
-                                    "set": item.all_eqpt_without_TP_kWh
+
+                            ...(originItem.ke_without_TP_kWh !== item.ke_without_TP_kWh) && {
+                                "ke_without_TP_kWh": {
+                                    "set": item.ke_without_TP_kWh
+                                },
+                            },
+
+                            ...(originItem.ac_without_TP_kWh !== item.ac_without_TP_kWh) && {
+                                "ac_without_TP_kWh": {
+                                    "set": item.ac_without_TP_kWh
+                                },
+                            },
+
+                            ...(originItem.ac_with_TP_kWh !== item.ac_with_TP_kWh) && {
+                                "ac_with_TP_kWh": {
+                                    "set": item.ac_with_TP_kWh
                                 },
                             },
                         },
@@ -773,6 +796,8 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                         }
                     }
                 };
+
+                setOpenModal(!openModal);
 
                 recalDays.push(item.day_of_month);
                 promiseArr.push(updateOneFirstIntermediary[0](updateOneFirstIntermediaryVariable));
@@ -909,10 +934,16 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
         const clonedFirstIntermediaryList = cloneDeep(firstIntermediaryList);
         clonedFirstIntermediaryList[index][attribute] = value.replace(/^0+/, '');
         setFirstIntermediaryList(clonedFirstIntermediaryList);
+        setDisableSave(false);
     }
 
     const getFirstIntermediaryElement = React.useMemo(() => {
-        return firstIntermediaryList.map((item, index) => {
+        return firstIntermediaryList.sort((a, b) => {
+            const aDate = moment(a.day_of_month + '/' + a.outlet_month_year, "DD/MM/YYYY");
+            const bDate = moment(b.day_of_month + '/' + b.outlet_month_year, "DD/MM/YYYY");
+
+            return aDate.diff(bDate);
+        }).map((item, index) => {
             const thisDay = moment(item.day_of_month + '/' + item.outlet_month_year, "DD/MM/YYYY");
             return {
                 date: <Table.Cell>
@@ -924,11 +955,27 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                 </Table.Cell>,
 
                 without: <Table.Cell>
-                    <input type="number" onChange={e => { changeFirstIntermediaryElement('all_eqpt_without_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_without_TP_kWh ? item.all_eqpt_without_TP_kWh.toString() : '0'} />
+                    <input type="number" disabled={true} onChange={e => { changeFirstIntermediaryElement('all_eqpt_without_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_without_TP_kWh ? item.all_eqpt_without_TP_kWh.toString() : '0'} />
                 </Table.Cell>,
 
                 with: <Table.Cell>
-                    <input type="number" onChange={e => { changeFirstIntermediaryElement('all_eqpt_with_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_with_TP_kWh ? item.all_eqpt_with_TP_kWh.toString() : '0'} />
+                    <input type="number" disabled={true} onChange={e => { changeFirstIntermediaryElement('all_eqpt_with_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_with_TP_kWh ? item.all_eqpt_with_TP_kWh.toString() : '0'} />
+                </Table.Cell>,
+
+                keWoTP: <Table.Cell>
+                    <input type="number" onChange={e => { changeFirstIntermediaryElement('ke_without_TP_kWh', index, e.currentTarget.value) }} value={item.ke_without_TP_kWh ? item.ke_without_TP_kWh.toString() : '0'} />
+                </Table.Cell>,
+
+                keWTP: <Table.Cell>
+                    <input type="number" onChange={e => { changeFirstIntermediaryElement('ke_with_TP_kWh', index, e.currentTarget.value) }} value={item.ke_with_TP_kWh ? item.ke_with_TP_kWh.toString() : '0'} />
+                </Table.Cell>,
+
+                acWoTP: <Table.Cell>
+                    <input type="number" onChange={e => { changeFirstIntermediaryElement('ac_without_TP_kWh', index, e.currentTarget.value) }} value={item.ac_without_TP_kWh ? item.ac_without_TP_kWh.toString() : '0'} />
+                </Table.Cell>,
+
+                acWTP: <Table.Cell>
+                    <input type="number" onChange={e => { changeFirstIntermediaryElement('ac_with_TP_kWh', index, e.currentTarget.value) }} value={item.ac_with_TP_kWh ? item.ac_with_TP_kWh.toString() : '0'} />
                 </Table.Cell>,
 
                 totalSavings: <Table.Cell>
@@ -943,6 +990,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
         const clonedSecondIntermediaryList = cloneDeep(secondIntermediaryList);
         clonedSecondIntermediaryList[index][attribute] = value.replace(/^0+/, '');
         setSecondIntermediaryList(clonedSecondIntermediaryList);
+        setDisableSave(false);
     }
 
 
@@ -1026,7 +1074,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
 
 
                             {/** Edit Button for modal popup */}
-                            {customerType === 'Outlet' && <button type="button" onClick={(e) => { setOpenEditPopup(!openEditPopup) }} className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}>
+                            {customerType === 'Outlet' && <button type="button" onClick={(e) => { setDisableSave(true); setOpenEditPopup(!openEditPopup) }} className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}>
                                 Edit
                             </button>}
 
@@ -1111,6 +1159,38 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                                                         return elem.with;
                                                     })}
                                                 </Table.Row>
+                                                <Table.Row className="bg-white text-[#000000] dark:border-gray-700 dark:bg-gray-800">
+                                                    <Table.Cell>
+                                                        <span className='block w-[144px]'> KE w/o TP (kWh)</span>
+                                                    </Table.Cell>
+                                                    {getFirstIntermediaryElement.map(elem => {
+                                                        return elem.keWoTP;
+                                                    })}
+                                                </Table.Row>
+                                                <Table.Row className="bg-white text-[#000000] dark:border-gray-700 dark:bg-gray-800">
+                                                    <Table.Cell>
+                                                        <span className='block w-[144px]'> KE with TP (kWh)</span>
+                                                    </Table.Cell>
+                                                    {getFirstIntermediaryElement.map(elem => {
+                                                        return elem.keWTP;
+                                                    })}
+                                                </Table.Row>
+                                                <Table.Row className="bg-white text-[#000000] dark:border-gray-700 dark:bg-gray-800">
+                                                    <Table.Cell>
+                                                        <span className='block w-[144px]'> AC w/o TP (kWh)</span>
+                                                    </Table.Cell>
+                                                    {getFirstIntermediaryElement.map(elem => {
+                                                        return elem.acWoTP;
+                                                    })}
+                                                </Table.Row>
+                                                <Table.Row className="bg-white text-[#000000] dark:border-gray-700 dark:bg-gray-800">
+                                                    <Table.Cell>
+                                                        <span className='block w-[144px]'> AC with TP (kWh)</span>
+                                                    </Table.Cell>
+                                                    {getFirstIntermediaryElement.map(elem => {
+                                                        return elem.acWTP;
+                                                    })}
+                                                </Table.Row>
                                                 <Table.Row className="bg-[#FAFAFA] dark:border-gray-700 dark:bg-gray-800">
                                                     <Table.Cell>
                                                         <span className='block w-[144px]'> Total Savings</span>
@@ -1154,13 +1234,11 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                                     <div className="flex w-full justify-end gap-x-2">
                                         <Button onClick={e => {
                                             selectedSubTitle === 0 ? setFirstIntermediaryList(firstOriginIntermediaryList) : setSecondIntermediaryList(secondOriginIntermediaryList);
-                                            // setOpenEditPopup(false);
+                                            setDisableSave(true);
                                         }} color="gray">
                                             Reset
                                         </Button>
-                                        <Button onClick={e => {
-                                            updateIntermediary();
-                                        }}>
+                                        <Button onClick={() => setOpenModal(true)} data-modal-target="popup-modal" data-modal-show="popup-modal" color={disableSave ? 'dark' : 'info'} disabled={disableSave}>
                                             {updateIntermediaryLoading ? <Oval
                                                 height={20}
                                                 width={20}
@@ -1174,6 +1252,62 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                                                 strokeWidthSecondary={2}
                                             /> : 'Save'}
                                         </Button>
+                                        <Modal  size="lg" show={openModal} onClose={() => setOpenModal(!openModal)}>
+                                            {/* <Modal.Header></Modal.Header> */}
+                                            <Modal.Body>
+                                                {/* <button onClick={() => setOpenModal(!openModal)} type="button" className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="popup-modal">
+                                                    <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                                    </svg>
+                                                    <span className="sr-only">Close modal</span>
+                                                </button> */}
+                                                <div className="py-4 text-center">
+                                                    {/* <svg className="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                    </svg> */}
+                                                    <div className="flex gap-x-2 justify-center mb-4">
+                                                        <FontAwesomeIcon icon={faInfo} className="p-1 px-2 text-orange-400 rounded-full border border-orange-400"></FontAwesomeIcon>
+                                                        <div className="flex flex-col text-left">
+                                                            <h3 className="text-lg mb-2 font-bold">Are you sure you want to save?</h3>
+                                                            <p>
+                                                                You will not be able to revert the changes if saved
+                                                            </p>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-end gap-x-2">
+                                                    <Button onClick={() => setOpenModal(!openModal)} type="button" color="gray">
+                                                        No
+                                                    </Button>
+                                                    <Button onClick={() => updateIntermediary()} data-modal-hide="popup-modal" type="button" color={"info"}>Yes</Button>
+                                                </div>
+                                            </Modal.Body>
+                                            {/* <Modal.Footer>
+                                            </Modal.Footer> */}
+                                        </Modal>
+                                        {/* <div id="popup-modal" tabIndex={-1} className="fixed top-0 left-0 right-0 z-50 hidden p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                                            <div className="relative w-full max-w-md max-h-full">
+                                                <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                                                    <button type="button" className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="popup-modal">
+                                                        <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                                        </svg>
+                                                        <span className="sr-only">Close modal</span>
+                                                    </button>
+                                                    <div className="p-6 text-center">
+                                                        <svg className="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                        </svg>
+                                                        <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to delete this product?</h3>
+                                                        <button data-modal-hide="popup-modal" type="button" className="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                                                            Yes, I'm sure
+                                                        </button>
+                                                        <button data-modal-hide="popup-modal" type="button" className="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">No, cancel</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> */}
                                         {/* <button
                                             className={`text-white bg-blue-500 hover:bg-blue-600 relative font-medium rounded-lg text-sm text-center w-48 px-2 py-5 items-center`}
 

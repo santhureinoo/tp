@@ -726,9 +726,6 @@ const ReportTable: any = () => {
           if (res && res.data && res.data.groups) {
             const groups = res.data.groups as group[];
             groups.forEach(group => {
-              let measuredKwh = 0;
-              let measuredExpense = 0;
-              let measuredPercent = 0;
 
               if (group.reports) {
                 let innerArr: any[] = [];
@@ -824,7 +821,6 @@ const ReportTable: any = () => {
                   if (outlet_month) {
                     outlet_total_eqpt = (outlet_month.no_of_ac_installed || 0) + (outlet_month.no_of_ex_installed || 0) + (outlet_month.no_of_fa_installed || 0);
                   }
-
                   arr.push([
                     cur.id, cur.report_id, cur.group.customers[0]?.outlet[0]?.outlet_id, cur.group.customers[0]?.outlet[0]?.name, cur.month, cur.year, outlet_total_eqpt, `$ ${cur.last_avail_tariff}`,
                     <div key={'frag ' + i} className='flex flex-row gap-x-4'>
