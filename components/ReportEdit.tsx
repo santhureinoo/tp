@@ -1143,6 +1143,14 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                                                         return elem.day;
                                                     })}
                                                 </Table.Row>
+                                                <Table.Row className="bg-[#FAFAFA] dark:border-gray-700 dark:bg-gray-800">
+                                                    <Table.Cell>
+                                                        <span className='block w-[144px]'> Total Savings</span>
+                                                    </Table.Cell>
+                                                    {getFirstIntermediaryElement.map(elem => {
+                                                        return elem.totalSavings;
+                                                    })}
+                                                </Table.Row>
                                                 <Table.Row className="bg-white text-[#000000] dark:border-gray-700 dark:bg-gray-800">
                                                     <Table.Cell>
                                                         <span className='block w-[144px]'> All Eqpt. w/o TP (kWh)</span>
@@ -1189,14 +1197,6 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                                                     </Table.Cell>
                                                     {getFirstIntermediaryElement.map(elem => {
                                                         return elem.acWTP;
-                                                    })}
-                                                </Table.Row>
-                                                <Table.Row className="bg-[#FAFAFA] dark:border-gray-700 dark:bg-gray-800">
-                                                    <Table.Cell>
-                                                        <span className='block w-[144px]'> Total Savings</span>
-                                                    </Table.Cell>
-                                                    {getFirstIntermediaryElement.map(elem => {
-                                                        return elem.totalSavings;
                                                     })}
                                                 </Table.Row>
                                             </Table.Body> : <Table.Body className="divide-y">
