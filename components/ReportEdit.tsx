@@ -16,7 +16,7 @@ import { Oval } from "react-loader-spinner";
 import { Button, Modal, Table } from "flowbite-react";
 import CustomizedDropDown from "./CustomizedDropDown";
 import { cloneDeep } from "@apollo/client/utilities";
-import { faInfo } from "@fortawesome/free-solid-svg-icons";
+import { faExclamation, faExclamationCircle, faInfo, faWarning } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
     openReportEdit: boolean;
@@ -1252,9 +1252,9 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                                                 strokeWidthSecondary={2}
                                             /> : 'Save'}
                                         </Button>
-                                        <Modal  size="lg" show={openModal} onClose={() => setOpenModal(!openModal)}>
+                                        <Modal size="lg" show={openModal} onClose={() => setOpenModal(!openModal)}>
                                             {/* <Modal.Header></Modal.Header> */}
-                                            <Modal.Body>
+                                            <Modal.Body className="p-8">
                                                 {/* <button onClick={() => setOpenModal(!openModal)} type="button" className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="popup-modal">
                                                     <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
@@ -1266,11 +1266,11 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                                     </svg> */}
                                                     <div className="flex gap-x-2 justify-center mb-4">
-                                                        <FontAwesomeIcon icon={faInfo} className="p-1 px-2 text-orange-400 rounded-full border border-orange-400"></FontAwesomeIcon>
+                                                        <FontAwesomeIcon icon={faExclamationCircle} className="bg-orange-400 text-xl rounded-full border border-orange-400 text-white"></FontAwesomeIcon>
                                                         <div className="flex flex-col text-left">
-                                                            <h3 className="text-lg mb-2 font-bold">Are you sure you want to save?</h3>
-                                                            <p>
-                                                                You will not be able to revert the changes if saved
+                                                            <h3 className="text-custom-lg mb-2 font-bold">Are you sure you want to save?</h3>
+                                                            <p className="text-sm px-1">
+                                                                You will not be able to revert the changes if saved. Reminder to trigger computation to recalculate.
                                                             </p>
                                                         </div>
 

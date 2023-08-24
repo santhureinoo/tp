@@ -13,6 +13,7 @@ module.exports = {
     extend: {
       fontSize: {
         'custom-sm' : ['10px', '10px'],
+        'custom-lg' : ['16px', '20px'],
         'custom-xs' : ['8px', '12px']
       },
       maxHeight: {
