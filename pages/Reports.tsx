@@ -13,6 +13,7 @@ import CustomizedDropDown from '../components/CustomizedDropDown';
 import ReportSteps from '../components/report/ReportSteps';
 import InvoiceEdit from '../components/InvoiceEdit';
 import { dateValueForQuery, formatCurrency, numberWithCommas } from '../common/helper';
+import axios from 'axios';
 
 const Reports: NextPage = () => {
   return (
@@ -60,6 +61,7 @@ const ReportTable: any = () => {
   });
   const [totalSavingPage, setTotalSavingPage] = React.useState(1);
   const [selectedSavingPageIndex, setSelectedSavingPageIndex] = React.useState(1);
+  const [isGlobalRecalculating, setIsGlobalRecalculating] = React.useState(0);
 
   //Generate 
   const [selectedGenerateMonth, setSelectedGenerateMonth] = React.useState("01");
@@ -524,6 +526,20 @@ const ReportTable: any = () => {
   const getGenerateResult = useLazyQuery(getReportsQuery, getReportsVariable);
   const getGenerateTotalResult = useLazyQuery(getGenerateTotalQuery, getGenerateTotalVariable);
 
+
+  const globalRecalculate = () => {
+    axios.post(
+      `${process.env.NEXT_PUBLIC_SITE_URL}:4001/recalculate_outlet_group_results`,
+      {
+        'outlet_date': `01/${selectedSavingsMonth === 'All' ? '' : selectedSavingsMonth}/${selectedSavingsYear === 'All' ?  '' : selectedSavingsYear}`
+      } // !!!
+    ).then((response) => {
+      setIsGlobalRecalculating(isGlobalRecalculating + 1);
+    }).catch(err => {
+      setIsGlobalRecalculating(isGlobalRecalculating + 1);
+    })
+  }
+
   const outletDropdown: DropdownProps[] = React.useMemo(() => {
     if (outletsResult.data && outletsResult.data.outlets.length > 0) {
       setSelectedOutletID(outletsResult.data.outlets[0].outlet_id)
@@ -669,8 +685,6 @@ const ReportTable: any = () => {
     { key: '11', value: 'Nov' },
     { key: '12', value: 'Dec' }
   ];
-
-  const action = ["Create", "Update", "Delete"];
 
   const generateTable = React.useMemo(() => {
     const generateRows = (): any[][] => {
@@ -865,7 +879,7 @@ const ReportTable: any = () => {
 
       }
     }
-  }, [selectedCustomerType, selectedSavingsMonth, selectedSavingsYear, selectedSavingsOutletID, selectedSavingPageIndex, selectedSubTitle])
+  }, [isGlobalRecalculating, selectedCustomerType, selectedSavingsMonth, selectedSavingsYear, selectedSavingsOutletID, selectedSavingPageIndex, selectedSubTitle])
 
   React.useEffect(() => {
     if (selectedCustomerType === "Outlet" && selectedSavingsOutletID !== '') {
@@ -881,7 +895,7 @@ const ReportTable: any = () => {
       })
     }
 
-  }, [selectedSavingsOutletID, selectedCustomerType, selectedSavingsMonth, selectedSavingsYear]);
+  }, [isGlobalRecalculating, selectedSavingsOutletID, selectedCustomerType, selectedSavingsMonth, selectedSavingsYear]);
 
   const savingTable = React.useCallback((detailElem: any) => {
 
@@ -923,8 +937,11 @@ const ReportTable: any = () => {
         detailContent={detailElem}
         setCurrentSelectedPage={setSelectedSavingPageIndex}
         currentSelectedPage={selectedSavingPageIndex}
-        leftSideElements={[<TableOptionField key={uuidv4()} label={'Customer Type'} onChange={(selectedValue: any) => { setSelectedCustomerType(selectedValue); setSelectedSavingsMonth("All"); setSelectedSavingsYear("All") }}
-          selectedValue={selectedCustomerType} data={['Group', 'Outlet']} />, savingsSubMenu()]}
+        leftSideElements={[<div className='flex flex-row justify-between'>
+          <TableOptionField key={uuidv4()} label={'Customer Type'} onChange={(selectedValue: any) => { setSelectedCustomerType(selectedValue); setSelectedSavingsMonth("All"); setSelectedSavingsYear("All") }}
+            selectedValue={selectedCustomerType} data={['Group', 'Outlet']} />
+          <PillButton key={'recal'} onClick={globalRecalculate} className={`text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 w-40 h-10`} text={"Global Recalculate"}></PillButton>
+        </div>, savingsSubMenu()]}
         leftSideFlexDirection={"Vertical"}
         rightSideElements={[]}
         handleEdit={(selectedData) => {
@@ -936,7 +953,7 @@ const ReportTable: any = () => {
           }); setOpenReportEdit(true)
         }} handleDelete={() => setOpenReportEdit(true)} />
     </React.Fragment>
-  }, [selectedCustomerType, tableLoading, selectedCustomerId, openReportEdit, setOpenReportEdit, selectedSavingPageIndex, totalSavingPage, savingReportData, selectedSavingsOutletID, selectedSavingsMonth, selectedSavingsYear, savingOutletDropdown]);
+  }, [isGlobalRecalculating, selectedCustomerType, tableLoading, selectedCustomerId, openReportEdit, setOpenReportEdit, selectedSavingPageIndex, totalSavingPage, savingReportData, selectedSavingsOutletID, selectedSavingsMonth, selectedSavingsYear, savingOutletDropdown]);
 
   const invoiceTable = React.useCallback((detailElem: any) => {
     const invoiceRows = (): any[][] => {

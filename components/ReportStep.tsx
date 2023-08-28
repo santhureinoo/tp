@@ -3,7 +3,7 @@ import PillButton from "./PillButton";
 import Image from 'next/image';
 
 interface Props {
-    titleChar: string;
+    titleChar?: string;
     subTitle: string;
     texts: string[];
     disabled: boolean;
@@ -16,14 +16,15 @@ interface Props {
 }
 const ReportStep = ({ titleChar, subTitle, texts, buttons, allActionDone, disabled, isUploading = false, nonButtons = [], onVerify, setOnVerify }: Props): React.ReactElement => {
 
-    return <div className="relative flex flex-col border-2 border-black border-dotted rounded-lg overflow-hidden bg-white">
+    //  border-2 border-black border-dotted
+    return <div className="relative flex flex-col rounded-lg overflow-hidden bg-white">
 
         {disabled && <div className="opacity-50 absolute bottom-0 left-0 h-full w-full backdrop-blur-sm bg-[#F0F0F0]">
 
         </div>}
         <div className="grid grid-cols-5">
             <div className="flex flex-row items-center p-8 sm:px-4 sm:h-full col-span-2">
-                <p className="text-7xl font-thin rounded-full px-6">{titleChar}</p>
+                {/* <p className="text-7xl font-thin rounded-full px-6">{titleChar}</p> */}
                 <div className="flex flex-col  p-6 text-gray-600">
                     <div className="flex flex-row text-sm">
                         <p className="flex items-center text-gray-500">
@@ -48,10 +49,10 @@ const ReportStep = ({ titleChar, subTitle, texts, buttons, allActionDone, disabl
                     return <PillButton key={'frag ' + index} onClick={button.onClick} disabled={button.disable || isUploading} className={`${button.css} w-40 h-10`} text={button.text}></PillButton>
                 })}
             </div>
-            <div className={`flex flex-row items-center p-8 sm:px-4 sm:h-full gap-x-2 justify-center ${allActionDone ? 'cursor-pointer' : 'opacity-25'} `}>
+            {/* <div className={`flex flex-row items-center p-8 sm:px-4 sm:h-full gap-x-2 justify-center ${allActionDone ? 'cursor-pointer' : 'opacity-25'} `}>
                 <span>Verified?</span>
                 <Image onClick={() => { allActionDone && setOnVerify(!onVerify) }} alt="confirmSvg" src={`/asserts/main/${onVerify ? 'verified' : 'unverified'}.svg`} width="24" height="24" />
-            </div>
+            </div> */}
         </div>
     </div>;
 }

@@ -27,7 +27,7 @@ const ReportSteps = (): React.ReactElement => {
     const getDownloadPresigned = async (name: string, index: number) => {
         const data = index === 1 ? { "filename": name } : { "filename": name, "outlet_id": 3, "outlet_date": "01/10/2022" }
         const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_SITE_URL }:4001/process_step_${index}`,
+            `${process.env.NEXT_PUBLIC_SITE_URL}:4001/process_new_step_${index}`,
             data
         );
         if (index === 1) {
@@ -103,7 +103,7 @@ const ReportSteps = (): React.ReactElement => {
                 // create file link in browser's memory
                 var binaryData = [];
                 binaryData.push(response.data);
-                const href = URL.createObjectURL(new Blob(binaryData, { type: 'text/csv;charset=utf-8' }));
+                const href = URL.createObjectURL(new Blob(binaryData, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
 
                 // create "a" HTML element with href to file & click
                 const link = document.createElement('a');
@@ -198,19 +198,19 @@ const ReportSteps = (): React.ReactElement => {
                 text: "Upload",
                 onClick: () => { onBtnUpload(index) },
                 disable: !uploadedFile[index] ? true : false,
-                css: ` text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800`,
+                css: ` text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800`,
             },
             {
                 text: index !== 3 ? "Download" : "Build Report & Invoice",
                 onClick: () => { onBtnDownload(index) },
                 disable: !alreadyUploaded[index] ? true : false,
-                css: `${index !== 3 ? '' : 'text-xs w-64'} text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800`,
+                css: `${index !== 3 ? '' : 'text-xs w-64'} text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800`,
             }
         ]
     }, [uploadedFile, alreadyUploaded])
 
     const nonBtnList = (index: number) => [
-        <label key={'frag label'} className="flex justify-center cursor-pointer rounded-full text-white w-40 h-10 bg-custom-darkblue hover:bg-custom-darkblue focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-custom-darkblue dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+        <label key={'frag label'} className="flex justify-center cursor-pointer rounded-full text-white w-40 h-10 bg-custom-darkblue hover:bg-custom-darkblue focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md text-sm px-5 py-2.5 dark:bg-custom-darkblue dark:hover:bg-blue-700 dark:focus:ring-blue-800">
             <span>Select Files</span>
             <input type='file' accept="*" onChange={(event) => handleUploadFile(event, index)} className="hidden" />
         </label>
@@ -229,15 +229,15 @@ const ReportSteps = (): React.ReactElement => {
                 </div> */}
 
                 <div className="flex flex-col gap-y-14">
-                    <ReportStep allActionDone={allActionDone[1]} isUploading={uploadingNow[1]} disabled={false} onVerify={verifyStep1} setOnVerify={setVerifyStep1} titleChar={"1"} subTitle={"Upload Input-Sheet"} texts={["Upload Input-SheetUpload the latest Input-Sheet", "to generate the input-sheet.csv"]} buttons={btnList(1)} nonButtons={nonBtnList(1)} ></ReportStep>
-                    <ReportStep allActionDone={allActionDone[2]} isUploading={uploadingNow[2]} disabled={verifyStep1 ? false : true} onVerify={verifyStep2} setOnVerify={setVerifyStep2} titleChar={"2"} subTitle={"Generate Output-Sheet"} texts={["Upload the input-sheet.csv", "to download output-sheet.csv"]} buttons={btnList(2)} nonButtons={nonBtnList(2)}></ReportStep>
-                    <ReportStep allActionDone={allActionDone[3]} isUploading={uploadingNow[3]} disabled={verifyStep2 ? false : true} onVerify={verifyStep3} setOnVerify={setVerifyStep3} titleChar={"3"} subTitle={"Generate Report & Invoice"} texts={["Upload the output-sheet.csv", "to generate Report & Invoice"]} buttons={btnList(3)} nonButtons={nonBtnList(3)}></ReportStep>
+                    <ReportStep allActionDone={allActionDone[1]} isUploading={uploadingNow[1]} disabled={false} onVerify={verifyStep1} setOnVerify={setVerifyStep1} subTitle={"Upload Input-Sheet"} texts={["Upload the latest Input-Sheet to", "generate the savings data and the output-sheet.csv"]} buttons={btnList(1)} nonButtons={nonBtnList(1)} ></ReportStep>
+                    {/* <ReportStep allActionDone={allActionDone[2]} isUploading={uploadingNow[2]} disabled={verifyStep1 ? false : true} onVerify={verifyStep2} setOnVerify={setVerifyStep2} titleChar={"2"} subTitle={"Generate Output-Sheet"} texts={["Upload the input-sheet.csv", "to download output-sheet.csv"]} buttons={btnList(2)} nonButtons={nonBtnList(2)}></ReportStep>
+                    <ReportStep allActionDone={allActionDone[3]} isUploading={uploadingNow[3]} disabled={verifyStep2 ? false : true} onVerify={verifyStep3} setOnVerify={setVerifyStep3} titleChar={"3"} subTitle={"Generate Report & Invoice"} texts={["Upload the output-sheet.csv", "to generate Report & Invoice"]} buttons={btnList(3)} nonButtons={nonBtnList(3)}></ReportStep> */}
                 </div>
             </div>
         </div>
         <ReportStepEdit onConfirm={() => {
             axios.get(
-                `${process.env.NEXT_PUBLIC_SITE_URL }:4001/create_group_passwords`,
+                `${process.env.NEXT_PUBLIC_SITE_URL}:4001/create_group_passwords`,
             );
             downloadFromS3(3);
         }} openReportStepEdit={openReportStepEdit} setOpenReportStepEdit={setOpenReportStepEdit} fromExtension={"Report & Invoice"} toExtension={"Output-Sheet.csv"} datePeriod={date} affectedRows={50} uploadedFileAttribute={selectedFileAttribute} />
