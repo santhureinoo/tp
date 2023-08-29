@@ -531,7 +531,7 @@ const ReportTable: any = () => {
     axios.post(
       `${process.env.NEXT_PUBLIC_SITE_URL}:4001/recalculate_outlet_group_results`,
       {
-        'outlet_date': `01/${selectedSavingsMonth === 'All' ? '' : selectedSavingsMonth}/${selectedSavingsYear === 'All' ?  '' : selectedSavingsYear}`
+        'outlet_date': `01/${selectedSavingsMonth === 'All' ? '' : selectedSavingsMonth}/${selectedSavingsYear === 'All' ? '' : selectedSavingsYear}`
       } // !!!
     ).then((response) => {
       setIsGlobalRecalculating(isGlobalRecalculating + 1);
@@ -799,7 +799,7 @@ const ReportTable: any = () => {
                           (%)
                         </span>
                         <span>
-                          {numberWithCommas(parseInt(report.outlet_measured_savings_percent || "0"), 2)}%
+                          {numberWithCommas(Number(report.outlet_measured_savings_percent || "0"), 2)}%
                         </span>
                       </div>
                     </div>);
@@ -859,7 +859,7 @@ const ReportTable: any = () => {
                           (%)
                         </span>
                         <span>
-                          {cur.outlet_measured_savings_percent}%
+                          {numberWithCommas(Number(cur.outlet_measured_savings_percent), 2)}%
                         </span>
                       </div>
                     </div>
@@ -982,7 +982,7 @@ const ReportTable: any = () => {
                 (%)
               </span>
               <span>
-                {numberWithCommas(parseInt(inv.outlet_measured_savings_percent))}%
+                {numberWithCommas(Number(inv.outlet_measured_savings_percent), 2)}%
               </span>
             </div>
           </div>
