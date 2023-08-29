@@ -799,7 +799,7 @@ const ReportTable: any = () => {
                           (%)
                         </span>
                         <span>
-                          {parseInt(report.outlet_measured_savings_percent || "0")}%
+                          {numberWithCommas(parseInt(report.outlet_measured_savings_percent || "0"), 2)}%
                         </span>
                       </div>
                     </div>);
