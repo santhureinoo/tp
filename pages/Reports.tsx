@@ -799,7 +799,7 @@ const ReportTable: any = () => {
                           (%)
                         </span>
                         <span>
-                          {numberWithCommas(Number(report.outlet_measured_savings_percent || "0"), 2)}%
+                          {numberWithCommas(Number(report.outlet_measured_savings_percent || "0") * 100, 0)}%
                         </span>
                       </div>
                     </div>);
@@ -859,7 +859,7 @@ const ReportTable: any = () => {
                           (%)
                         </span>
                         <span>
-                          {numberWithCommas(Number(cur.outlet_measured_savings_percent), 2)}%
+                          {numberWithCommas(Number(cur.outlet_measured_savings_percent) * 100, 0)}%
                         </span>
                       </div>
                     </div>
@@ -982,7 +982,7 @@ const ReportTable: any = () => {
                 (%)
               </span>
               <span>
-                {numberWithCommas(Number(inv.outlet_measured_savings_percent), 2)}%
+                {numberWithCommas(Number(inv.outlet_measured_savings_percent) * 100, 0)}%
               </span>
             </div>
           </div>
