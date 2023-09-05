@@ -700,6 +700,23 @@ export interface rg_factors {
 
 }
 
+export namespace date_range_customer_dashboards_tableFields {
+    export type id = number;
+    export type starte_date = string;
+    export type end_date = string;
+    export type updated_at = string;
+}
+
+export interface date_range_customer_dashboards_table {
+    [key: string]: any;
+    id?: date_range_customer_dashboards_tableFields.id;
+    start_date: date_range_customer_dashboards_tableFields.starte_date;
+    end_date: date_range_customer_dashboards_tableFields.end_date;
+    updated_at?: date_range_customer_dashboards_tableFields.updated_at;
+}
+
+
+
 export namespace secondary_intermediary_tableFields {
     export type outlet_id = number;
     export type outlet_month_year = string;
@@ -751,9 +768,7 @@ export interface _prisma_migrations {
     rolled_back_at: _prisma_migrationsFields.rolled_back_at;
     started_at: _prisma_migrationsFields.started_at;
     applied_steps_count: _prisma_migrationsFields.applied_steps_count;
-
 }
-
 // SDL
 export interface PageCursor {
     cursor?: String;
