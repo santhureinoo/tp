@@ -11,11 +11,11 @@ export const useDropdown = (initialState = false, onAfterClose: () => void): [Re
     const [isOpen, setIsOpen] = useState(initialState)
 
     const handleClickOutside = useCallback(
-        (event) => {
+        (event: any) => {
             if (ref.current && ref.current.contains(event.target)) {
                 return
             }
-            
+
             setIsOpen(false)
             onAfterClose && onAfterClose()
         },
@@ -23,7 +23,7 @@ export const useDropdown = (initialState = false, onAfterClose: () => void): [Re
     )
 
     const handleHideDropdown = useCallback(
-        (event) => {
+        (event: any) => {
             if (event.key === 'Escape') {
                 setIsOpen(false)
                 onAfterClose && onAfterClose()

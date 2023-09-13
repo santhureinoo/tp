@@ -3,7 +3,7 @@ import Table from '../components/Table'
 import React from 'react';
 import TableOptionField from '../components/TableOptionField';
 import { v4 as uuidv4 } from 'uuid';
-import { customer, group, invoice, outlet, reports, results } from '../types/datatype';
+import { customer, date_range_customer_dashboards_table, group, invoice, outlet, reports, results } from '../types/datatype';
 import ClientOnly from '../components/ClientOnly';
 import { gql, useLazyQuery, useQuery, WatchQueryFetchPolicy } from '@apollo/client';
 import { DropdownProps } from '../common/types';
@@ -14,6 +14,7 @@ import ReportSteps from '../components/report/ReportSteps';
 import InvoiceEdit from '../components/InvoiceEdit';
 import { dateValueForQuery, formatCurrency, numberWithCommas } from '../common/helper';
 import axios from 'axios';
+import moment from 'moment';
 
 const Reports: NextPage = () => {
   return (
@@ -58,6 +59,11 @@ const ReportTable: any = () => {
     reportId: 0,
     selectedMonth: "",
     selectedYear: "",
+  });
+  const [dateRangeCustomerDashboards, setDateRangeCustomerDashboards] = React.useState<date_range_customer_dashboards_table>({
+    id: -1,
+    start_date: `${moment().format("MM/YYYY")}`,
+    end_date: `${moment().add(1, 'months').format("MM/YYYY")}`,
   });
   const [totalSavingPage, setTotalSavingPage] = React.useState(1);
   const [selectedSavingPageIndex, setSelectedSavingPageIndex] = React.useState(1);
@@ -224,6 +230,11 @@ const ReportTable: any = () => {
         },
 
       },
+      "resultWhere": {
+        "outlet_date": {
+          "contains": dateValueForQuery(selectedSavingsMonth, selectedSavingsYear),
+        }
+      },
       // "take": 10,
       // "skip": (selectedSavingPageIndex * 5) - 5,
       "customersWhere2": {
@@ -245,7 +256,7 @@ const ReportTable: any = () => {
   };
 
   const getReportsByOutletIdQuery = gql`
-  query FindManyReports($where: ReportsWhereInput, $take: Int, $skip: Int, $customersWhere2: CustomerWhereInput, $outletWhere2: OutletWhereInput, $outletMonthWhere2: Outlet_monthWhereInput) {
+  query FindManyReports($where: ReportsWhereInput, $take: Int, $skip: Int, $customersWhere2: CustomerWhereInput, $outletWhere2: OutletWhereInput, $resultWhere: ResultsWhereInput, $outletMonthWhere2: Outlet_monthWhereInput) {
     findManyReports(where: $where, take: $take, skip: $skip) {
       id
       report_id
@@ -264,6 +275,35 @@ const ReportTable: any = () => {
           outlet(where: $outletWhere2) {
             outlet_id
             name
+            results(where: $resultWhere) {
+              outlet_eqpt_energy_usage_with_TP_month_expenses
+              outlet_eqpt_energy_usage_with_TP_month_kW
+              outlet_eqpt_energy_usage_without_TP_month_expenses
+              outlet_eqpt_energy_usage_without_TP_month_kW
+              outlet_measured_savings_expenses
+              outlet_measured_savings_kWh
+              outlet_measured_savings_percent
+              co2_savings_kg
+              savings_tariff_expenses
+              acmv_25percent_benchmark_comparison_kWh
+              acmv_25percent_benchmark_comparison_expenses
+              acmv_10percent_benchmark_comparison_kWh
+              acmv_10percent_benchmark_comparison_expenses
+              ke_and_ac_25percent_benchmark_comparison_kWh
+              ke_and_ac_25percent_benchmark_comparison_expenses
+              ke_and_ac_10percent_benchmark_comparison_kWh
+              ke_and_ac_10percent_benchmark_comparison_expenses
+              ac_measured_savings_kWh
+              ke_measured_savings_kWh
+              ke_eqpt_energy_baseline_avg_hourly_kW
+              ac_eqpt_energy_baseline_avg_hourly_kW
+              ke_eqpt_energy_baseline_avg_hourly_as_date
+              acmv_eqpt_energy_baseline_avg_hourly_kW
+              ac_eqpt_energy_baseline_avg_hourly_as_date
+              acmv_eqpt_energy_baseline_avg_hourly_as_date
+              acmv_measured_savings_kWh
+              outlet_date
+            }
             outlet_month(where: $outletMonthWhere2) {
               outlet_date
               no_of_ex_installed
@@ -512,8 +552,20 @@ const ReportTable: any = () => {
     }
   }`;
 
+  const getDateRangeCustomDashboardQuery = gql`
+query Date_range_customer_dashboards {
+    date_range_customer_dashboards {
+      id
+      start_date
+      end_date
+      updated_at
+    }
+  }`
+
+
   const outletsResult = useQuery(getOutletsQuery);
   const resultsResult = useQuery(getResultsQuery, getResultsVariable);
+  const getDateRangeCustomDashboard = useQuery(getDateRangeCustomDashboardQuery);
   const getReportsByOutletIdResult = useLazyQuery(getReportsByOutletIdQuery, getReportsByOutletIDVariable);
   const getGroupsResult = useLazyQuery(getGroupsQuery, getGroupsVariable);
   // const getReportsByCustomerIdResult = useLazyQuery(getReportsByCustomerIDQuery, getReportsByCustomerIDVariable);
@@ -531,7 +583,7 @@ const ReportTable: any = () => {
     axios.post(
       `${process.env.NEXT_PUBLIC_SITE_URL}:4001/recalculate_outlet_group_results`,
       {
-        'outlet_date': `01/${selectedSavingsMonth === 'All' ? '' : selectedSavingsMonth}/${selectedSavingsYear === 'All' ? '' : selectedSavingsYear}`
+        'outlet_date': `01/${selectedSavingsMonth === 'All' || selectedSavingsYear === 'All' ? dateRangeCustomerDashboards.end_date : selectedSavingsMonth + "/" + selectedSavingsYear}`
       } // !!!
     ).then((response) => {
       setIsGlobalRecalculating(isGlobalRecalculating + 1);
@@ -595,6 +647,13 @@ const ReportTable: any = () => {
       setResults(resultsResult.data.findManyResults);
     }
   }, [resultsResult]);
+
+  React.useEffect(() => {
+    if (getDateRangeCustomDashboard.data && getDateRangeCustomDashboard.data.date_range_customer_dashboards
+      && getDateRangeCustomDashboard.data.date_range_customer_dashboards.length > 0) {
+      setDateRangeCustomerDashboards(getDateRangeCustomDashboard.data.date_range_customer_dashboards[0]);
+    }
+  }, [getDateRangeCustomDashboard]);
 
   React.useEffect(() => {
     if (savingOutletDropdown.length > 0) {
@@ -826,15 +885,33 @@ const ReportTable: any = () => {
             const arr = [];
             if (res && res.data && res.data.findManyReports) {
               const reports = res.data.findManyReports as reports[];
+              let resultInd = 0;
               for (let i = 0; i < reports.length; i++) {
                 const cur = reports[i];
                 if (cur.group && cur.group.customers && cur.group.customers.length > 0 && cur.group.customers[0].outlet
                   && cur.group.customers[0].outlet.length && cur.group.customers[0].outlet[0].outlet_month) {
                   const outlet_month = cur.group.customers[0].outlet[0].outlet_month.find(om => om.outlet_date === `01/${cur.month}/${cur.year}`);
                   let outlet_total_eqpt = 0;
+                  const result = {
+                    kwh: 0,
+                    exp: 0,
+                    percent: 0,
+                    euwotp_kwh: 0,
+                    euwotp_exp: 0,
+                    euwtp_kwh: 0,
+                    euwtp_exp: 0,
+                    ste: 0,
+                    co2: 0,
+                  }
                   if (outlet_month) {
                     outlet_total_eqpt = (outlet_month.no_of_ac_installed || 0) + (outlet_month.no_of_ex_installed || 0) + (outlet_month.no_of_fa_installed || 0);
                   }
+
+                  result.kwh = cur.group.customers[0]?.outlet[0]?.results ? Number(cur.group.customers[0]?.outlet[0]?.results[resultInd].outlet_measured_savings_kWh) : 0;
+                  result.exp = cur.group.customers[0]?.outlet[0]?.results ? Number(cur.group.customers[0]?.outlet[0]?.results[resultInd].outlet_measured_savings_expenses) : 0;
+                  result.percent = cur.group.customers[0]?.outlet[0]?.results ? Number(cur.group.customers[0]?.outlet[0]?.results[resultInd].outlet_measured_savings_percent) : 0;
+                  resultInd++;
+
                   arr.push([
                     cur.id, cur.report_id, cur.group.customers[0]?.outlet[0]?.outlet_id, cur.group.customers[0]?.outlet[0]?.name, cur.month, cur.year, outlet_total_eqpt, `$ ${cur.last_avail_tariff}`,
                     <div key={'frag ' + i} className='flex flex-row gap-x-4'>
@@ -843,7 +920,7 @@ const ReportTable: any = () => {
                           (kWH)
                         </span>
                         <span>
-                          {cur.outlet_measured_savings_kWh}
+                          {numberWithCommas(result.kwh)}
                         </span>
                       </div>
                       <div className='flex flex-col'>
@@ -851,7 +928,7 @@ const ReportTable: any = () => {
                           ($)
                         </span>
                         <span>
-                          ${cur.outlet_measured_savings_expenses}
+                          ${numberWithCommas(result.exp)}
                         </span>
                       </div>
                       <div className='flex flex-col'>
@@ -859,7 +936,7 @@ const ReportTable: any = () => {
                           (%)
                         </span>
                         <span>
-                          {numberWithCommas(Number(cur.outlet_measured_savings_percent) * 100, 0)}%
+                          {numberWithCommas(Number(result.percent) * 100, 0)}%
                         </span>
                       </div>
                     </div>
@@ -937,7 +1014,7 @@ const ReportTable: any = () => {
         detailContent={detailElem}
         setCurrentSelectedPage={setSelectedSavingPageIndex}
         currentSelectedPage={selectedSavingPageIndex}
-        leftSideElements={[<div className='flex flex-row justify-between'>
+        leftSideElements={[<div key={"table-option"} className='flex flex-row justify-between'>
           <TableOptionField key={uuidv4()} label={'Customer Type'} onChange={(selectedValue: any) => { setSelectedCustomerType(selectedValue); setSelectedSavingsMonth("All"); setSelectedSavingsYear("All") }}
             selectedValue={selectedCustomerType} data={['Group', 'Outlet']} />
           <PillButton key={'recal'} onClick={globalRecalculate} className={`text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 w-40 h-10`} text={"Global Recalculate"}></PillButton>

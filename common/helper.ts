@@ -65,14 +65,33 @@ export function disableTemplate(path: string) {
   }
 }
 
-export function numberWithCommas(x?: number, fixedNum = 2) {
-  if (x) {
-    return x.toFixed(fixedNum).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+// export function numberWithCommas(x?: number, fixedNum = 2) {
+//   if (x) {
+//     return x.toFixed(fixedNum).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+//   }
+//   else {
+//     return 0;
+//   }
+
+// }
+
+export function getInDecimal(x: number, fixed = 0) {
+  return x % 1 === 0 ? x : Number((Math.round(x * Math.pow(10, fixed + 1)) / Math.pow(10, fixed + 1)).toFixed(fixed));
+}
+
+export function numberWithCommas(x?: number, fixed = 0) {
+  if (x && x > 999) {
+    let numX = Number(x);
+    if (fixed > 0) {
+      return getInDecimal(x, fixed);
+      // numX = Math.round(numX * Math.pow(10, fixed)) / Math.pow(10, fixed);
+    }
+
+    return getInDecimal(numX, fixed).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   else {
-    return 0;
+    return x && !isNaN(x) ? getInDecimal(x, fixed) : x;
   }
-
 }
 
 export function formatCurrency(currency?: number) {
@@ -147,5 +166,4 @@ export function dateValueForQuery(month: string, year: string) {
     }
   }
   return finalStr;
-
 }

@@ -39,7 +39,7 @@ const ReportSteps = (): React.ReactElement => {
         }
     }
 
-    const uploadToS3 = React.useCallback((index) => {
+    const uploadToS3 = React.useCallback((index: any) => {
         const currentUploadedFile = uploadedFile[index];
         if (currentUploadedFile) {
             axios.post(
@@ -89,7 +89,7 @@ const ReportSteps = (): React.ReactElement => {
 
     }, [uploadedFile])
 
-    const downloadFromS3 = React.useCallback((index) => {
+    const downloadFromS3 = React.useCallback((index: any) => {
         const currentUploadedFileAttribute = uploadedFileAttribute[index];
         if (currentUploadedFileAttribute) {
             const downloadURL = currentUploadedFileAttribute.downloadURL ? currentUploadedFileAttribute.downloadURL : "https://20ix7znzn5.execute-api.ap-southeast-1.amazonaws.com/staging/getDownloadPresignedUrl";

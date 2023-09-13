@@ -348,7 +348,7 @@ const GroupReport: NextPage = () => {
                 </div>
                 <div className='flex flex-col'>
                     <img className="float-right w-28 h-28 object-scale-down" src={'/asserts/reports/icon_summary_treesplanted.png'} />
-                    <span>{numberWithCommas((reportAttributes?.energy_saving_py || 0) * 0.00084, 0)}</span>
+                    <span>{numberWithCommas((reportAttributes?.energy_saving_py || 0) * 0.017, 0)}</span>
                     <span>tree per years and wait 10 years</span>
                 </div>
                 <div className='flex flex-col'>
