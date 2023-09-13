@@ -842,7 +842,7 @@ query Date_range_customer_dashboards {
                           (kWH)
                         </span>
                         <span>
-                          {numberWithCommas(parseInt(report.outlet_measured_savings_kWh || "0"))}
+                          {numberWithCommas(Number(report.outlet_measured_savings_kWh || "0"))}
                         </span>
                       </div>
                       <div className='flex flex-col'>
@@ -850,7 +850,7 @@ query Date_range_customer_dashboards {
                           ($)
                         </span>
                         <span>
-                          $ {numberWithCommas(parseInt(report.outlet_measured_savings_expenses || "0"))}
+                          $ {numberWithCommas(Number(report.outlet_measured_savings_expenses || "0"))}
                         </span>
                       </div>
                       <div className='flex flex-col'>
@@ -907,9 +907,12 @@ query Date_range_customer_dashboards {
                     outlet_total_eqpt = (outlet_month.no_of_ac_installed || 0) + (outlet_month.no_of_ex_installed || 0) + (outlet_month.no_of_fa_installed || 0);
                   }
 
-                  result.kwh = cur.group.customers[0]?.outlet[0]?.results ? Number(cur.group.customers[0]?.outlet[0]?.results[resultInd].outlet_measured_savings_kWh) : 0;
-                  result.exp = cur.group.customers[0]?.outlet[0]?.results ? Number(cur.group.customers[0]?.outlet[0]?.results[resultInd].outlet_measured_savings_expenses) : 0;
-                  result.percent = cur.group.customers[0]?.outlet[0]?.results ? Number(cur.group.customers[0]?.outlet[0]?.results[resultInd].outlet_measured_savings_percent) : 0;
+                  // console.log(reports[i]);
+
+                  // console.log (cur.group.customers[0]?.outlet[0]?.results);
+                  result.kwh = cur.group.customers[0]?.outlet[0]?.results ? Number(cur.group.customers[0]?.outlet[0]?.results[0].outlet_measured_savings_kWh) : 0;
+                  result.exp = cur.group.customers[0]?.outlet[0]?.results ? Number(cur.group.customers[0]?.outlet[0]?.results[0].outlet_measured_savings_expenses) : 0;
+                  result.percent = cur.group.customers[0]?.outlet[0]?.results ? Number(cur.group.customers[0]?.outlet[0]?.results[0].outlet_measured_savings_percent) : 0;
                   resultInd++;
 
                   arr.push([

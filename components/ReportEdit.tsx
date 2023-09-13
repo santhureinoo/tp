@@ -10,7 +10,7 @@ import DropdownMenu from "./DropdownMenu";
 import { useRouter } from 'next/router';
 import { useDropdown } from '../hooks/UseDropdown';
 import axios from "axios";
-import { convertMonthName, dateValueForQuery, downloadFile, numberWithCommas } from "../common/helper";
+import { convertMonthName, dateValueForQuery, downloadFile, getInDecimal, numberWithCommas } from "../common/helper";
 import moment from "moment";
 import { Oval } from "react-loader-spinner";
 import { Button, Modal, Table } from "flowbite-react";
@@ -871,7 +871,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                             if (outletDate.month() + 1 === Number(month)) {
                                 result.exp += res.outlet_measured_savings_expenses ? Number(res.outlet_measured_savings_expenses) : 0;
                                 result.kwh += res.outlet_measured_savings_kWh ? Number(res.outlet_measured_savings_kWh) : 0;
-                                result.percent += res.outlet_measured_savings_percent ? Number(res.outlet_measured_savings_percent) * 100 : 0;
+                                result.percent += res.outlet_measured_savings_percent ? getInDecimal(Number(res.outlet_measured_savings_percent), 2) : 0;
                                 result.euwotp_kwh += res.outlet_eqpt_energy_usage_without_TP_month_kW ? Number(res.outlet_eqpt_energy_usage_without_TP_month_kW) : 0;
                                 result.euwotp_exp += res.outlet_eqpt_energy_usage_without_TP_month_expenses ? Number(res.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0;
                                 result.euwtp_kwh += res.outlet_eqpt_energy_usage_with_TP_month_kW ? Number(res.outlet_eqpt_energy_usage_with_TP_month_kW) : 0;
@@ -1533,7 +1533,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                         </div>
                         <div>
                             <h4>%</h4>
-                            <span className="text-slate-400">{numberWithCommas(Number(reportMeasuredEnergySavings?.percent) * 100, 0)}</span>
+                            <span className="text-slate-400">{numberWithCommas(Number(groupMeasuredEnergySavings?.percent) * 100, 0)}</span>
                         </div>
                     </div>
                 }
