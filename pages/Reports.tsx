@@ -923,7 +923,7 @@ query Date_range_customer_dashboards {
                           (kWH)
                         </span>
                         <span>
-                          {numberWithCommas(result.kwh)}
+                          {cur.outlet_measured_savings_kWh}
                         </span>
                       </div>
                       <div className='flex flex-col'>
@@ -931,7 +931,7 @@ query Date_range_customer_dashboards {
                           ($)
                         </span>
                         <span>
-                          ${numberWithCommas(result.exp)}
+                          ${cur.outlet_measured_savings_expenses}
                         </span>
                       </div>
                       <div className='flex flex-col'>
@@ -939,7 +939,7 @@ query Date_range_customer_dashboards {
                           (%)
                         </span>
                         <span>
-                          {numberWithCommas(Number(result.percent) * 100, 0)}%
+                          {numberWithCommas(Number(cur.outlet_measured_savings_percent) * 100, 0)}%
                         </span>
                       </div>
                     </div>
