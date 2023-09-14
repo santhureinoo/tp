@@ -228,12 +228,24 @@ const ReportTable: any = () => {
             "equals": selectedSavingsYear
           }
         },
-
+        "NOT": [
+          {
+            "outlet_measured_savings_expenses": {
+              "equals": "0"
+            },
+            "outlet_measured_savings_kWh": {
+              "equals": "0"
+            },
+            "outlet_measured_savings_percent": {
+              "equals": "0"
+            }
+          }
+        ]
       },
       "resultWhere": {
         "outlet_date": {
           "contains": dateValueForQuery(selectedSavingsMonth, selectedSavingsYear),
-        }
+        },
       },
       // "take": 10,
       // "skip": (selectedSavingPageIndex * 5) - 5,
@@ -338,6 +350,19 @@ const ReportTable: any = () => {
             "equals": selectedSavingsYear
           }
         },
+        "NOT": [
+          {
+            "outlet_measured_savings_expenses": {
+              "equals": "0"
+            },
+            "outlet_measured_savings_kWh": {
+              "equals": "0"
+            },
+            "outlet_measured_savings_percent": {
+              "equals": "0"
+            }
+          }
+        ]
       },
       ...(dateValueForQuery(selectedSavingsMonth, selectedSavingsYear) !== '') && {
         "resultsWhere2": {
@@ -811,62 +836,57 @@ query Date_range_customer_dashboards {
                   }
                   return previousValue;
                 }, [] as reports[]).forEach(report => {
-                  let isFound = -1;
-                  if (isFound < 0) {
-                    innerArr.push(group.group_id);
-                    innerArr.push(group.group_name);
-                    innerArr.push(report.month, report.year);
-                    let totalSavingTariff = 0;
-                    innerArr.push(report.total_updated_outlets);
+                  innerArr.push(group.group_id);
+                  innerArr.push(group.group_name);
+                  innerArr.push(report.month, report.year);
+                  let totalSavingTariff = 0;
+                  innerArr.push(report.total_updated_outlets);
 
-                    if (group.customers) {
-                      group.customers.forEach(customer => {
-                        if (customer.outlet) {
-                          customer.outlet.forEach(out => {
-                            if (out.results) {
-                              out.results.forEach(res => {
-                                if (res.outlet_date.split('/')[1] === report.month) {
-                                  totalSavingTariff += Number(res.savings_tariff_expenses || '0');
-                                }
+                  if (group.customers) {
+                    group.customers.forEach(customer => {
+                      if (customer.outlet) {
+                        customer.outlet.forEach(out => {
+                          if (out.results) {
+                            out.results.forEach(res => {
+                              if (res.outlet_date.split('/')[1] === report.month) {
+                                totalSavingTariff += Number(res.savings_tariff_expenses || '0');
+                              }
 
-                              });
-                            }
-                          })
-                        }
-                      })
-                    }
-                    innerArr.push('$' + formatCurrency(totalSavingTariff));
-                    innerArr.push(<div className='flex flex-row gap-x-4'>
-                      <div className='flex flex-col'>
-                        <span className='text-custom-xs'>
-                          (kWH)
-                        </span>
-                        <span>
-                          {numberWithCommas(Number(report.outlet_measured_savings_kWh || "0"))}
-                        </span>
-                      </div>
-                      <div className='flex flex-col'>
-                        <span className='text-custom-xs'>
-                          ($)
-                        </span>
-                        <span>
-                          $ {numberWithCommas(Number(report.outlet_measured_savings_expenses || "0"))}
-                        </span>
-                      </div>
-                      <div className='flex flex-col'>
-                        <span className='text-custom-xs'>
-                          (%)
-                        </span>
-                        <span>
-                          {numberWithCommas(Number(report.outlet_measured_savings_percent || "0") * 100, 0)}%
-                        </span>
-                      </div>
-                    </div>);
-                    arr.push(innerArr);
-                    innerArr = [];
-                  } else {
-                    innerArr = []
+                            });
+                          }
+                        })
+                      }
+                    })
                   }
+                  innerArr.push('$' + formatCurrency(totalSavingTariff));
+                  innerArr.push(<div className='flex flex-row gap-x-4'>
+                    <div className='flex flex-col'>
+                      <span className='text-custom-xs'>
+                        (kWH)
+                      </span>
+                      <span>
+                        {numberWithCommas(Number(report.outlet_measured_savings_kWh || "0"))}
+                      </span>
+                    </div>
+                    <div className='flex flex-col'>
+                      <span className='text-custom-xs'>
+                        ($)
+                      </span>
+                      <span>
+                        $ {numberWithCommas(Number(report.outlet_measured_savings_expenses || "0"))}
+                      </span>
+                    </div>
+                    <div className='flex flex-col'>
+                      <span className='text-custom-xs'>
+                        (%)
+                      </span>
+                      <span>
+                        {numberWithCommas(Number(report.outlet_measured_savings_percent || "0") * 100, 0)}%
+                      </span>
+                    </div>
+                  </div>);
+                  arr.push(innerArr);
+                  innerArr = [];
                 });
               }
             })
