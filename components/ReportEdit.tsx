@@ -361,17 +361,8 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
             // if (selectedSubTitle === 0) {
             getFirstIntermediary[0]({ 'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy }).then(result => {
                 if (result && result.data.first_intermediary_tables) {
-                    setFirstIntermediaryList(result.data.first_intermediary_tables.map((item: first_intermediary_table) => {
-                        item.all_eqpt_with_TP_kWh = Math.round(Number(item.all_eqpt_with_TP_kWh)).toString();
-                        item.all_eqpt_without_TP_kWh = Math.round(Number(item.all_eqpt_without_TP_kWh)).toString();
-                        return item;
-                    }));
-
-                    setFirstOriginIntermediaryList(result.data.first_intermediary_tables.map((item: first_intermediary_table) => {
-                        item.all_eqpt_with_TP_kWh = Math.round(Number(item.all_eqpt_with_TP_kWh)).toString();
-                        item.all_eqpt_without_TP_kWh = Math.round(Number(item.all_eqpt_without_TP_kWh)).toString();
-                        return item;
-                    }));
+                    setFirstIntermediaryList(result.data.first_intermediary_tables);
+                    setFirstOriginIntermediaryList(result.data.first_intermediary_tables);
                 }
             })
             // } else {
@@ -954,11 +945,11 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                 </Table.Cell>,
 
                 without: <Table.Cell>
-                    <input type="number" disabled={true} onChange={e => { changeFirstIntermediaryElement('all_eqpt_without_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_without_TP_kWh ? item.all_eqpt_without_TP_kWh.toString() : '0'} />
+                    <input type="number" disabled={true} onChange={e => { changeFirstIntermediaryElement('all_eqpt_without_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_without_TP_kWh ? numberWithCommas(Number(item.all_eqpt_without_TP_kWh), 2) : '0'} />
                 </Table.Cell>,
 
                 with: <Table.Cell>
-                    <input type="number" disabled={true} onChange={e => { changeFirstIntermediaryElement('all_eqpt_with_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_with_TP_kWh ? item.all_eqpt_with_TP_kWh.toString() : '0'} />
+                    <input type="number" disabled={true} onChange={e => { changeFirstIntermediaryElement('all_eqpt_with_TP_kWh', index, e.currentTarget.value) }} value={item.all_eqpt_with_TP_kWh ? numberWithCommas(Number(item.all_eqpt_with_TP_kWh), 2) : '0'} />
                 </Table.Cell>,
 
                 keWoTP: <Table.Cell>
@@ -978,7 +969,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                 </Table.Cell>,
 
                 totalSavings: <Table.Cell>
-                    {numberWithCommas(Number(item.total_savings_kWh || '0'))}
+                    {numberWithCommas(Number(item.total_savings_kWh || '0'), 2)}
                 </Table.Cell>,
 
             }
