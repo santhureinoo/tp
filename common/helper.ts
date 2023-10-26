@@ -83,7 +83,7 @@ export function numberWithCommas(x?: number, fixed = 0) {
   if (x && x > 999) {
     let numX = Number(x);
     if (fixed > 0) {
-      return getInDecimal(x, fixed);
+      return getInDecimal(x, fixed).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       // numX = Math.round(numX * Math.pow(10, fixed)) / Math.pow(10, fixed);
     }
 

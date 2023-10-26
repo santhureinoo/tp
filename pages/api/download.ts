@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
-import puppeteer from 'puppeteer';
+import puppeteer, { BrowserContext } from 'puppeteer';
 import { temporaryFile, temporaryDirectory } from 'tempy';
 
 const PDFMerger = require('pdf-merger-js');
@@ -15,11 +15,11 @@ export default async function handler(
   const month = req.query.month as string;
   const year = req.query.year as string;
   const outletIds = req.query['outletIds[]'] as string[];
-  const viewPort = { width: 1707, height: 960 };
+  const viewPort = { width: 1100, height: 960, deviceScaleFactor: 2 };
   const browser = await puppeteer.launch({
     headless: true,
     defaultViewport: viewPort,
-    args: ['--ash-host-window-bounds=1707*960', '--window-size=1707,960', '--window-position=0,0', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    args: ['--ash-host-window-bounds=1100*960', '--window-size=1100,960', '--window-position=0,0', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
   });
   const page = await browser.newPage();
   const merger = new PDFMerger();
@@ -39,23 +39,42 @@ export default async function handler(
     url = `${origin}/reports/invoice/${id}?year=${year}&month=${month}`;
   }
 
-  await merger.add('./public/pdf/Group_Report_Default.pdf');
+  if (type !== 'invoice') {
+    await merger.add('./public/pdf/Group_Report_Default.pdf');
+  }
+
   await page.goto(url, {
     timeout: 0,
     waitUntil: ["load", 'networkidle2', 'networkidle0', 'domcontentloaded'],
   });
   await page.emulateMediaType('screen');
 
-  const pdfBuffer = await page.pdf({
-    // path: 'report.pdf',
-    // format: 'A3',
-    height: '34cm',
-    width: '25.4cm',
-    landscape: true,
-    printBackground: true,
-    preferCSSPageSize: false,
-    scale: type === 'invoice' ? 0.8 : 1.2,
-  })
+  let pdfBuffer;
+
+  if (type === 'invoice') {
+    pdfBuffer = await page.pdf({
+      // path: 'report.pdf',
+      format: 'A4',
+      // height: '34cm',
+      // width: '25.4cm',
+      landscape: true,
+      printBackground: true,
+      preferCSSPageSize: false,
+      scale: 0.7,
+    })
+  } else {
+    pdfBuffer = await page.pdf({
+      // path: 'report.pdf',
+      // format: 'A4',
+      height: '34cm',
+      width: '25.4cm',
+      landscape: true,
+      printBackground: true,
+      preferCSSPageSize: false,
+      scale: 0.8,
+    })
+  }
+
 
   fs.writeFileSync(tempFileDir, pdfBuffer);
   await merger.add(tempFileDir);
@@ -63,6 +82,7 @@ export default async function handler(
   /**
    *  Looping across outlets for group+annex selection.
    */
+
   if (outletIds) {
     for (let i = 0; i < outletIds.length; i++) {
       const subUrl = `${origin}/reports/group_annax_outlets/${outletIds[i]}?year=${year}&month=${month}`;
@@ -71,16 +91,14 @@ export default async function handler(
         waitUntil: ["load", 'networkidle2', 'networkidle0', 'domcontentloaded'],
       });
 
+
       const pdfBuffer = await page.pdf({
-        // path: 'report.pdf',
-        // format: 'A3',
-        // height: '45.1612cm',
-        // width: '25.4cm',
         height: '34cm',
         width: '25.4cm',
         landscape: true,
         printBackground: true,
-        scale: 1.2,
+        preferCSSPageSize: true,
+        scale: 0.8,
       })
 
       fs.writeFileSync(tempFileDir, pdfBuffer);

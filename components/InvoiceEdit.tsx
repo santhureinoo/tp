@@ -165,6 +165,7 @@ const InvoiceEdit = ({ openReportEdit, setOpenReportEdit, invoice, afterOperatio
                                                                 id: invoice?.invoice_id,
                                                                 month: month,
                                                                 year: year,
+                                                                outletIds: invoice ? eval(invoice.outlet_ids) : [],
                                                             }
                                                         } // !!!
                                                     ).then((response) => {

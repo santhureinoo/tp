@@ -4,7 +4,7 @@ import { NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React from "react";
-import { median } from "../../../common/helper";
+import { getInDecimal, median } from "../../../common/helper";
 import { invoice, outlet, results } from "../../../types/datatype";
 
 const InvoiceReport: NextPage = () => {
@@ -93,16 +93,29 @@ const InvoiceReport: NextPage = () => {
         onCompleted: (data: any) => {
             if (data && data.findFirstInvoice) {
                 setInvoice(data.findFirstInvoice);
-                getResults[0]().then(res => {
-                    setLstResults(res.data.findManyResults);
-                })
             }
 
         },
         'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy
     }
 
-    useQuery(getInvoiceQuery, getInvoiceVariable);
+    const invoiceResults = useLazyQuery(getInvoiceQuery, getInvoiceVariable);
+
+    React.useEffect(() => {
+        if (id && typeof id === 'string') {
+            if (Number(id) !== 0) {
+                invoiceResults[0]();
+            }
+        }
+    }, [id]);
+
+    React.useEffect(() => {
+        if (invoice.outlet_ids) {
+            getResults[0]().then(res => {
+                setLstResults(res.data.findManyResults);
+            })
+        }
+    }, [invoice.outlet_ids])
 
     const getResults = useLazyQuery(getResultsQuery, getResultsVariable);
 
@@ -116,11 +129,11 @@ const InvoiceReport: NextPage = () => {
             let totalSF = 0;
 
             lstResults.forEach(res => {
-                totalKwh += Number(res.outlet_measured_savings_kWh);
-                totalExpense += Number(res.outlet_measured_savings_expenses);
+                totalKwh += getInDecimal(Number(res.outlet_measured_savings_kWh));
+                totalExpense += getInDecimal(Number(res.outlet_measured_savings_expenses), 2);
                 totalPercent.push(Number(res.outlet_measured_savings_percent));
-                totalCo2 += Number(res.co2_savings_kg);
-                totalSF += Number(res.tp_sales_expenses);
+                totalCo2 += getInDecimal(Number(res.co2_savings_kg));
+                totalSF += getInDecimal(Number(res.tp_sales_expenses));
             })
 
             return <tr id="tFoot" className="font-bold">
@@ -140,7 +153,7 @@ const InvoiceReport: NextPage = () => {
 
                 </td>
                 <td>
-                    {median(totalPercent)}%
+                    {getInDecimal(median(totalPercent) * 100)}%
                 </td>
                 <td>
                     {totalCo2.toLocaleString()} kg
@@ -210,30 +223,30 @@ const InvoiceReport: NextPage = () => {
                                 <td>
                                     <div className="flex flex-row justify-between h-full">
                                         <span>$</span>
-                                        <span>{result.outlet && result.outlet.outlet_month && result.outlet.outlet_month.reduce((prev, current) => Number(current.last_avail_tariff) + Number(prev), 0)}</span>
+                                        <span>{result.outlet && result.outlet.outlet_month && result.outlet.outlet_month.reduce((prev, current) => Number(current.last_avail_tariff) + Number(prev), 0).toFixed(4)}</span>
                                     </div>
 
                                 </td>
                                 <td>
-                                    {result.outlet_measured_savings_kWh}
+                                    {getInDecimal(parseFloat(result.outlet_measured_savings_kWh || "0"), 0)}
                                 </td>
                                 <td>
                                     <div className="flex flex-row justify-between h-full">
                                         <span>$</span>
-                                        <span>{result.outlet_measured_savings_expenses}</span>
+                                        <span>{getInDecimal(parseFloat(result.outlet_measured_savings_expenses || "0"), 2)}</span>
                                     </div>
 
                                 </td>
                                 <td>
-                                    {result.outlet_measured_savings_percent}%
+                                    {getInDecimal(parseFloat(result.outlet_measured_savings_percent || "0") * 100)}%
                                 </td>
                                 <td>
-                                    {result.co2_savings_kg}
+                                    {getInDecimal(parseFloat(result.co2_savings_kg || "0"))}
                                 </td>
                                 <td>
                                     <div className="flex flex-row justify-between h-full">
                                         <span>$</span>
-                                        <span>{result.tp_sales_expenses}</span>
+                                        <span>{getInDecimal(parseFloat(result.tp_sales_expenses || "0"))}</span>
                                     </div>
 
                                 </td>

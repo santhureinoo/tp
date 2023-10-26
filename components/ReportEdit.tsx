@@ -624,7 +624,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                                 }
                             } // !!!
                         ).then((response) => {
-                            downloadFile(response.data, `TablePointer Summary Report - ${currentGroup?.group_name} - ${month} ${year}`);
+                            downloadFile(response.data, `TablePointer Summary Report - ${currentGroup?.group_name} - ${month} ${year} - Group`);
                         }).finally(() => {
                             setLoading(false);
                         })
@@ -691,7 +691,7 @@ const ReportEdit = ({ openReportEdit, setOpenReportEdit, selectedID, selectedOut
                                         }
                                     } // !!!
                                 ).then((response) => {
-                                    downloadFile(response.data, `TablePointer Summary Report - ${currentGroup?.group_name} - ${month} ${year}`);
+                                    downloadFile(response.data, `TablePointer Summary Report - ${currentGroup?.group_name} - ${month} ${year} - Group`);
                                 }).finally(() => {
                                     setLoading(false);
                                 })

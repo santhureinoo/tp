@@ -30,10 +30,10 @@ import { NextPage } from "next";
 import { useRouter } from 'next/router';
 import { gql, useMutation, useQuery, WatchQueryFetchPolicy } from "@apollo/client";
 import React from 'react';
-import { group, outlet, reports, results } from '../../../types/datatype';
+import { global_input, group, outlet, reports, results } from '../../../types/datatype';
 import { report } from 'process';
 import axios from 'axios';
-import { downloadFile, numberWithCommas } from '../../../common/helper';
+import { downloadFile, getInDecimal, numberWithCommas } from '../../../common/helper';
 import moment from 'moment';
 
 
@@ -145,7 +145,31 @@ const GroupReport: NextPage = () => {
         'fetchPolicy': 'no-cache' as WatchQueryFetchPolicy
     }
 
+    const getGlobalInputQuery = gql`
+    query Global_input($where: Global_inputWhereUniqueInput!) {
+        global_input(where: $where) {
+          poss_tariff_increase
+        }
+      }`;
+
+    const getGlobalInputVariable = {
+        "variables": {
+            "where": {
+                "global_input_id": 1
+            }
+        }
+    }
+
+
     const getGroupResult = useQuery(getGroupQuery, getGroupVariable);
+    const getGlobalInputResult = useQuery(getGlobalInputQuery, getGlobalInputVariable);
+    const [globalSetting, setGlobalSetting] = React.useState<global_input>();
+
+    React.useEffect(() => {
+        if (getGlobalInputResult.data) {
+            setGlobalSetting(getGlobalInputResult.data.global_input);
+        }
+    }, [getGlobalInputResult]);
 
     React.useEffect(() => {
         if (getGroupResult.data && getGroupResult.data.findManyReports) {
@@ -240,20 +264,20 @@ const GroupReport: NextPage = () => {
                             No. of Live Outlets
                         </td>
                         <td colSpan={2} className="row-span-2">
-                            <span>Eqpt.Energy Usage</span>
-                            <span>W/O TablePointer (Month)</span>
+                            <span>Eqpt.Energy Usage W/O TablePointer (Month)</span>
+                            {/* <span>W/O TablePointer (Month)</span> */}
                         </td>
                         <td colSpan={2} className="row-span-2">
-                            <span>Eqpt.Energy Usage</span>
-                            <span>WITH TablePointer (Month)</span>
+                            <span>Eqpt.Energy Usage WITH TablePointer (Month)</span>
+                            {/* <span>WITH TablePointer (Month)</span> */}
                         </td>
                         <td colSpan={3} className="row-span-2">
-                            <span>Measured Energy Savings</span>
-                            <span>(Month)</span>
+                            <span>Measured Energy Savings (Month)</span>
+                            {/* <span>(Month)</span> */}
                         </td>
                         <td className="row-span-2">
-                            <span>Savings @</span>
-                            <span>Tariff</span>
+                            <span>Savings @ Tariff ↑</span>
+                            {/* <span>Tariff</span> */}
                         </td>
                     </tr>
                     <tr>
@@ -279,8 +303,9 @@ const GroupReport: NextPage = () => {
                             %
                         </td>
                         <td>
-                            <span>$</span>
-                            {/* <span>0.3228</span> */}
+                            <div className='flex flex-row justify-between'>
+                                <span>$</span><span>{numberWithCommas(Number(globalSetting?.poss_tariff_increase), 4)}</span>
+                            </div>
                         </td>
                     </tr>
                 </thead>
@@ -290,37 +315,37 @@ const GroupReport: NextPage = () => {
                             {reportAttributes.outletCount.toFixed(0)}
                         </td>
                         <td>
-                            {reportAttributes.eqptWTP.toFixed(2)}
+                            {numberWithCommas(reportAttributes.eqptWTP)}
                         </td>
                         <td>
                             <div className='flex flex-row justify-between'>
-                                <span>$</span> <span>{reportAttributes.eqptWTPExpense.toFixed(2)}</span>
+                                <span>$</span> <span>{numberWithCommas(reportAttributes.eqptWTPExpense, 2)}</span>
                             </div>
 
                         </td>
                         <td>
-                            {reportAttributes.eqptWoTP.toFixed(2)}
+                            {numberWithCommas(reportAttributes.eqptWoTP)}
                         </td>
                         <td>
                             <div className='flex flex-row justify-between'>
-                                <span>$</span> <span>{reportAttributes.eqptWoTPExpense.toFixed(2)}</span>
+                                <span>$</span> <span>{numberWithCommas(reportAttributes.eqptWoTPExpense, 2)}</span>
                             </div>
 
                         </td>
                         <td>
-                            {reportAttributes.measuredEnergySavingsKWH.toFixed(2)}
+                            {numberWithCommas(reportAttributes.measuredEnergySavingsKWH)}
                         </td>
                         <td>
                             <div className='flex flex-row justify-between'>
-                                <span>$</span> <span>{reportAttributes.measuredEnergySavingsExpense.toFixed(2)}</span>
+                                <span>$</span> <span>{numberWithCommas(reportAttributes.measuredEnergySavingsExpense, 2)}</span>
                             </div>
                         </td>
                         <td>
-                            {Math.round(reportAttributes.measuredEnergySavingsPercent)}%
+                            {getInDecimal((reportAttributes.measuredEnergySavingsKWH / reportAttributes.eqptWoTP) * 100)}%
                         </td>
                         <td>
                             <div className='flex flex-row justify-between'>
-                                <span>$</span><span>{reportAttributes.savingTariff.toFixed(2)}</span>
+                                <span>$</span><span>{numberWithCommas(reportAttributes.savingTariff, 2)}</span>
                             </div>
 
                         </td>
@@ -335,23 +360,23 @@ const GroupReport: NextPage = () => {
             <p className='report-text mb-2'>
                 Annually Unlocked :
             </p>
-            <div className='flex flex-row gap-x-4 text-report-non-table-text text-center font-bold justify-center'>
-                <div className='flex flex-col'>
+            <div className='flex flex-row gap-x-4 text-report-non-table-text text-center font-bold'>
+                <div className='flex flex-col items-center'>
                     <img className="float-right w-28 h-28 object-scale-down" src={'/asserts/reports/icon_summary_energysaved.png'} />
-                    <span>$ {numberWithCommas(reportAttributes?.energy_saving_py, 0)}</span>
+                    <span>$ {numberWithCommas(reportAttributes?.measuredEnergySavingsExpense * 12, 0)}</span>
                     <span>energy savings per year</span>
                 </div>
-                <div className='flex flex-col'>
+                <div className='flex flex-col items-center'>
                     <img className="float-right w-28 h-28 object-scale-down" src={'/asserts/reports/icon_summary_co2.png'} />
-                    <span>$ {numberWithCommas(reportAttributes?.co2_saving_py, 0)}</span>
+                    <span>{numberWithCommas(reportAttributes?.measuredEnergySavingsKWH * 0.709 * 12, 0)}</span>
                     <span>kg CO<sup>2</sup> saved per year</span>
                 </div>
-                <div className='flex flex-col'>
+                <div className='flex flex-col items-center'>
                     <img className="float-right w-28 h-28 object-scale-down" src={'/asserts/reports/icon_summary_treesplanted.png'} />
-                    <span>{numberWithCommas((reportAttributes?.energy_saving_py || 0) * 0.017, 0)}</span>
-                    <span>tree per years and wait 10 years</span>
+                    <span>{numberWithCommas((reportAttributes?.co2_saving_py || 0) * 0.017 * 12, 0)}</span>
+                    <span>tree per year and wait 10 years</span>
                 </div>
-                <div className='flex flex-col'>
+                <div className='flex flex-col items-center'>
                     <img className="float-right w-28 h-28 object-scale-down" src={'/asserts/reports/icon_summary_foodsold.png'} />
                     <span>{numberWithCommas((reportAttributes?.energy_saving_py || 0) * 2, 0)}</span>
                     <span>meals to be sold per year</span>

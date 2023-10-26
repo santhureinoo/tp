@@ -31,10 +31,10 @@ import { Chart } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { NextPage } from "next";
 import { useRouter } from 'next/router';
-import { first_intermediary_table, group, outlet, reports, secondary_intermediary_table } from '../../../types/datatype';
+import { first_intermediary_table, global_input, group, outlet, reports, secondary_intermediary_table } from '../../../types/datatype';
 import React from 'react';
 import { gql, useQuery, WatchQueryFetchPolicy } from '@apollo/client';
-import { convertDate, numberWithCommas } from '../../../common/helper';
+import { convertDate, getInDecimal, numberWithCommas } from '../../../common/helper';
 
 
 ChartJS.register(
@@ -80,7 +80,23 @@ const GroupReport: NextPage = () => {
         savingTariff: 0,
         groupName: "",
     });
+    const [globalSetting, setGlobalSetting] = React.useState<global_input>();
     const { id, month, year } = router.query;
+
+    const getGlobalInputQuery = gql`
+    query Global_input($where: Global_inputWhereUniqueInput!) {
+        global_input(where: $where) {
+          poss_tariff_increase
+        }
+      }`;
+
+    const getGlobalInputVariable = {
+        "variables": {
+            "where": {
+                "global_input_id": 1
+            }
+        }
+    }
 
     const getOutletQuery = gql`
     query FindFirstOutlet($where: OutletWhereInput, $resultsWhere2: ResultsWhereInput) {
@@ -228,8 +244,15 @@ const GroupReport: NextPage = () => {
     }
 
     const getOutletResult = useQuery(getOutletQuery, getOutletVariable);
+    const getGlobalInputResult = useQuery(getGlobalInputQuery, getGlobalInputVariable);
     const getFirstIntermediaryResult = useQuery(getFirstIntermediaryQuery, getFirstIntermediaryVariable);
     const getSecondIntermediaryResult = useQuery(getSecondIntermediaryQuery, getSecondIntermediaryVariable);
+
+    React.useEffect(() => {
+        if (getGlobalInputResult.data) {
+            setGlobalSetting(getGlobalInputResult.data.global_input);
+        }
+    }, [getGlobalInputResult]);
 
     const dataRow = React.useMemo(() => {
         let elem = <></>;
@@ -244,12 +267,12 @@ const GroupReport: NextPage = () => {
                             </td>
                             <td>
                                 <div className='flex flex-row justify-between'>
-                                    <span>$</span><span>{numberWithCommas(Number(result.savings_tariff_expenses))}</span>
+                                    <span>$</span><span>{numberWithCommas(Number(result.savings_tariff_expenses), 4)}</span>
                                 </div>
 
                             </td>
                             <td>
-                                {Number(result.outlet_eqpt_energy_usage_without_TP_month_kW).toFixed(2)}
+                                {numberWithCommas(Number(result.outlet_eqpt_energy_usage_without_TP_month_kW))}
                             </td>
                             <td>
                                 <div className='flex flex-row justify-between'>
@@ -257,7 +280,7 @@ const GroupReport: NextPage = () => {
                                 </div>
                             </td>
                             <td>
-                                {Number(result.outlet_eqpt_energy_usage_with_TP_month_kW).toFixed(2)}
+                                {numberWithCommas(Number(result.outlet_eqpt_energy_usage_with_TP_month_kW))}
                             </td>
                             <td>
                                 <div className='flex flex-row justify-between'>
@@ -265,19 +288,24 @@ const GroupReport: NextPage = () => {
                                 </div>
                             </td>
                             <td>
-                                {Number(result.outlet_measured_savings_kWh).toFixed(2)}
+                                {numberWithCommas(Number(result.outlet_measured_savings_kWh))}
                             </td>
                             <td>
-                                {numberWithCommas(Number(result.outlet_measured_savings_expenses))}
+                                <div className='flex flex-row justify-between'>
+                                    <span>$</span><span>{numberWithCommas(Number(result.outlet_measured_savings_expenses))}</span>
+                                </div>
                             </td>
                             <td>
-                                {Number(result.outlet_measured_savings_percent).toFixed(0)}%
+                                {getInDecimal(Number(result.outlet_measured_savings_percent) * 100)}%
                             </td>
                             <td>
-                                {Number(result.co2_savings_kg).toFixed(2)}
+                                {getInDecimal(Number(result.co2_savings_kg))}
                             </td>
                             <td>
-                                {numberWithCommas(Number(result.savings_tariff_expenses))}
+                                <div className='flex flex-row justify-between'>
+                                    <span>$</span><span>{numberWithCommas(Number(result.savings_tariff_expenses), 2)}</span>
+                                </div>
+
                             </td>
                         </tr>
                         <tr>
@@ -317,7 +345,7 @@ const GroupReport: NextPage = () => {
                             </td>
 
                         </tr>
-                        <tr>
+                        {/* <tr>
                             <td rowSpan={2}>
                                 Kitchen Exhaust
                             </td>
@@ -392,7 +420,7 @@ const GroupReport: NextPage = () => {
                             <td>
                                 valid as of {convertDate(result.ac_eqpt_energy_baseline_avg_hourly_as_date)}
                             </td>
-                        </tr>
+                        </tr> */}
                     </React.Fragment>
                 })}
             </React.Fragment>;
@@ -404,9 +432,11 @@ const GroupReport: NextPage = () => {
 
     const stackBarChart = React.useMemo(() => {
         if (getFirstIntermediaryResult.data && getFirstIntermediaryResult.data.first_intermediary_tables) {
-            const first_intermediary_tables: first_intermediary_table[] = getFirstIntermediaryResult.data.first_intermediary_tables;
+            const first_intermediary_tables: first_intermediary_table[] = (getFirstIntermediaryResult.data.first_intermediary_tables as first_intermediary_table[]).sort((a, b) => {
+                return Number(a.day_of_month) == Number(b.day_of_month) ? 0 : Number(a.day_of_month) > Number(b.day_of_month) ? 1 : -1;
+            });
             const chartData = {
-                labels: ["A", "B", "C"],
+                labels: first_intermediary_tables.map((fi) => fi.day_of_month + "/" + fi.outlet_month_year),
                 datasets: [
                     // {
                     //     type: 'line' as const,
@@ -422,7 +452,7 @@ const GroupReport: NextPage = () => {
                         type: 'bar' as const,
                         label: 'Without Tablepointer',
                         backgroundColor: 'rgb(26,35,126)',
-                        data: first_intermediary_tables.map(ft => Number(ft.all_eqpt_without_TP_kWh)),
+                        data: first_intermediary_tables.map(ft => getInDecimal(Number(ft.all_eqpt_without_TP_kWh))),
                         datalabels: {
                             align: 'center' as any,
                             anchor: 'center' as any,
@@ -432,14 +462,15 @@ const GroupReport: NextPage = () => {
                                 }
                             }
                         },
-                        barThickness: 25,
+                        barThickness: 20,
+                        responsive: true,
                         order: 3,
                     },
                     {
                         type: 'bar' as const,
                         label: 'With Tablepointer',
                         backgroundColor: 'rgb(255,112,0)',
-                        data: first_intermediary_tables.map(ft => Number(ft.all_eqpt_with_TP_kWh)),
+                        data: first_intermediary_tables.map(ft => getInDecimal(Number(ft.all_eqpt_with_TP_kWh))),
                         datalabels: {
                             align: 'center' as any,
                             anchor: 'center' as any,
@@ -449,7 +480,8 @@ const GroupReport: NextPage = () => {
                                 }
                             }
                         },
-                        barThickness: 25,
+                        barThickness: 20,
+                        responsive: true,
                         order: 2,
                     }
 
@@ -505,6 +537,7 @@ const GroupReport: NextPage = () => {
             }
 
             const stackBarOption = {
+                barPercentage: 0.3,
                 plugins: {
                     legend: {
                         display: true,
@@ -535,7 +568,7 @@ const GroupReport: NextPage = () => {
                         },
                         display: true,
                         ticks: {
-                            display: false
+                            display: true
                         }
                     },
                     // x2: { // add extra axes
@@ -569,9 +602,7 @@ const GroupReport: NextPage = () => {
             const scatterData = () => {
                 return (
                     {
-                        labels: [
-                            "00", "01", "02", "03"
-                        ],
+                        labels: second_intermediary_tables.map((_, index) => index),
                         datasets: [
                             {
                                 type: 'line' as const,
@@ -619,7 +650,9 @@ const GroupReport: NextPage = () => {
                         display: true,
                         ticks: {
                             display: false,
-                        }
+                        },
+                        barPercentage: 0.9,
+                        categoryPercentage: 0.55
                     },
                     x2: { // add extra axes
                         position: 'bottom' as const,
@@ -628,6 +661,8 @@ const GroupReport: NextPage = () => {
                             display: false
                         },
                         display: false,
+                        barPercentage: 0.9,
+                        categoryPercentage: 0.55
                     },
                     y: {
                         beginAtZero: true,
@@ -650,91 +685,96 @@ const GroupReport: NextPage = () => {
     }, [getSecondIntermediaryResult.data])
 
     return <React.Fragment>
-        <div>
-            {/* <h1 className='report-main-header-text'>
+        <div id="month-of-reference">
+            <div>
+                {/* <h1 className='report-main-header-text'>
                 {year + " --- " + month + ` (${id})`}
             </h1> */}
-            <span>
-                {"Month of reference:"}
-            </span>
-            <span>
-                {month + "/" + year}
-            </span>
-        </div>
-        <div className='w-auto'>
-            <table className="report-table w-auto text-xs">
-                <thead>
-                    <tr>
-                        <td rowSpan={2}>
+                <span>
+                    {"Month of reference:"}
+                </span>
+                <span>
+                    {month + "/" + year}
+                </span>
+            </div>
+            <div className='w-auto'>
+                <table className="report-table w-auto text-xs">
+                    <thead>
+                        <tr>
+                            <td rowSpan={2}>
 
-                        </td>
-                        <td>
-                            Eqpt. Energy Baseline (Avg. Hourly)
-                        </td>
-                        <td>
-                            Last Avail. Tariff
-                        </td>
-                        <td colSpan={2}>
-                            Eqpt. Energy Usage W/O TablePointer (Month)
-                        </td>
-                        <td colSpan={2}>
-                            Eqpt. Energy Usage WITH TablePointer (Month)
-                        </td>
-                        <td colSpan={3}>
-                            Measured Energy Savings (Month)
-                        </td>
-                        <td>
-                            CO<sup>2</sup> Savings (Month)
-                        </td>
-                        <td>
-                            Savings @ Tariff
-                        </td>
-                        <td>
-                            Remarks
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            kW
-                        </td>
-                        <td>
-                            $ / kWh
-                        </td>
-                        <td>
-                            kWh
-                        </td>
-                        <td>
-                            $
-                        </td>
-                        <td>
-                            kWh
-                        </td>
-                        <td>
-                            $
-                        </td>
-                        <td>
-                            kWh
-                        </td>
-                        <td>
-                            $
-                        </td>
-                        <td>
-                            %
-                        </td>
-                        <td>
-                            kg
-                        </td>
-                        <td >
-                            <span>$</span>
-                        </td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {dataRow}
-                </tbody>
-            </table>
-            {/* <span className="text-xs">*26% savings generated and within benchmark</span> */}
+                            </td>
+                            <td>
+                                Eqpt. Energy Baseline (Avg. Hourly)
+                            </td>
+                            <td>
+                                Last Avail. Tariff
+                            </td>
+                            <td colSpan={2}>
+                                Eqpt. Energy Usage W/O TablePointer (Month)
+                            </td>
+                            <td colSpan={2}>
+                                Eqpt. Energy Usage WITH TablePointer (Month)
+                            </td>
+                            <td colSpan={3}>
+                                Measured Energy Savings (Month)
+                            </td>
+                            <td>
+                                CO<sup>2</sup> Savings (Month)
+                            </td>
+                            <td>
+                                Savings @ Tariff ↑
+                            </td>
+                            <td>
+                                Remarks
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                kW
+                            </td>
+                            <td>
+                                $ / kWh
+                            </td>
+                            <td>
+                                kWh
+                            </td>
+                            <td>
+                                $
+                            </td>
+                            <td>
+                                kWh
+                            </td>
+                            <td>
+                                $
+                            </td>
+                            <td>
+                                kWh
+                            </td>
+                            <td>
+                                $
+                            </td>
+                            <td>
+                                %
+                            </td>
+                            <td>
+                                kg
+                            </td>
+                            <td >
+                                <div className='flex flex-row justify-between'>
+                                    <span>$</span><span>{numberWithCommas(Number(globalSetting?.poss_tariff_increase), 4)}</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {dataRow}
+                    </tbody>
+                </table>
+                {/* <span className="text-xs">*26% savings generated and within benchmark</span> */}
+            </div>
         </div>
+
         {/* <div >
             <p className='report-text mb-2'>
                 Annually Unlocked :
@@ -758,10 +798,10 @@ const GroupReport: NextPage = () => {
                 </div>
             </div>
         </div> */}
-        <div className='h-64 mt-4'>
+        <div id="scatter-chart" className='h-64 mt-4'>
             {scatterChart}
         </div>
-        <div className='h-64 mt-2'>
+        <div id="stack-bar-chart" className='h-64 mt-2'>
             {stackBarChart}
         </div>
         <div className='italic text-xs flex flex-col mt-2'>
