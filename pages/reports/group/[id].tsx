@@ -304,7 +304,7 @@ const GroupReport: NextPage = () => {
                         </td>
                         <td>
                             <div className='flex flex-row justify-between'>
-                                <span>$</span><span>{numberWithCommas(Number(globalSetting?.poss_tariff_increase), 4)}</span>
+                                <span>$</span><span>{numberWithCommas(Number(globalSetting?.poss_tariff_increase || "0"), 4)}</span>
                             </div>
                         </td>
                     </tr>
