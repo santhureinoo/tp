@@ -15,11 +15,11 @@ export default async function handler(
   const month = req.query.month as string;
   const year = req.query.year as string;
   const outletIds = req.query['outletIds[]'] as string[];
-  const viewPort = { width: 1100, height: 960, deviceScaleFactor: 2 };
+  const viewPort = { width: 2000, height: 1200, deviceScaleFactor: 2 };
   const browser = await puppeteer.launch({
     headless: true,
     defaultViewport: viewPort,
-    args: ['--ash-host-window-bounds=1100*960', '--window-size=1100,960', '--window-position=0,0', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    args: ['--ash-host-window-bounds=2000*1200', '--window-size=2000,1200', '--window-position=0,0', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
   });
   const page = await browser.newPage();
   const merger = new PDFMerger();
@@ -65,13 +65,16 @@ export default async function handler(
   } else {
     pdfBuffer = await page.pdf({
       // path: 'report.pdf',
-      // format: 'A4',
       height: '34cm',
       width: '25.4cm',
       landscape: true,
       printBackground: true,
-      preferCSSPageSize: false,
-      scale: 0.8,
+      preferCSSPageSize: true,
+      margin: {
+        left:100,
+        right:100,
+      },
+      scale: 1,
     })
   }
 
@@ -90,7 +93,6 @@ export default async function handler(
         timeout: 0,
         waitUntil: ["load", 'networkidle2', 'networkidle0', 'domcontentloaded'],
       });
-
 
       const pdfBuffer = await page.pdf({
         height: '34cm',

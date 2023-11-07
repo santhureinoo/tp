@@ -34,7 +34,7 @@ import { useRouter } from 'next/router';
 import { first_intermediary_table, global_input, group, outlet, reports, secondary_intermediary_table } from '../../../types/datatype';
 import React from 'react';
 import { gql, useQuery, WatchQueryFetchPolicy } from '@apollo/client';
-import { convertDate, getInDecimal, numberWithCommas } from '../../../common/helper';
+import { convertDate, getInDecimal, numberWithCommas, render_html_to_canvas } from '../../../common/helper';
 
 
 ChartJS.register(
@@ -490,6 +490,22 @@ const GroupReport: NextPage = () => {
 
             const stackBarTop: Plugin = {
                 id: 'stackBarTop',
+                afterDatasetsDraw: function (chart, options) {
+                    // console.log(chart);
+                    var ctx = chart.ctx;
+                    // ctx.font = Chart..global.defaultFontStyle;
+                    ctx.fillStyle = "#666666";
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    chart.data.datasets.forEach(function (dataset, i) {
+                        var meta = chart.getDatasetMeta(i);
+                        meta.data.forEach(function (bar: any, index) {
+                            const total: number = bar.$context.parsed._stacks.y[0] + bar.$context.parsed._stacks.y[1];
+                            (bar.height > 0 && (bar.$context.parsed.y === bar.$context.parsed._stacks.y[0])) && render_html_to_canvas(`<div style="border: 1px solid black;">${total}</div>`, ctx, bar.x, bar.y, (total.toString().length * 10) + 12, 30);
+                        });
+                    });
+                    console.log("___________________________");
+                },
                 beforeDraw(chart: any, args: any, options: any) {
                     const { ctx, chartArea: { top, bottom, left, right, width, height }, scales: { x, y } } = chart;
                     ctx.save();
@@ -698,7 +714,7 @@ const GroupReport: NextPage = () => {
                 </span>
             </div>
             <div className='w-auto'>
-                <table className="report-table w-auto text-xs">
+                <table className="report-table w-full text-xs">
                     <thead>
                         <tr>
                             <td rowSpan={2}>

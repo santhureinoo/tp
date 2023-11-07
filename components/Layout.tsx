@@ -44,9 +44,8 @@ const Layout = ({ title, children, disableHeader = false, disableSideBar = false
                                 </>
 
                             }
-                            {disableHeader && children}
-
                         </div>
+                        {disableHeader && children}
                     </div>
                 </div>
             </main>
