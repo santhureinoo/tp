@@ -24,7 +24,7 @@ import {
     Title,
     Tooltip,
     SubTitle,
-    Plugin
+    Plugin,
 
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
@@ -435,8 +435,10 @@ const GroupReport: NextPage = () => {
             const first_intermediary_tables: first_intermediary_table[] = (getFirstIntermediaryResult.data.first_intermediary_tables as first_intermediary_table[]).sort((a, b) => {
                 return Number(a.day_of_month) == Number(b.day_of_month) ? 0 : Number(a.day_of_month) > Number(b.day_of_month) ? 1 : -1;
             });
+            const labelList = first_intermediary_tables.map((fi) => fi.day_of_month + "/" + fi.outlet_month_year);
+            labelList.push("");
             const chartData = {
-                labels: first_intermediary_tables.map((fi) => fi.day_of_month + "/" + fi.outlet_month_year),
+                labels: labelList,
                 datasets: [
                     // {
                     //     type: 'line' as const,
@@ -450,7 +452,7 @@ const GroupReport: NextPage = () => {
                     // },
                     {
                         type: 'bar' as const,
-                        label: 'Without Tablepointer',
+                        label: 'Energy Savings',
                         backgroundColor: 'rgb(26,35,126)',
                         data: first_intermediary_tables.map(ft => getInDecimal(Number(ft.all_eqpt_without_TP_kWh))),
                         datalabels: {
@@ -468,7 +470,7 @@ const GroupReport: NextPage = () => {
                     },
                     {
                         type: 'bar' as const,
-                        label: 'With Tablepointer',
+                        label: 'Energy Usage WITH TablePointer (kWh)',
                         backgroundColor: 'rgb(255,112,0)',
                         data: first_intermediary_tables.map(ft => getInDecimal(Number(ft.all_eqpt_with_TP_kWh))),
                         datalabels: {
@@ -490,6 +492,12 @@ const GroupReport: NextPage = () => {
 
             const stackBarTop: Plugin = {
                 id: 'stackBarTop',
+                // beforeBuildTicks(chart, args, options) {
+                //     const canvas = document.getElementById("stack-bar-chart")?.getElementsByTagName("canvas")[0]
+                //     console.log(canvas);
+                //     const orig = canvas ? Number(canvas.getAttribute('width')) : 0;
+                //     // canvas?.setAttribute('width', (orig).toString());
+                // },
                 afterDatasetsDraw: function (chart, options) {
                     // console.log(chart);
                     var ctx = chart.ctx;
@@ -501,90 +509,115 @@ const GroupReport: NextPage = () => {
                         var meta = chart.getDatasetMeta(i);
                         meta.data.forEach(function (bar: any, index) {
                             const total: number = bar.$context.parsed._stacks.y[0] + bar.$context.parsed._stacks.y[1];
-                            (bar.height > 0 && (bar.$context.parsed.y === bar.$context.parsed._stacks.y[0])) && render_html_to_canvas(`<div style="border: 1px solid black;">${total}</div>`, ctx, bar.x, bar.y, (total.toString().length * 10) + 12, 30);
+                            (bar.height > 0 && (bar.$context.parsed.y === bar.$context.parsed._stacks.y[0])) && render_html_to_canvas(`<div style="border: 1px solid black; font-size:14px;">${total}</div>`, ctx, bar.x, bar.y, (total.toString().length * 10) + (14 - total.toString().length), 30);
                         });
                     });
-                    console.log("___________________________");
                 },
-                beforeDraw(chart: any, args: any, options: any) {
-                    const { ctx, chartArea: { top, bottom, left, right, width, height }, scales: { x, y } } = chart;
-                    ctx.save();
-                    var fontsize = 14;
-                    var fontface = 'verdana';
-                    var lineHeight = fontsize * 1.286;
-                    // var text = '100';
-
-                    ctx.font = fontsize + 'px ' + fontface;
-                    // var textWidth = ctx.measureText(text).width;
-
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'top';
-
-                    // ctx.fillText(text, x.getPixelForValue(0), y.getPixelForValue(0));
-                    // ctx.strokeRect(x.getPixelForValue(0), y.getPixelForValue(0), textWidth, lineHeight);
-                    // const img = new Image();
-                    // img.src = "https://www.chartjs.org/img/chartjs-logo.svg"
-                    // ctx.drawImage(img, 10, 10, 30, 30);
-                    // const data = "data:image/svg+xml," +
-                    // "<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>" +
-                    //   "<foreignObject width='100%' height='100%'>" +
-                    //     "<div xmlns='http://www.w3.org/1999/xhtml' style='font-size:12px'>" +
-                    //      "<ul> <li style='color:red'> hello </li>  <li style='color:green'>thomas</li> </ul> "  +
-                    //     "</div>" +
-                    //   "</foreignObject>" +
-                    // "</svg>";
-                    // var DOMURL = window.URL || window.webkitURL || window;
-                    // var img = new Image();
-                    // var svg = new Blob([data], {
-                    //     type: 'image/svg+xml;charset=utf-8'
-                    // });
-                    // var url = DOMURL.createObjectURL(svg);
-                    // img.onload = function () {
-                    //     ctx.drawImage(img, 10, 10, 30, 30);
-                    //     DOMURL.revokeObjectURL(url);
-                    //     console.log("CALLE");
-                    // }
-                    // img.src = url;
-                    // setTimeout(()=>{
-                    //     ctx.drawImage(img, 10, 10, 30, 30);
-                    //     DOMURL.revokeObjectURL(url);
-                    // }, 5000);
-                }
             }
 
+            // <block:plugin:0>
+            const getOrCreateLegendList = (chart: any, id: any) => {
+                const legendContainer = document.getElementById(id);
+                let listContainer = legendContainer?.querySelector('ul');
+
+                if (!listContainer) {
+                    listContainer = document.createElement('ul');
+                    listContainer.style.display = 'flex';
+                    listContainer.style.flexDirection = 'row';
+                    listContainer.style.margin = "0px";
+                    listContainer.style.padding = "0px";
+
+                    legendContainer?.appendChild(listContainer);
+                }
+
+                return listContainer;
+            };
+
+            const htmlLegendPlugin = {
+                id: 'htmlLegend',
+                afterUpdate(chart: any, args: any, options: any) {
+                    const ul = getOrCreateLegendList(chart, options.containerID);
+
+                    // Remove old legend items
+                    while (ul.firstChild) {
+                        ul.firstChild.remove();
+                    }
+
+                    // Reuse the built-in legendItems generator
+                    const items = chart.options.plugins.legend.labels.generateLabels(chart);
+
+                    items.unshift({
+                        fillStyle: 'white',
+                        strokeStyle: 'gray',
+                        lineWidth: '1',
+                        fontColor: 'gray',
+                        text: 'Energy Usage W/O TablePointer (kWh)'
+                    });
+
+                    items.forEach((item: any) => {
+                        const li = document.createElement('li');
+                        li.style.alignItems = 'center';
+                        li.style.cursor = 'pointer';
+                        li.style.display = 'flex';
+                        li.style.flexDirection = 'row';
+                        li.style.marginLeft = '10px';
+
+                        // Color box
+                        const boxSpan = document.createElement('span');
+                        boxSpan.style.background = item.fillStyle;
+                        boxSpan.style.borderColor = item.strokeStyle;
+                        boxSpan.style.borderWidth = item.lineWidth + 'px';
+                        boxSpan.style.display = 'inline-block';
+                        boxSpan.style.flexShrink = "20px";
+                        boxSpan.style.height = '20px';
+                        boxSpan.style.marginRight = '10px';
+                        boxSpan.style.width = '20px';
+
+                        // Text
+                        const textContainer = document.createElement('p');
+                        textContainer.style.color = item.fontColor;
+                        textContainer.style.margin = "0px";
+                        textContainer.style.padding = "0px";
+                        textContainer.style.textDecoration = item.hidden ? 'line-through' : '';
+
+                        const text = document.createTextNode(item.text);
+                        textContainer.appendChild(text);
+
+                        li.appendChild(boxSpan);
+                        li.appendChild(textContainer);
+                        ul.appendChild(li);
+                    });
+                }
+            };
+            // </block:plugin>
             const stackBarOption = {
                 barPercentage: 0.3,
                 plugins: {
                     legend: {
-                        display: true,
-                        position: 'right' as any,
-                        align: 'start' as any,
-                    }
-                    // datalabels: {
-                    //     color: 'white',
-                    //     font: {
-                    //         weight: 'bold' as any
-                    //     },
-                    //     formatter: Math.round
-                    // },
+                        display: false,
+                        position: 'top' as any,
+                        align: 'center' as any,
+                    },
+
+                    htmlLegend: {
+                        // ID of the container to put the legend in
+                        containerID: 'legend-container',
+                    },
+
                 },
-                // elements: {
-                //     bar: {
-                //         borderRadius: 30,
-                //     }
-                // },
                 responsive: true,
                 maintainAspectRatio: false,
                 // clamp: true,
                 scales: {
                     x: {
+                        grace: 1,
                         stacked: true,
                         grid: {
                             display: false
                         },
                         display: true,
                         ticks: {
-                            display: true
+                            display: true,
                         }
                     },
                     // x2: { // add extra axes
@@ -596,16 +629,17 @@ const GroupReport: NextPage = () => {
                     //     display: false,
                     // },
                     y: {
+                        grace: '20%',
                         stacked: true,
                         grid: {
                             display: false
-                        }
+                        },
                     },
 
                 }
             };
 
-            return <Chart type='bar' data={chartData} options={stackBarOption} plugins={[stackBarTop]} />
+            return <Chart type='bar' data={chartData} options={stackBarOption} plugins={[stackBarTop, htmlLegendPlugin]} />
         } else {
             return <></>
         }
@@ -667,8 +701,8 @@ const GroupReport: NextPage = () => {
                         ticks: {
                             display: false,
                         },
-                        barPercentage: 0.9,
-                        categoryPercentage: 0.55
+                        barPercentage: 1,
+                        categoryPercentage: 1
                     },
                     x2: { // add extra axes
                         position: 'bottom' as const,
@@ -677,8 +711,8 @@ const GroupReport: NextPage = () => {
                             display: false
                         },
                         display: false,
-                        barPercentage: 0.9,
-                        categoryPercentage: 0.55
+                        barPercentage: 1,
+                        categoryPercentage: 1
                     },
                     y: {
                         beginAtZero: true,
@@ -814,13 +848,16 @@ const GroupReport: NextPage = () => {
                 </div>
             </div>
         </div> */}
-        <div id="scatter-chart" className='h-64 mt-4'>
+        <div id="scatter-chart" className='h-80 mt-4'>
             {scatterChart}
         </div>
-        <div id="stack-bar-chart" className='h-64 mt-2'>
+        <div className='flex place-content-center my-4' id='legend-container'>
+
+        </div>
+        <div id="stack-bar-chart" className='h-80 mt-4'>
             {stackBarChart}
         </div>
-        <div className='italic text-xs flex flex-col mt-2'>
+        <div className='italic text-xs flex flex-col mt-12'>
             <span>
                 {`* Eqpt.Energy Baseline represents the equipment's energy usage over a typical hour without Tablepointer,
                 and is continuously and dynamically sampled for statistical best-fit averaging to ensure validity over time.`}

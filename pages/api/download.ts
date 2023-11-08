@@ -53,13 +53,15 @@ export default async function handler(
 
   if (type === 'invoice') {
     pdfBuffer = await page.pdf({
-      // path: 'report.pdf',
-      format: 'A4',
-      // height: '34cm',
-      // width: '25.4cm',
+      height: '34cm',
+      width: '25.4cm',
       landscape: true,
       printBackground: true,
       preferCSSPageSize: false,
+      margin: {
+        left: 30,
+        right: 30,
+      },
       scale: 0.7,
     })
   } else {
@@ -71,10 +73,10 @@ export default async function handler(
       printBackground: true,
       preferCSSPageSize: true,
       margin: {
-        left:100,
-        right:100,
+        left: 30,
+        right: 30,
       },
-      scale: 1,
+      scale: type === "group" ? 1 : 0.6,
     })
   }
 
@@ -100,7 +102,11 @@ export default async function handler(
         landscape: true,
         printBackground: true,
         preferCSSPageSize: true,
-        scale: 0.8,
+        margin: {
+          left: 30,
+          right: 30,
+        },
+        scale: 0.6,
       })
 
       fs.writeFileSync(tempFileDir, pdfBuffer);

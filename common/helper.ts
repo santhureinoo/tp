@@ -179,9 +179,9 @@ export function render_html_to_canvas(html: string, ctx: CanvasRenderingContext2
   img.onload = function () {
     ctx.beginPath();
     ctx.moveTo(x, y);
-    ctx.lineTo(x + 6, y - 25);
+    ctx.lineTo(x + 6, y - 20);
     ctx.stroke();
-    ctx.drawImage(img, x, y - 35);
+    ctx.drawImage(img, x, y - 30);
   }
   img.src = data;
 }
