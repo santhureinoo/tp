@@ -54,7 +54,6 @@ const BatchGenerator = ({ openBatchCalculate, setOpenBatchCalculate, reportType 
                 }
             }
         })
-        console.log(parentList);
         return parentList;
     }
 
@@ -94,7 +93,6 @@ const BatchGenerator = ({ openBatchCalculate, setOpenBatchCalculate, reportType 
             }
         }
         ).then((response) => {
-            console.log(response);
             setDownloadURL(response.data.downloadUrl);
             const missingOutletList: string[] = [];
             /**
@@ -119,7 +117,6 @@ const BatchGenerator = ({ openBatchCalculate, setOpenBatchCalculate, reportType 
             setMissingOutlets(missingOutletList);
             // downloadFile(response.data, `TablePointer Summary Report - ${currentGroup?.group_name} - ${month} ${year} - Group`);
         }).catch(error => {
-            console.log("EEE", finalProgress.progress);
             setFinalProgress({
                 progress: 0,//finalProgress.progress,
                 status: 'exception'
@@ -252,7 +249,7 @@ const BatchGenerator = ({ openBatchCalculate, setOpenBatchCalculate, reportType 
         return <React.Fragment>
             <div className='flex flex-col items-center'>
                 <h1 className='text-center'>Batch Generate Savings Reports</h1>
-                <DatePicker className='w-1/3' size={"large"} picker="month" value={date} onChange={(event) => { console.log(event); event && setDate(event) }} />
+                <DatePicker className='w-1/3' size={"large"} picker="month" value={date} onChange={(event) => { event && setDate(event) }} />
             </div>
             <div className='flex justify-between mt-5'>
                 <MultiItemSelector Items={leftSideItems} Label={'Choose Group'} onSelected={setLeftSideItems}></MultiItemSelector>
