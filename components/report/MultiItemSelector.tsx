@@ -43,7 +43,7 @@ const MultiItemSelector = ({ Items, Label, onSelected }: Props): React.ReactElem
                         return <></>
                     }
                 }
-                return <Checkbox value={item.value} checked={item.checked} onChange={(event) => onSelect(index, event.target.checked)}>{item.display}</Checkbox>
+                return <Checkbox key={"chk-" + index} value={item.value} checked={item.checked} onChange={(event) => onSelect(index, event.target.checked)}>{item.display}</Checkbox>
             })}
         </div>;
     }, [Items, searchText]);

@@ -277,8 +277,8 @@ const BatchGenerator = ({ openBatchCalculate, setOpenBatchCalculate, reportType 
                 return <ExclamationOutlined rev={undefined} className="text-warning-batch-gen" />
             } : undefined} strokeColor={finalProgress.status === 'exception' ? '#F5222D' : missingOutlets.length > 0 ? "#FFC53D" : undefined} />
             <div>
-                {missingOutlets.map(data => {
-                    return <p className={"text-warning-batch-gen"}>{data}</p>
+                {missingOutlets.map((data, index) => {
+                    return <p key={"missing-key" + index} className={"text-warning-batch-gen"}>{data}</p>
                 })}
                 {
                     finalProgress.status === 'exception' && <p className={"text-exception-batch-gen"}>{`Unknown error, please contact tech team to investigate`}</p>
