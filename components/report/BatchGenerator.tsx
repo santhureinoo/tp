@@ -301,7 +301,7 @@ const BatchGenerator = ({ openBatchCalculate, setOpenBatchCalculate, reportType 
             setMissingOutlets([]);
         }}
         destroyOnClose={true}
-        width={800}
+        width={850}
         footer={
             <div className='flex justify-center w-100'>
                 {finalProgress.progress === -1 ? <button onClick={onBatchGenerate} disabled={disableGenBtn} className="bg-custom-active-link text-white hover:bg-sky-700 text-md px-5 py-3 rounded-md">
