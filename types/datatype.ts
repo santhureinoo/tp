@@ -782,3 +782,12 @@ export interface PageCursors {
     last: PageCursor;
     previous: PageCursor;
 }
+
+//
+export interface Item {
+    display: string;
+    value: any;
+    checked: boolean;
+    customers: string;
+    prev_position?: number;
+}

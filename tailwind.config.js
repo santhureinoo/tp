@@ -14,6 +14,7 @@ module.exports = {
       fontSize: {
         'custom-sm' : ['10px', '10px'],
         'custom-lg' : ['16px', '20px'],
+        'custom-lg2' : ['24px', '24px'],
         'custom-xs' : ['8px', '12px']
       },
       maxHeight: {
@@ -33,6 +34,8 @@ module.exports = {
         'stack-bar-outer': '#ff7000',
         'stack-bar-inner': '#1a237e',
         'custom-active-link' : '#147CFC',
+        'warning-batch-gen' : '#FFC53D',
+        'exception-batch-gen' : '#F5222D'
       }
     },
   },

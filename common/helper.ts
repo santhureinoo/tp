@@ -12,13 +12,13 @@ export function bytesToSize(bytes: number) {
   return Math.round(bytes / Math.pow(1024, i)) + ' ' + sizes[i];
 }
 
-export function downloadFile(data: any, name: string) {
+export function downloadFile(data: any, name: string, extension = 'application/pdf') {
   // uploadURL and filename
   // const result = response.data;
   // create file link in browser's memory
   var binaryData = [];
   binaryData.push(data);
-  const href = URL.createObjectURL(new Blob(binaryData, { type: 'application/pdf' }));
+  const href = URL.createObjectURL(new Blob(binaryData, { type: extension }));
 
   // create "a" HTML element with href to file & click
   const link = document.createElement('a');

@@ -3,7 +3,7 @@ import Table from '../components/Table'
 import React from 'react';
 import TableOptionField from '../components/TableOptionField';
 import { v4 as uuidv4 } from 'uuid';
-import { customer, date_range_customer_dashboards_table, group, invoice, outlet, reports, results } from '../types/datatype';
+import { Item, customer, date_range_customer_dashboards_table, group, invoice, outlet, reports, results } from '../types/datatype';
 import ClientOnly from '../components/ClientOnly';
 import { gql, useLazyQuery, useQuery, WatchQueryFetchPolicy } from '@apollo/client';
 import { DropdownProps } from '../common/types';
@@ -15,6 +15,10 @@ import InvoiceEdit from '../components/InvoiceEdit';
 import { dateValueForQuery, formatCurrency, numberWithCommas } from '../common/helper';
 import axios from 'axios';
 import moment from 'moment';
+import rfdc from 'rfdc';
+import BatchGenerator from '../components/report/BatchGenerator';
+
+const cloneDeep = rfdc();
 
 const Reports: NextPage = () => {
   return (
@@ -78,6 +82,9 @@ const ReportTable: any = () => {
 
   //Loading
   const [tableLoading, setTableLoading] = React.useState(false);
+
+  //Modal
+  const [openBatchCalculate, setOpenBatchCalculate] = React.useState<'none' | 'group' | 'group_annex' | 'invoice'>("none");
 
 
   const getReportsQuery = gql`
@@ -673,6 +680,8 @@ query Date_range_customer_dashboards {
     }
   }, [resultsResult]);
 
+
+
   React.useEffect(() => {
     if (getDateRangeCustomDashboard.data && getDateRangeCustomDashboard.data.date_range_customer_dashboards
       && getDateRangeCustomDashboard.data.date_range_customer_dashboards.length > 0) {
@@ -1040,7 +1049,10 @@ query Date_range_customer_dashboards {
         leftSideElements={[<div key={"table-option"} className='flex flex-row justify-between'>
           <TableOptionField key={uuidv4()} label={'Customer Type'} onChange={(selectedValue: any) => { setSelectedCustomerType(selectedValue); setSelectedSavingsMonth("All"); setSelectedSavingsYear("All") }}
             selectedValue={selectedCustomerType} data={['Group', 'Outlet']} />
-          <PillButton key={'recal'} onClick={globalRecalculate} height={"h-10"} className={`text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 w-40`} text={"Global Recalculate"}></PillButton>
+          <div className='flex gap-x-2'>
+            <PillButton key={'batch-gen'} onClick={() => setOpenBatchCalculate('group_annex')} height={"h-10"} className={`text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 w-40`} text={"Batch Generate"}></PillButton>
+            <PillButton key={'recal'} onClick={globalRecalculate} height={"h-10"} className={`text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 w-40`} text={"Global Recalculate"}></PillButton>
+          </div>
         </div>, savingsSubMenu()]}
         leftSideFlexDirection={"Vertical"}
         rightSideElements={[]}
@@ -1103,6 +1115,7 @@ query Date_range_customer_dashboards {
         leftSideElements={[<TableOptionField key={uuidv4()} label={'Pte Ltd'} onChange={(selectedValue: string) => { setSelectedInvoicePte(parseInt(selectedValue)) }}
           selectedValue={selectedInvoicePte.toString() || ''} data={allPte} />,]}
         rightSideElements={[
+          <PillButton key={'batch-gen'} onClick={() => setOpenBatchCalculate('invoice')} height={"h-10"} className={`text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 w-40`} text={"Batch Generate"}></PillButton>,
           <TableOptionField key={uuidv4()} label={'Month'} onChange={(selectedValue: string) => { setSelectedInvoiceMonth(selectedValue) }}
             selectedValue={selectedInvoiceMonth} data={month} />,
           <TableOptionField key={uuidv4()} label={'Year'} onChange={(selectedValue: string) => { setSelectedInvoiceYear(selectedValue) }}
@@ -1132,6 +1145,7 @@ query Date_range_customer_dashboards {
           </div>
         </div>
       </div>
+      <BatchGenerator reportType={openBatchCalculate} openBatchCalculate={openBatchCalculate === 'none' ? false : true} setOpenBatchCalculate={(val) => val ? setOpenBatchCalculate(openBatchCalculate) : setOpenBatchCalculate('none')}></BatchGenerator>
     </React.Fragment >
   )
 }
