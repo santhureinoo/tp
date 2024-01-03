@@ -232,6 +232,8 @@ export interface lastest_report_date {
 export namespace groupFields {
     export type group_id = number;
     export type group_name = string;
+    export type live_energy_measurement = string;
+    export type hide = boolean;
 
 }
 
@@ -239,6 +241,8 @@ export interface group {
     [key: string]: any;
     group_id: groupFields.group_id;
     group_name: groupFields.group_name;
+    live_energy_measurement: groupFields.live_energy_measurement;
+    hide: groupFields.hide;
     reports?: reports[];
     customers?: customer[];
 }

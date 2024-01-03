@@ -50,7 +50,7 @@ const BatchGenerator = ({ openBatchCalculate, setOpenBatchCalculate, reportType 
                 if (item.prev_position === 0) {
                     parentList.unshift(item);
                 } else {
-                    parentList.splice(item.prev_position - 1, 0, item);
+                    parentList.splice(item.prev_position, 0, item);
                 }
             }
         })
