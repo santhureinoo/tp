@@ -2,7 +2,7 @@ import { Image } from "antd";
 import { NextPage } from "next";
 import React from "react";
 
-const Report: NextPage = () => {
+const Index: NextPage = () => {
     return <React.Fragment>
         <div className="h-screen bg-cover bg-[url('/grouplogin.jpg')]">
             <div className="absolute left-0 bottom-36 bg-tp-orange p-10">
@@ -14,4 +14,4 @@ const Report: NextPage = () => {
     </React.Fragment>
 }
 
-export default Report;
+export default Index;
