@@ -29,6 +29,7 @@
     "next": "12.1.4",
     "next-absolute-url": "^1.2.2",
     "next-s3-upload": "^0.2.4",
+    "nextjs-cors": "^2.2.0",
     "pdf-merger-js": "^4.3.0",
     "puppeteer": "^19.4.0",
     "react": "18.0.0",

@@ -53,7 +53,7 @@ const Submit: NextPage = () => {
 
         return <React.Fragment>
             <div className="h-screen">
-                <h2 className="text-custom-lg3 text-stack-bar-inner text-center my-8">Details Received</h2>
+                <h2 className="text-custom-lg4 text-stack-bar-inner text-center my-8">Details Received</h2>
                 <SavingProjectionBox title={'Outlet Information'} body={outletInformation(reqData.outlet.country, reqData.outlet.postal_code, reqData.outlet.street_address)}></SavingProjectionBox>
                 <SavingProjectionBox title={'Operation Information'} body={operationInformation(reqData)}></SavingProjectionBox>
             </div>

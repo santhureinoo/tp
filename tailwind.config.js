@@ -18,7 +18,7 @@ module.exports = {
         'custom-lg1' : ['20px', '25px'],
         'custom-lg2' : ['24px', '24px'],
         'custom-lg3' : ['28px', '28px'],
-        'custom-lg4' : ['30px','37.5px'],
+        'custom-lg4' : ['45px','37.5px'],
         'custom-xs' : ['8px', '12px']
       },
       maxHeight: {
