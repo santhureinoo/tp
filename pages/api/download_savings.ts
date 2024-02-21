@@ -38,7 +38,7 @@ export default async function handler(
   await page.setViewport(viewPort);
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36');
 
-  const addPage = async (url: string) => {
+  const addPage = async (url: string, scale: number) => {
     await page.goto(url, {
       timeout: 0,
       waitUntil: ["load", 'networkidle2', 'networkidle0', 'domcontentloaded'],
@@ -57,7 +57,7 @@ export default async function handler(
       //   left: 30,
       //   right: 30,
       // },
-      scale: 1
+      scale: scale
     })
 
     fs.writeFileSync(tempFileDir, pdfBuffer);
@@ -65,9 +65,9 @@ export default async function handler(
   }
   const data = JSON.stringify(req.body);
   const origin = process.env.NEXT_PUBLIC_SITE_URL + ':3000';
-  await addPage(`${origin}/reports/saving_projections`);
-  await addPage(`${origin}/reports/saving_projections/result?data=${encodeURIComponent(data)}`);
-  await addPage(`${origin}/reports/saving_projections/submit?data=${encodeURIComponent(data)}`);
+  await addPage(`${origin}/reports/saving_projections`, 1);
+  await addPage(`${origin}/reports/saving_projections/result?data=${encodeURIComponent(data)}`, 0.8);
+  await addPage(`${origin}/reports/saving_projections/submit?data=${encodeURIComponent(data)}`, 1);
 
   const mergedPdfBuffer = await merger.saveAsBuffer();
 
