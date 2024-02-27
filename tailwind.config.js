@@ -13,12 +13,11 @@ module.exports = {
     extend: {
       fontSize: {
         'custom-sm' : ['10px', '10px'],
-        'custom-sm1' : ['14px', '17.43px'],
         'custom-lg' : ['16px', '20px'],
-        'custom-lg1' : ['20px', '25px'],
+        'custom-lg1' : ['25px', '25px'],
         'custom-lg2' : ['24px', '24px'],
         'custom-lg3' : ['28px', '28px'],
-        'custom-lg4' : ['45px','37.5px'],
+        'custom-lg4' : ['65px','37.5px'],
         'custom-xs' : ['8px', '12px']
       },
       maxHeight: {

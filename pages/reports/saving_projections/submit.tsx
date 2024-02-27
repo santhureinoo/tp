@@ -23,7 +23,7 @@ const operationInformation = (data: any) => <div className="flex flex-col">
     <div className="flex gap-x-24 justify-start">
         {section('Type of Restaurant/Dining', data.outlet.restaurant_type)}
         {section('Operating hours per week', data.outlet.operating_hours)}
-        {section('Energy Tariff', data.outlet.tariff)}
+        {section('Energy Tariff', "$" + data.outlet.tariff)}
         {section('Total Outlets', data.outlet.total_outlets)}
     </div>
     <hr className="h-px my-8 bg-tp-blue border-0 mx-36" />

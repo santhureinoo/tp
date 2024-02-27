@@ -5,12 +5,12 @@ import SavingProjectionBox from "../../../components/report/SavingProjectionBox"
 import { useRouter } from "next/router";
 import { formatCurrency } from "../../../common/helper";
 
-const section = (title: any, body: string, footer?: string, imagesrc?: any) => {
+const section = (title: any, body: any, footer?: string, imagesrc?: any) => {
     return <div className="flex flex-col items-center">
         {imagesrc && <img className="float-right w-28 h-28 object-scale-down my-4" src={imagesrc} />}
         <h2 className="text-stack-bar-inner text-custom-lg4">{title}</h2>
         <p className="text-tp-orange text-custom-lg1 py-2">{body}</p>
-        <p className="text-tp-orange text-custom-sm1">{footer}</p>
+        <p className="text-tp-orange text-custom-lg">{footer}</p>
     </div>
 }
 
@@ -31,7 +31,7 @@ const groupSavingsOverEquipmentLifetime = (groupSavings: any) => <div className=
     </div>
     <div className='flex justify-around'>
         {section(formatCurrency(parseInt(groupSavings.mealsServed)), 'Meals Served', `Equivalent to operating ${groupSavings.noOfServiceDays} more days.`, '/asserts/reports/icon_open.png')}
-        {section(<span>{formatCurrency(parseInt(groupSavings.kgOfCO2))}<sub className="text-sm"></sub></span>, 'kg of CO2', `Equivalent to ${groupSavings.noOfCarsDrivenForAYear} trips around the world on a Boeing 747.`, '/asserts/reports/icon_aeroplane.png')}
+        {section(<span>{formatCurrency(parseInt(groupSavings.kgOfCO2))}</span>, <span>kg of CO<sub>2</sub></span>, `Equivalent to ${groupSavings.noOfCarsDrivenForAYear} trips around the world on a Boeing 747.`, '/asserts/reports/icon_aeroplane.png')}
     </div>
     <div className='flex justify-around'>
         {section(<span>{formatCurrency(parseInt(groupSavings.treesPlanted))}<sub className="text-sm"></sub></span>, 'Trees Planted', `Equivalent to ${groupSavings.noOfSoccerFields} soccer fields`, '/asserts/reports/icon_forest.png')}
@@ -43,7 +43,6 @@ const Report: NextPage = () => {
     const { data } = router.query;
     if (data) {
         const reqData = JSON.parse(decodeURIComponent(data as string));
-        console.log(reqData);
         return <React.Fragment>
             <div className="h-screen">
                 <h2 className="text-custom-lg4 text-stack-bar-inner text-center my-8">Projection</h2>
