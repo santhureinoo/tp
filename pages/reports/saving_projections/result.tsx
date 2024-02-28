@@ -6,10 +6,10 @@ import { useRouter } from "next/router";
 import { formatCurrency } from "../../../common/helper";
 
 const section = (title: any, body: any, footer?: string, imagesrc?: any) => {
-    return <div className="flex flex-col gap-y-3 items-center">
+    return <div className="flex flex-col items-center">
         {imagesrc && <img className="float-right w-28 h-28 object-scale-down my-4" src={imagesrc} />}
-        <h2 className="text-stack-bar-inner text-custom-lg4">{title}</h2>
-        <p className="text-tp-orange text-custom-lg1 py-2">{body}</p>
+        <h2 className="text-stack-bar-inner text-custom-lg4 mb-3">{typeof title === 'string' ? <p className="mb-2">{title}</p> : title}</h2>
+        <p className="text-tp-orange text-custom-lg1 mb-2">{body}</p>
         <p className="text-tp-orange text-custom-lg">{footer}</p>
     </div>
 }
