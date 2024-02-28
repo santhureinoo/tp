@@ -31,7 +31,7 @@ const groupSavingsOverEquipmentLifetime = (groupSavings: any) => <div className=
     </div>
     <div className='flex justify-around'>
         {section(formatCurrency(parseInt(groupSavings.mealsServed)), 'Meals Served', `Equivalent to operating ${groupSavings.noOfServiceDays} more days.`, '/asserts/reports/icon_open.png')}
-        {section(<span>{formatCurrency(parseInt(groupSavings.kgOfCO2))}</span>, <span>kg of CO<sub>2</sub></span>, `Equivalent to ${groupSavings.noOfCarsDrivenForAYear} trips around the world on a Boeing 747.`, '/asserts/reports/icon_aeroplane.png')}
+        {section(formatCurrency(parseInt(groupSavings.kgOfCO2)), <span>kg of CO<sub>2</sub></span>, `Equivalent to ${groupSavings.noOfCarsDrivenForAYear} trips around the world on a Boeing 747.`, '/asserts/reports/icon_aeroplane.png')}
     </div>
     <div className='flex justify-around'>
         {section(<span>{formatCurrency(parseInt(groupSavings.treesPlanted))}<sub className="text-sm"></sub></span>, 'Trees Planted', `Equivalent to ${groupSavings.noOfSoccerFields} soccer fields`, '/asserts/reports/icon_forest.png')}
