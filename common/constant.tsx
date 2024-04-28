@@ -6,6 +6,8 @@ import React from "react";
 import TwoTitlesHeader from "../components/TwoTitlesHeader";
 import { group, outlet_month_shifts } from "../types/datatype";
 import moment from "moment";
+import { EditOutlined } from "@ant-design/icons";
+import { Badge, Tag } from "antd";
 
 export const DummyCustomerDataRow = {
     CID: 'Cust-105864',
@@ -16,13 +18,26 @@ export const DummyCustomerDataRow = {
     EQU: '5',
 }
 
+const editItem = (text: String) => {
+    return <span>{text}<EditOutlined onClick={(data) => {
+
+    }} rev={undefined}></EditOutlined></span>;
+}
+
 export const DummyEquipmentDataRow = {
-    EID: 'EQ-2405',
-    CUS: 'KFC Indonesia',
-    OUT: 'KFC Gunung Sahari',
-    ETY: 'Exhaust 1',
-    ENA: 'Exhaust 1',
-    VAO: '20/10/2021 18:56',
+    name: <a>Outlet 12</a>,
+    groupname: editItem("Group Name"),
+    position: editItem('Company Pte Ltd'),
+    role: < Badge status="success" text="Live" />,
+    assigned: <Tag color="green">Audit</Tag>,
+    invoiceAccess: < Tag > Taiwan</Tag>,
+    editUser: <Tag>GMT +8:00</Tag>,
+    reset: <div className='flex'>
+        <Tag>Taipei</Tag><Tag>Xin Yang area</Tag>
+    </div>,
+    deleteUser: <div className='flex'>
+        <Tag>DD Exhaust</Tag><Tag>Split-screen AC</Tag>
+    </div>
 }
 
 export const DummyOutletDataRow = {
@@ -215,7 +230,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
         startTime: '',
         endTime: '',
         remarks_on_op_hours: '',
-    },  {
+    }, {
         day_of_week: 'friday',
         outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
@@ -232,7 +247,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
         startTime: '',
         endTime: '',
         remarks_on_op_hours: '',
-    },  {
+    }, {
         day_of_week: 'saturday',
         outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,
@@ -249,7 +264,7 @@ export const defaultOutletMonthShifts: outlet_month_shifts[] = [
         startTime: '',
         endTime: '',
         remarks_on_op_hours: '',
-    },  {
+    }, {
         day_of_week: 'sunday',
         outlet_date: moment().format("DD/MM/YYYY"),
         outlet_id: -1,

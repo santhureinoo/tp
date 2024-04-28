@@ -22,22 +22,24 @@ interface Props {
     currentSelectedPage?: number;
     detailContent?: JSX.Element;
     openDetailContent?: boolean;
+    openCreateContent?: boolean;
     loading?: boolean;
     setOpenDetailContent?: (val: boolean) => void;
+    setOpenCreateDetail?: (val: boolean) => void;
     setCurrentSelectedPage?: (pageNum: number) => void;
 }
 
-const Table = ({ headers, data, onlyShowButton, loading = false, hiddenDataCol = [], setOpenDetailContent, openDetailContent, detailContent, hiddenDataColIndex = [], currentSelectedPage = 1, setCurrentSelectedPage, totalNumberOfPages = 40, handleAddNew, leftSideFlexDirection = "Horizontal", handleEdit, handleDelete, hideDetailMenu = false, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
+const Table = ({ headers, data, onlyShowButton, loading = false, hiddenDataCol = [], setOpenDetailContent, openDetailContent, detailContent, hiddenDataColIndex = [], currentSelectedPage = 1, setCurrentSelectedPage, totalNumberOfPages = 40, handleAddNew, leftSideFlexDirection = "Horizontal", handleEdit, handleDelete, hideDetailMenu = false, rightSideElements = [], leftSideElements = [], buttonText, openCreateContent, setOpenCreateDetail }: Props & TableProps) => {
     const [openTinyMenuIndex, setOpenTinyMenuIndex] = React.useState(-1);
     const drawerElem = React.useRef<HTMLDivElement | null>(null);
     const [drawerInterface, setDrawerInterface] = React.useState<DrawerInterface>();
-
 
     /**
      * Hack : https://github.com/themesberg/flowbite-react/issues/340
      * Flowbite doesn't still support drawer as react component, we need to trigger the button manually.
      *   */
     React.useEffect(() => {
+        console.log(openDetailContent);
         if (drawerInterface && openDetailContent !== undefined) {
             if (openDetailContent) {
                 drawerInterface.show();
@@ -49,7 +51,7 @@ const Table = ({ headers, data, onlyShowButton, loading = false, hiddenDataCol =
 
     React.useEffect(() => {
         // options with default values
-        if (setOpenDetailContent) {
+        if (detailContent && setOpenDetailContent) {
             const options: DrawerOptions = {
                 placement: 'right',
                 backdrop: true,
@@ -101,7 +103,8 @@ const Table = ({ headers, data, onlyShowButton, loading = false, hiddenDataCol =
                         </button>} */}
                         {buttonText && <div className="text-center">
                             <button onClick={() => {
-                                setOpenDetailContent && setOpenDetailContent(!openDetailContent);
+                                setOpenCreateDetail ? setOpenCreateDetail(!openCreateContent) :
+                                    setOpenDetailContent && setOpenDetailContent(!openDetailContent);
                             }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" aria-controls="drawer-right-example">
                                 {buttonText}
                             </button>
@@ -183,9 +186,9 @@ const Table = ({ headers, data, onlyShowButton, loading = false, hiddenDataCol =
                     previousClassName={"bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hidden rounded-md md:inline-flex relative items-center px-4 py-2 border text-sm font-medium"}
                 />
             </div>
-            <div ref={drawerElem} id="drawer-right-example" className="edit-container fixed top-0 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform translate-x-full bg-white w-80 dark:bg-gray-800" tabIndex={-1} aria-labelledby="drawer-right-label">
+            {detailContent && <div ref={drawerElem} id="drawer-right-example" className="edit-container fixed top-0 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform translate-x-full bg-white w-120 dark:bg-gray-800" tabIndex={-1} aria-labelledby="drawer-right-label">
                 {detailContent}
-            </div>
+            </div>}
         </React.Fragment >
 
     )

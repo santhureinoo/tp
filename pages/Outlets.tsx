@@ -10,6 +10,10 @@ import { customer, outlet } from '../types/datatype';
 import ClientOnly from '../components/ClientOnly';
 import { calculatePagination } from '../common/helper';
 import { useRouter } from 'next/router';
+import { EditOutlined } from '@ant-design/icons';
+import { Badge, Tag } from 'antd';
+import OutletCreate from '../components/OutletCreate';
+import TableDynamicInput from '../components/TableDynamicInput';
 // import SavingsEdit from '../components/outlet/SavingsEdit';
 
 const Outlets: NextPage = () => {
@@ -23,10 +27,10 @@ const Outlets: NextPage = () => {
   )
 }
 
-Outlets.getInitialProps = async () => {
-  const title = 'Outlet';
-  return { title };
-};
+// Outlets.getInitialProps = async () => {
+//   const title = 'Outlet';
+//   return { title };
+// };
 
 const OutletTable: any = () => {
 
@@ -37,6 +41,7 @@ const OutletTable: any = () => {
   const [selectedOutlet, setSelectedOutlet] = React.useState<outlet>();
   const [totalPage, setTotalpage] = React.useState(0);
   const [currentPageIndex, setCurrentPageIndex] = React.useState(1);
+  const [isOutletCreateModelOpen, setIsOutletCreateModelOpen] = React.useState(false);
   const [selectedCustomerID, setSelectedCustomerID] = React.useState("");
 
   // GraphQL
@@ -143,9 +148,66 @@ const OutletTable: any = () => {
     outletsResult.refetch();
   }, [currentPageIndex]);
 
-  const resultInArray = React.useMemo(() => {
-    return outlets ? outlets.map((out) => [out.outlet_id, out.customer?.name, out.name, out.outlet_month ? out.outlet_month[0]?.last_avail_tariff : '', out.outlet_month ? out.outlet_month[0]?.tariff_month : "", out.outlet_month && out.outlet_month[0]?.percent_share_of_savings !== '' ? out.outlet_month[0]?.percent_share_of_savings + " %" : ""]) : [];
-  }, [outlets]);
+  // const resultInArray = React.useMemo(() => {
+  //   return outlets ? outlets.map((out) => [out.outlet_id, out.customer?.name, out.name, out.outlet_month ? out.outlet_month[0]?.last_avail_tariff : '', out.outlet_month ? out.outlet_month[0]?.tariff_month : "", out.outlet_month && out.outlet_month[0]?.percent_share_of_savings !== '' ? out.outlet_month[0]?.percent_share_of_savings + " %" : ""]) : [];
+  // }, [outlets]);
+
+  const resultInArray = [
+    [
+      <span className='text-blue-400 cursor-pointer' onClick={() => setOpenOutletEdit(true)}>Outlet 12</span>,
+      <TableDynamicInput setText={() => { }} text='Group Name' />,
+      <TableDynamicInput setText={() => { }} text='Company Pte Ltd' />,
+      <Badge status="success" text="Live" />,
+      <Tag color="green">Audit</Tag>,
+      <Tag>Taiwan</Tag>,
+      <Tag>GMT +8:00</Tag>,
+      <div className='flex'>
+        <Tag>Taipei</Tag><Tag>Xin Yang area</Tag>
+      </div>,
+      <div className='flex'>
+        <Tag>DD Exhaust</Tag><Tag>Split-screen AC</Tag>
+      </div>,
+      <div className='flex'>
+        <Tag color={"red"}>Split-screen AC</Tag>
+      </div>
+    ],
+    [
+      <span className='text-blue-400 cursor-pointer' onClick={() => setOpenOutletEdit(true)}>Outlet 12</span>,
+      <TableDynamicInput setText={() => { }} text='Group Name' />,
+      <TableDynamicInput setText={() => { }} text='Company Pte Ltd' />,
+      <Badge status="success" text="Live" />,
+      <Tag color="green">Audit</Tag>,
+      <Tag>Taiwan</Tag>,
+      <Tag>GMT +8:00</Tag>,
+      <div className='flex'>
+        <Tag>Taipei</Tag><Tag>Xin Yang area</Tag>
+      </div>,
+      <div className='flex'>
+        <Tag>DD Exhaust</Tag><Tag>Split-screen AC</Tag>
+      </div>,
+      <div className='flex'>
+        <Tag color={"red"}>Split-screen AC</Tag>
+      </div>
+    ],
+    [
+      <span className='text-blue-400 cursor-pointer' onClick={() => setOpenOutletEdit(true)}>Outlet 12</span>,
+      <TableDynamicInput setText={() => { }} text='Group Name' />,
+      <TableDynamicInput setText={() => { }} text='Company Pte Ltd' />,
+      <Badge status="success" text="Live" />,
+      <Tag color="green">Audit</Tag>,
+      <Tag>Taiwan</Tag>,
+      <Tag>GMT +8:00</Tag>,
+      <div className='flex'>
+        <Tag>Taipei</Tag><Tag>Xin Yang area</Tag>
+      </div>,
+      <div className='flex'>
+        <Tag>DD Exhaust</Tag><Tag>Split-screen AC</Tag>
+      </div>,
+      <div className='flex'>
+        <Tag color={"red"}>Split-screen AC</Tag>
+      </div>
+    ]
+  ]
 
   const customerDropdown = React.useMemo(() => {
     if (customersResult.data && customersResult.data.customers && customersResult.data.customers.length > 0) {
@@ -160,32 +222,25 @@ const OutletTable: any = () => {
 
   return (
     <React.Fragment>
+      <OutletCreate isModelOpen={isOutletCreateModelOpen} setIsModelOpen={setIsOutletCreateModelOpen} />
       <Table
-        headers={['Outlet ID', 'Customer', 'Outlet Name', 'Tariff Rate', 'Date of Tariff', 'Share of Savings']}
+        headers={['Outlet', 'Group', 'Company', 'Status', 'IPMVP Stage', 'Country', 'Timezone', 'Other Tags', 'Equipment Types', 'Equipment Paused']}
         data={resultInArray}
         totalNumberOfPages={totalPage} setCurrentSelectedPage={setCurrentPageIndex} currentSelectedPage={currentPageIndex}
         openDetailContent={openOutletEdit}
         setOpenDetailContent={setOpenOutletEdit}
+        openCreateContent={isOutletCreateModelOpen}
+        setOpenCreateDetail={setIsOutletCreateModelOpen}
         detailContent={<OutletEdit outlet={selectedOutlet} customerDropdown={customerDropdown} afterOperation={() => { getTotalResult.refetch(); outletsResult.refetch(); }} openOutletEdit={openOutletEdit} setOpenOutletEdit={setOpenOutletEdit} selectedCustomerID={parseInt(selectedCustomerID)} />}
         leftSideElements={[
-          <TableOptionField key={uuidv4()} label={'Pte Ltd'} selectedValue={selectedCustomerID.toString()} data={customerDropdown} onChange={(selectedValue: string) => { setSelectedCustomerID(selectedValue) }} />
+          // <TableOptionField key={uuidv4()} label={'Pte Ltd'} selectedValue={selectedCustomerID.toString()} data={customerDropdown} onChange={(selectedValue: string) => { setSelectedCustomerID(selectedValue) }} />
+          <h3 className="text-3xl font-bold">Outlets</h3>
         ]}
+        hideDetailMenu={true}
         handleAddNew={() => {
           setSelectedOutlet(undefined);
           setOpenOutletEdit(true);
-        }} handleEdit={(selectedData) => { setSelectedOutlet(outlets.find(outlet => outlet.outlet_id === selectedData[0])); setOpenOutletEdit(true) }} handleDelete={(selectedData) => {
-          deleteOutletResult["0"]({
-            variables: {
-              "where": {
-                "outlet_id": selectedData[0]
-              },
-            }
-          })
-            .then((value) => {
-              outletsResult.refetch();
-              getTotalResult.refetch();
-            })
-        }} buttonText={"+ Add New Outlet"} rightSideElements={[]} />
+        }} buttonText={"+ Create Outlet"} rightSideElements={[]} />
 
     </React.Fragment>
   )

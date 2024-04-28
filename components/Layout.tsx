@@ -17,8 +17,7 @@ const Layout = ({ title, children, disableHeader = false, disableSideBar = false
                 <title>{title} - Dashboard</title>
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <main className={`flex h-screen w-screen ${disableHeader ? '' : 'bg-gray-200'}`}>
-                {!disableSideBar && <Sidebar setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />}
+            <main className={`flex h-screen w-screen`}>
                 <div className="flex-1 flex flex-col w-3/4">
                     <div className="flex-1 overflow-x-hidden overflow-y-auto">
                         <div className="container mx-auto px-6 py-8">
@@ -30,10 +29,11 @@ const Layout = ({ title, children, disableHeader = false, disableSideBar = false
                                         strokeLinejoin="round"></path>
                                 </svg>
                             </button>}
+                            {!disableSideBar && <Sidebar setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />}
                             {!disableHeader &&
-                                <>
-                                    <h3 className="text-gray-700 text-3xl font-bold">{title}</h3>
-                                    <div className="flex flex-col mt-8">
+                                <div className="mx-8">
+                                    <h3 className="text-3xl font-bold">{title}</h3>
+                                    <div className="flex flex-col mt-2">
                                         <div className="-my-2 py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
                                             <div
                                                 className="align-middle inline-block min-w-full sm:rounded-lg">
@@ -41,11 +41,13 @@ const Layout = ({ title, children, disableHeader = false, disableSideBar = false
                                             </div>
                                         </div>
                                     </div>
-                                </>
-
+                                </div>
                             }
                         </div>
-                        {disableHeader && children}
+                        {disableHeader &&
+                            <div className="mx-16">
+                                {children}
+                            </div>}
                     </div>
                 </div>
             </main>

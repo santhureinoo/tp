@@ -21,15 +21,15 @@ const Users: NextPage = () => {
   return (
     <React.Fragment>
       <Table
-        headers={['Equipment ID', 'Customer', 'Outlet', 'Equipment Type', 'Equipment Name', 'Valid as Of']}
+        headers={['Name', 'Email', 'Position/Title', 'Role', 'Assigned', 'Invoice Access', 'Edit User', 'Reset Password', 'Delete User']}
         data={getDummyUserData()}
         leftSideElements={[
-          <Searchfield key={uuidv4()} IconFront={false} WithButton={false} ButtonText={'Search'} data={[]} setFilteredData={() => { }} />
+          <h3 className="text-3xl font-bold">Users</h3>
         ]}
         rightSideElements={[
-          <TableOptionField key={uuidv4()} label={'Business'} data={['All', 'Some']} />,
-          <TableOptionField key={uuidv4()} label={'Outlet'} data={['All', 'Some']} />,
+
         ]}
+        hideDetailMenu={true}
         handleAddNew={() => {
           setOpenUserEdit(true);
         }} handleEdit={(selectedData) => setOpenUserEdit(true)} handleDelete={() => setOpenUserEdit(true)} buttonText={"+ Add New User"} />
@@ -38,10 +38,10 @@ const Users: NextPage = () => {
   )
 }
 
-Users.getInitialProps = async () => {
-  const title = 'User';
-  return { title };
-};
+// Users.getInitialProps = async () => {
+//   const title = 'User';
+//   return { title };
+// };
 
 
 export default Users

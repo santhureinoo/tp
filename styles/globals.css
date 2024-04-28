@@ -17,7 +17,7 @@
 }
 @layer utilities {
     .link-active {
-        @apply flex items-center py-4 px-6 bg-[#E8F2FF] text-[custom-active-link] font-medium rounded-lg;
+        @apply flex items-center py-4 px-6 text-custom-active-link font-medium border-b-4 border-custom-active-link;
     }
     .link {
         @apply flex items-center py-4 px-6 hover:bg-[#E8F2FF] hover:text-black font-medium hover:rounded-lg;
@@ -129,3 +129,5 @@
 
     }
 }
+
+.ant-btn-primary { background-color: #1677ff !important; }

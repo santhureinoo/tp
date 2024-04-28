@@ -7,6 +7,10 @@ import { gql, useLazyQuery, useMutation, WatchQueryFetchPolicy } from "@apollo/c
 import { outlet, outlet_month, outlet_month_shifts, outlet_person_in_charge } from "../types/datatype"; import rfdc from 'rfdc';
 import { defaultOutletMonthShifts } from '../common/constant';
 import moment from 'moment';
+import CYTextField from './CYTextField';
+import { Badge, Button, Form, Input, Modal, Space, Table, Tag } from 'antd';
+import { DownOutlined, LinkOutlined } from '@ant-design/icons';
+import CYCustom from './CYCustom';
 const cloneDeep = rfdc();
 
 interface Props {
@@ -21,6 +25,7 @@ interface Props {
 const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustomerID, afterOperation, customerDropdown }: Props) => {
     // const [contactList, setContactList] = React.useState<outlet_person_in_charge[]>([]);
     const [selectedInformation, setSelectedinformation] = React.useState(1);
+    const [openEquipmentModal, setOpenEquipmentModal] = React.useState(false);
     const [currentOutlet, setCurrentOutlet] = React.useState<outlet>({
         outlet_id: -1,
         customer_id: selectedCustomerID,
@@ -534,37 +539,102 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit, outlet, selectedCustome
 
     }
 
+    const dataSource = [
+        {
+            1: 'DD Exhaust',
+        },
+        {
+            1: 'Split Screen Aircon',
+        },
+    ];
+
+    const columns = [
+        {
+            title: () => {
+                return <h2 className='text-2xl'>Equipment</h2>
+            },
+            dataIndex: '1',
+            key: '1',
+        },
+
+        {
+            title: () => {
+                return <div className='text-2xl flex w-100 justify-end'>
+                    <Button size={"large"} className='text-md' onClick={() => setOpenEquipmentModal(!openEquipmentModal)}>Add Equipment</Button>
+                </div>;
+            },
+            dataIndex: '2',
+            key: '2',
+            render: () => (
+                <Space size="middle" className='w-100 flex flex-row justify-end'>
+                    <Badge status="success" text="Live" />
+                    <a className="text-blue-500">Pause</a>
+                    <a className="text-blue-500">Edit</a>
+                    <a className="text-red-500">Delete</a>
+                </Space>
+            ),
+        },
+    ];
+
     return (
         <React.Fragment>
+            <Modal
+                title="Create Equipment"
+                centered
+                open={openEquipmentModal}
+                onOk={() => setOpenEquipmentModal(!openEquipmentModal)}
+                onCancel={() => setOpenEquipmentModal(!openEquipmentModal)}
+            >
+                <Form className='flex flex-col'>
+                    <Form.Item label="EM MAC ID" className='mb-4'>
+                        <Input></Input>
+                    </Form.Item>
+                    <Form.Item label="Select Equipment" className='mb-4'>
+                        <Input></Input>
+                    </Form.Item>
+                    <Form.Item label="Equipment Name" className='mb-4'>
+                        <Input></Input>
+                    </Form.Item>
+                    <div className='flex flex-col content-center items-center gap-y-4'>
+                        <h3>Settings</h3>
+                        <div className='px-8 flex flex-row flex-wrap'>
+                            <Input className='w-1/2 px-2' addonBefore="Amp" defaultValue="0.5" />
+                            <Input className='w-1/2 px-2' addonBefore="KE" defaultValue="0.1" />
+                            <Input className='w-1/2 px-2' addonBefore="Amp" defaultValue="10" />
+                            <Input className='w-1/2 px-2' addonBefore="KE" defaultValue="0.95" />
+                        </div>
+                    </div>
+                </Form>
+            </Modal>
             <div className="flex justify-end">
                 <button onClick={(e) => { setOpenOutletEdit(!openOutletEdit) }} className={`w-8 h-8`} type='button'>
                     <FontAwesomeIcon style={{ fontSize: '2em', cursor: 'pointer' }} icon={faCircleXmark} />
                 </button>
             </div>
             <div className="edit-space-divider">
-
-                <div className="edit-sub-container">
-                    <div className="flex flex-row gap-x-12 cursor-pointer">
-                        <div onClick={(e) => { setSelectedinformation(1); }} className="flex justify-between">
-                            {
-                                selectedInformation === 1 ? <h2><b>Outlet</b> <br /> Information</h2> : <h2 className="header-thin">Outlet<br />Information</h2>
-                            }
-
-                        </div>
-                        <div onClick={(e) => { setSelectedinformation(2); }} className="flex">
-                            {
-                                selectedInformation === 2 ? <h2><b>Savings</b> <br /> Information</h2> : <h2 className="header-thin">Savings<br />Information</h2>
-                            }
-
-                        </div>
+                <div className='flex flex-row justify-between'>
+                    <CYTextField text='Outlet 2' className='text-3xl font-bold'></CYTextField>
+                    <LinkOutlined className='font-[#147CFC]' style={{ fontSize: '200%', color: '#147CFC'}} rev={undefined} />
+                </div>
+                <div className='flex justify-between'>
+                    <div className='flex flex-col'>
+                        <CYTextField text='Group Name' className='' isForm={true} label='Group'></CYTextField>
+                        <CYTextField text='Company PTE LTD' className='' isForm={true} label='Company'></CYTextField>
+                        <CYTextField text='Group Name' className='' isForm={true} label='Country'></CYTextField>
+                        <CYTextField text='Group Name' className='' isForm={true} label='Timezone'></CYTextField>
+                        <CYTextField text='Group Name' className='' isForm={true} label='Other Tag'></CYTextField>
+                        <CYTextField text='$0.30' className='' isForm={true} label='Tariff'></CYTextField>
+                    </div>
+                    <div className='flex flex-row gap-x-4'>
+                        <CYCustom text={<Badge status="success" text="Live" />} className='' isForm={true} label='Status'></CYCustom>
+                        <CYCustom text={<Tag color="green">Audit</Tag>} className='' isForm={true} label='IPMVP'></CYCustom>
                     </div>
                 </div>
-                {selectedInformation === 1 ? <OutletInformation customers={customerDropdown} setOutlet={setCurrentOutlet} outlet={currentOutlet} /> : <SavingsInformation setOutlet={setCurrentOutlet} outlet={currentOutlet} />}
+                <Table columns={columns} dataSource={dataSource} />
                 <div className="flex flex-row gap-x-3 justify-between">
                     <button type='button' className="bg-white text-blue-500 border border-neutral-400 rounded-lg w-full text-sm h-11 text-center">Reset</button>
                     <button type='button' onClick={onClick} className="bg-blue-500 text-white rounded-lg w-full text-sm h-11 text-center">Save</button>
                 </div>
-
 
             </div>
 
